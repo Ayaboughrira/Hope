@@ -1,0 +1,349 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .main {
+    padding: 40px 0;
+  }
+  
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    font-size: 1.25rem;
+    color: #666;
+  }
+  
+  .breadcrumbs {
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .breadcrumbs a {
+    color: #3490dc;
+    text-decoration: none;
+  }
+  
+  .breadcrumbs a:hover {
+    text-decoration: underline;
+  }
+  
+  .campaignDetailContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+  }
+  
+  @media (max-width: 768px) {
+    .campaignDetailContainer {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Image Gallery Styles */
+  .imageGallery {
+    position: relative;
+  }
+  
+  .mainImage {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 400px;
+    margin-bottom: 16px;
+  }
+  
+  .mainImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .navButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .navButton:hover {
+    background: rgba(255, 255, 255, 0.9);
+  }
+  
+  .prevButton {
+    left: 10px;
+  }
+  
+  .nextButton {
+    right: 10px;
+  }
+  
+  .thumbnails {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .thumbnail {
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  
+  .thumbnail:hover {
+    opacity: 0.9;
+  }
+  
+  .activeThumbnail {
+    opacity: 1;
+    border: 2px solid #3490dc;
+  }
+  
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Campaign Info Styles */
+  .campaignInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .campaignHeader {
+    margin-bottom: 16px;
+  }
+  
+  .associationBadge {
+    display: inline-block;
+    background-color: rgb(250, 218, 184);;
+    color: #4b5563;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+  }
+  
+  .campaignTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
+  }
+  
+  .location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+  }
+  
+  .campaignDates {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+  }
+  .dateTimeContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .dateInfo, .timeInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .dateLabel, .timeLabel {
+    color: #cadafa;
+    margin-bottom: 4px;
+    font-size: 0.8em;
+  }
+  
+  .dateValue, .timeValue {
+    font-weight: 600;
+    color: #111827;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .campaignDescription h2,
+  .campaignDetails h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #111827;
+  }
+  
+  .campaignDescription p {
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  
+  .campaignDetails ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .campaignDetails li {
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  
+  .actionButtons {
+    display: flex;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  
+  .adoptButton, .contactButton {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .adoptButton {
+    background-color:#FF8C00;
+    color: white;
+    border: none;
+    flex: 2;
+  }
+  
+  .adoptButton:hover {
+    background-color: #ce770d;
+  }
+  
+  .contactButton {
+    background-color: white;
+    color: #FF8C00;
+    border: 1px solid #FF8C00;
+    flex: 1;
+  }
+  
+  .contactButton:hover {
+    background-color: #f0f9ff;
+  }
+  
+  .additionalInfo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 24px;
+    padding: 20px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+  }
+  
+  @media (max-width: 640px) {
+    .additionalInfo {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .infoItem h3 {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+  
+  .infoItem p {
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  /* Related Campaigns Styles */
+  .relatedCampaigns {
+    margin-top: 60px;
+  }
+  
+  .relatedCampaigns h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #111827;
+  }
+  
+  .relatedList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  @media (max-width: 768px) {
+    .relatedList {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .relatedList {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .relatedCard {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+  
+  .relatedCard:hover {
+    transform: translateY(-5px);
+  }
+  
+  .relatedImage {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  
+  .relatedContent {
+    padding: 16px;
+  }
+  
+  .relatedContent h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #111827;
+  }
+  
+  .relatedContent p {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }

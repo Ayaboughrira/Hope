@@ -1,0 +1,171 @@
+[
+  {
+    "id": "1",
+    "name": "Criticism of infected animals",
+    "association":"adopt animal",
+    "location": "Annaba",
+    "image": "/images/image4.jpg",
+    "shortDescription": "Join our efforts to help and critique infected animals.",
+    "description": "Our Furry Friends Adoption Day is a special",
+    "startDate": "2025-03-15",
+    "startTime": "09:00 AM",
+    "endDate": "2025-03-25",
+    "images": [
+      "/images/image4.jpg",
+      "/images/image4.jpg",
+      "/images/image5.jpg"
+    ],
+    "requirements": [
+      "Experience with cats preferred",
+      "Stable home environment",
+      "Understanding of potential medical needs",
+      "Application and interview required",
+      "Ability to provide regular veterinary care"
+    ],
+    "adoptionFee": "€30-€75 (reduced for senior cats)",
+    "animalsAvailable": 15,
+    "successRate": 70
+  
+  },
+  {
+    "id": "2",
+    "name": "Help Dogs in the Woods",
+    "association":"adopt",
+    "location": "Annaba",
+    "image": "/images/image6.jpg",
+    "shortDescription": "Help us protect ....",
+    "description": "Our Furry Friends Adoption Day is a special",
+    "startDate": "2025-04-10",
+    "startTime": "10:30 AM",
+    "endDate": "2025-04-15",
+    "images": [
+      "/images/image3.jpg",
+      "/images/image4.jpg",
+      "/images/image5.jpg"
+    ],
+    "requirements": [
+      "Experience with cats preferred",
+      "Stable home environment",
+      "Understanding of potential medical needs",
+      "Application and interview required",
+      "Ability to provide regular veterinary care"
+    ],
+    "adoptionFee": "€30-€75 (reduced for senior cats)",
+    "animalsAvailable": 15,
+    "successRate": 70
+  
+  },
+
+  {
+    "id": "3",
+    "name": "Street Cats Rescue Initiative",
+    "association":"cats",
+    "location": "Oran",
+    "image": "/images/cat-rescue.jpg",
+    "shortDescription": "Support our program to ....",
+    "description": "Our Furry Friends Adoption Day is a special",
+    "startDate": "2025-02-25",
+    "startTime": "08:00 AM",
+    "endDate": "2025-02-25",
+    "images": [
+      "/images/image3.jpg",
+      "/images/image4.jpg",
+      "/images/image5.jpg"
+    ],
+    "requirements": [
+      "Experience with cats preferred",
+      "Stable home environment",
+      "Understanding of potential medical needs",
+      "Application and interview required",
+      "Ability to provide regular veterinary care"
+    ],
+    "adoptionFee": "€30-€75 (reduced for senior cats)",
+    "animalsAvailable": 15,
+    "successRate": 70
+  
+  },
+  {
+    "id": "4",
+    "name": "Help Cats in the Woods",
+    "association":"dog",
+    "location": "Setif",
+    "image": "/images/image4.jpg",
+    "shortDescription": "Help us .....",
+    "description": "Our Furry Friends Adoption Day is a special",
+    "startDate": "2025-03-25",
+    "startTime": "11:00 AM",
+    "endDate": "2025-03-27",
+    "images": [
+      "/images/image3.jpg",
+      "/images/image4.jpg",
+      "/images/image5.jpg"
+    ],
+    "requirements": [
+      "Experience with cats preferred",
+      "Stable home environment",
+      "Understanding of potential medical needs",
+      "Application and interview required",
+      "Ability to provide regular veterinary care"
+    ],
+    "adoptionFee": "€30-€75 (reduced for senior cats)",
+    "animalsAvailable": 15,
+    "successRate": 70
+  
+  },
+  {
+    "id": "5",
+    "name": "Exotic Birds Conservation",
+    "association":"animal",
+    "location": "Annaba",
+    "image": "/images/bird-conservation.jpg",
+    "shortDescription": "Join our efforts to protect ....",
+    "description": "Our Furry Friends Adoption Day is a special",
+    "startDate": "2025-05-05",
+    "startTime": "09:30 AM",
+    "endDate": "2025-09-25",
+    "images": [
+      "/images/image3.jpg",
+      "/images/image4.jpg",
+      "/images/image5.jpg"
+    ],
+    "requirements": [
+      "Experience with cats preferred",
+      "Stable home environment",
+      "Understanding of potential medical needs",
+      "Application and interview required",
+      "Ability to provide regular veterinary care"
+    ],
+    "adoptionFee": "€30-€75 (reduced for senior cats)",
+    "animalsAvailable": 15,
+    "successRate": 70
+  
+  },
+  {
+    "id": "6",
+    "name": "Exotic Birds Conservation",
+    "location": "Annaba",
+    "association":"care animal",
+    "image": "/images/bird-conservation.jpg",
+    "shortDescription": "Join our efforts ......",
+    "description": "Our Furry Friends Adoption Day is a special",
+    "startDate": "2025-05-05",
+    "startTime": "11:30 AM",
+    "endDate": "2025-09-25",
+    "images": [
+      "/images/image3.jpg",
+      "/images/image4.jpg",
+      "/images/image5.jpg"
+    ],
+    "requirements": [
+      "Experience with cats preferred",
+      "Stable home environment",
+      "Understanding of potential medical needs",
+      "Application and interview required",
+      "Ability to provide regular veterinary care"
+    ],
+    "adoptionFee": "€30-€75 (reduced for senior cats)",
+    "animalsAvailable": 15,
+    "successRate": 70
+  
+  }
+]

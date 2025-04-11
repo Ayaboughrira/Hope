@@ -1,0 +1,296 @@
+.animalCatalog {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Layout principal: sidebar à gauche, contenu à droite */
+.mainContent {
+  display: flex;
+  gap: 20px;
+}
+
+/* Styles pour la sidebar avec filtres */
+.sidebar {
+  width: 250px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.filterGroup label {
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #555;
+}
+
+.filterGroup select,
+.filterGroup input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white; 
+  color: black;
+}
+
+/* Styles pour la zone de contenu principale */
+.contentArea {
+  flex: 1;
+}
+
+/* Styles pour la section héro */
+.heroSection {
+  margin-bottom: 30px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.heroContent {
+  padding: 30px;
+  color: white;
+  position: relative;
+  z-index: 1;
+  text-align: center; 
+}
+.heroContent h1 {
+  font-size: 36px;
+  text-align: center; 
+  margin-bottom: 20px;
+}
+
+.adoptionInfo {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.adoptionInfo h2 {
+  color: #fff;
+  margin-top: 0;
+  font-size: 24px;
+  text-align: center;
+}
+
+.adoptionInfo p {
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* Ajouter l'image d'arrière-plan à la section  */
+.heroSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.7);
+  z-index: 0;
+}
+
+/* Styles pour la grille d'animaux */
+.animalsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.animalCard {
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  background-color: white;
+}
+
+.animalCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.animalImage {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.animalImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.animalCard:hover .animalImage img {
+  transform: scale(1.05);
+}
+
+/* Bouton favoris */
+.favoriteBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.favoriteBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.favoriteBtn.active {
+  background: rgba(255, 220, 220, 0.9);
+}
+
+.animalInfo {
+  padding: 15px;
+}
+
+.animalInfo h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.animalInfo p {
+  margin: 5px 0;
+  color: #666;
+}
+
+/* Réduire la taille des icônes de genre */
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.genderIcon svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.genderIcon {
+  display: flex;
+  align-items: center;
+}
+
+/* Messages d'état */
+.loading,
+.noResults {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #777;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mainContent {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    position: static;
+    margin-bottom: 20px;
+  }
+  
+  .animalsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/*pour la bare de filtrage horizontal*/
+.speciesFilterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #ff8c00;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: center; 
+}
+
+.speciesFilterButton {
+  padding: 8px 16px;
+  background-color: white;
+  color: black;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.speciesFilterButton:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.speciesFilterButton.active {
+  background-color: #4a90e2;
+  color: white;
+  border-color: #3a80d2;
+}
+
+/* Add styles for the search input */
+.search input {
+  width: 100%;
+}
+
+/* Add styles for the gender class */
+.gender {
+  display: flex;
+  align-items: center;
+}
+
+/* Rendre la barre responsive */
+@media (max-width: 768px) {
+  .speciesFilterBar {
+    padding: 10px;
+  }
+  
+  .speciesFilterButton {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}

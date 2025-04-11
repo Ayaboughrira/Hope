@@ -1,0 +1,417 @@
+.authContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background-color: #ff8c00;
+}
+
+.authWrapper {
+  width: 100%;
+  max-width: 64rem;
+}
+
+.authCard {
+  display: flex;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  /* Fixed height for stability */
+  height: 500px;
+  width: 100%;
+}
+
+.authImage {
+  position: relative;
+  width: 50%;
+}
+
+.imageCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.authForm {
+  width: 50%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  /* Added to ensure proper spacing */
+  justify-content: space-between;
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.appLogo {
+  height: 3rem;
+  width: auto;
+  margin: 0 auto;
+}
+
+.formTitle {
+  margin-top: 1rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #374151;
+  padding-bottom: 0.5rem; 
+}
+
+/* Commented out since it uses absolute positioning which may cause issues
+.formTitle::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 3px;
+  background-color: #fbbf24;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}*/
+
+/* Added subtitle styling */
+.formSubtitle {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.userTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.userTypeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px solid #fbbf24;
+  border-radius: 0.5rem;
+  background-color: white;
+  transition: all 0.3s ease; /* Enhanced transition */
+  cursor: pointer;
+  font-weight: 500;
+  color: #374151;
+}
+
+.userTypeButton:hover {
+  background-color: #fef3c7;
+  transform: translateY(-2px);
+}
+
+.userTypeIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #fbbf24;
+}
+
+.signupForm,
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Increased gap for login form fields */
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem; /* Added spacing between fields */
+}
+
+.inputWithIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af;
+}
+
+.fieldInput {
+  width: 100%;
+  padding: 0.9rem 1rem 0.9rem 3rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 5rem;
+  transition: all 0.3s ease; /* Enhanced transition */
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
+.formNavigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Enhanced transition */
+  background-color: #fbbf24;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.navButton:hover {
+  background-color: #f59e0b;
+  transform: translateY(-2px);
+}
+
+.navButton.back {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.navButton.back:hover {
+  background-color: #e5e7eb;
+}
+
+.buttonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.formFooter {
+  text-align: center;
+  margin-top: auto;
+}
+
+.switchModeButton {
+  color: #fbbf24;
+  text-decoration: none;
+  position: relative;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-block;
+  transition: all 0.3s ease; /* Added transition */
+  border: none;
+  background: transparent;
+}
+
+.switchModeButton::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: #fbbf24;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.switchModeButton:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Added submit button styling */
+.submitButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #fbbf24;
+  color: white;
+  border: none;
+  border-radius: 5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Enhanced transition */
+}
+
+.submitButton:hover {
+  background-color: #f59e0b;
+  transform: translateY(-2px);
+}
+
+/* Added animation for page transitions */
+.authForm > * {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive design */
+/* Media queries for medium screens (tablets) */
+@media (max-width: 1024px) {
+  .authCard {
+    height: auto;
+    flex-direction: column;
+  }
+
+  .authImage,
+  .authForm {
+    width: 100%;
+  }
+
+  .authImage {
+    height: 300px;
+  }
+
+  .authForm {
+    padding: 1.5rem;
+  }
+
+  .formTitle {
+    font-size: 1.5rem;
+  }
+
+  .formSubtitle {
+    font-size: 0.75rem;
+  }
+
+  .userTypeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .userTypeButton {
+    padding: 0.75rem;
+  }
+
+  .fieldInput {
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+  }
+
+  .navButton {
+    padding: 0.5rem 1rem;
+  }
+
+  .submitButton {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Media queries for small screens (smartphones) */
+@media (max-width: 768px) {
+  .authContainer {
+    padding: 1rem;
+  }
+
+  .authCard {
+    border-radius: 0.5rem;
+  }
+
+  .authImage {
+    height: 200px;
+  }
+
+  .authForm {
+    padding: 1rem;
+  }
+
+  .formTitle {
+    font-size: 1.25rem;
+  }
+
+  .formSubtitle {
+    font-size: 0.7rem;
+  }
+
+  .userTypeButton {
+    font-size: 0.875rem;
+  }
+
+  .fieldInput {
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .navButton {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .submitButton {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .switchModeButton {
+    font-size: 0.875rem;
+  }
+}
+
+/* Media queries for very small screens */
+@media (max-width: 480px) {
+  .authCard {
+    height: auto;
+  }
+
+  .authImage {
+    height: 150px;
+  }
+
+  .authForm {
+    padding: 0.75rem;
+  }
+
+  .formTitle {
+    font-size: 1rem;
+  }
+
+  .formSubtitle {
+    font-size: 0.65rem;
+  }
+
+  .userTypeButton {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .fieldInput {
+    padding: 0.5rem 1rem 0.5rem 2rem;
+    font-size: 0.75rem;
+  }
+
+  .navButton {
+    font-size: 0.65rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .submitButton {
+    font-size: 0.65rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .switchModeButton {
+    font-size: 0.75rem;
+  }
+}

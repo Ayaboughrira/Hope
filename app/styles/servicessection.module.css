@@ -1,0 +1,107 @@
+.servicesSection {
+    padding: 80px 50px;
+    background-color: #f9f9f9;
+  }
+  
+  .servicesIntro {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 60px;
+  }
+  
+  .servicesHeading {
+    flex: 1;
+  }
+  
+  .subHeading {
+    color: #FF8126;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  
+  .mainHeading {
+    font-size: 32px;
+    color: #333;
+    line-height: 1.3;
+  }
+  
+  .highlight {
+    color: #FF8126;
+  }
+  
+  .servicesDescription {
+    flex: 1;
+  }
+  
+  .servicesDescription p {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  
+  .servicesDescription ul {
+    list-style-type: none;
+    margin-bottom: 30px;
+  }
+  
+  .servicesDescription li {
+    color: #333;
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 20px;
+  }
+  
+  .servicesDescription li::before {
+    content: "✓";
+    color: #FF8126;
+    position: absolute;
+    left: 0;
+  }
+  
+  .discoverBtn {
+    background-color: #FF8126;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .discoverBtn:hover {
+    background-color: #e06b16;
+  }
+  
+  .servicesCards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .serviceCard {
+    background-color: white;
+    border-radius: 10px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+  }
+  
+  .serviceCard:hover {
+    transform: translateY(-10px);
+  }
+  
+  .serviceCard img {
+    height: 60px;
+    margin-bottom: 20px;
+  }
+  
+  .serviceCard h3 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .serviceCard p {
+    color: #666;
+  }

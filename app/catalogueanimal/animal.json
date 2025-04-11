@@ -1,0 +1,65 @@
+[
+    {
+      "id": 1,
+      "name": "Max",
+      "species": "Dog",
+      "gender": "Male",
+      "age": 2,
+      "size": "Medium",
+      "image": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      "description": "Max est un chien très joueur et affectueux. Il adore courir et jouer avec sa balle."
+    },
+    {
+      "id": 2,
+      "name": "Félix",
+      "species": "Cat",
+      "gender": "Male",
+      "age": 1,
+      "size": "Small",
+      "image": "https://images.unsplash.com/photo-1548247416-ec66f4900b2e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      "description": "Félix est un chat indépendant mais très câlin quand il le veut bien."
+    },
+    {
+      "id": 3,
+      "name": "Bella",
+      "species": "Cat",
+      "gender": "Female",
+      "age": 1,
+      "size": "Big",
+      "image": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      "description": "Bella est une chienne calme et douce qui adore les promenades tranquilles."
+    },
+    {
+      "id": 4,
+      "name": "Mimi",
+      "species": "Cat",
+      "gender": "Female",
+      "age": 2,
+      "size": "Small",
+      "image": "https://images.unsplash.com/photo-1568043210943-0e8aac4b9734?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      "description": "Mimi est une chatte joueuse et curieuse qui adore explorer son environnement."
+    },
+    {
+      "id": 5,
+      "name": "Rex",
+      "species": "Dog",
+      "gender": "Male",
+      "age": 2,
+      "size": "Big",
+      "image": "https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      "description": "Rex est un vieux chien sage et loyal qui aime passer du temps au soleil."
+    },
+    {
+      "id": 6,
+      "name": "Luna",
+      "species": "Cat",
+      "gender": "Femelle",
+      "age": 8,
+      "size": "Medium",
+      "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+      "description": "Luna est une chatte élégante et sociable qui adore être le centre d'attention."
+    }
+    
+    
+    
+  ]

@@ -1,0 +1,88 @@
+/* styles/AdoptionSection.module.css */
+.adoptionSection {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  background-image: url('/images/background1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 50px 0;
+  /* Clip-path pour créer l'effet de vagues en haut et en bas */
+  clip-path: url(#sectionWaveShape);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Overlay plus léger pour rendre la photo plus visible/claire */
+ /* background-color: rgba(0, 0, 0, 0.4);*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.content {
+  max-width: 800px;
+  text-align: center;
+  color: white;
+  /* Ajouter un léger fond pour améliorer la lisibilité sur l'image plus claire */
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  border-radius: 10px;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+  font-weight: 700;
+  /* Ombre de texte pour améliorer la lisibilité sur fond d'image */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.description, .objective {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  /* Ombre de texte pour améliorer la lisibilité sur fond d'image */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.button {
+  display: inline-block;
+  background-color: white;
+  color: #ff7f00;
+  border-color: #ff7f00;
+  padding: 14px 28px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: white;
+  color: #ff7f00;
+  border-color: #ff7f00;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation légère pour les vagues */
+@keyframes moveWaves {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(1%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

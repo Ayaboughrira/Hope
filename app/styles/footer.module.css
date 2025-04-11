@@ -1,0 +1,145 @@
+/* Styles pour le Footer */
+.footer {
+    background: linear-gradient(to bottom, #020b25, #121a2f);
+    color: white;
+    position:relative;
+    padding: 70px 30px 20px;
+    margin-top: 100px;
+     
+  }
+  
+  
+  /* Contenu du Footer */
+  .footercontent {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+  
+  .footersection h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    position: relative;
+    padding-bottom: 10px;
+  }
+  
+  .footersection h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background-color: #ff7f00;
+  }
+  
+  .footersection p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  
+  .footersection ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footersection ul li {
+    margin-bottom: 10px;
+  }
+  
+  .footersection ul li a {
+    color: #e0e0e0;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .footersection ul li a:hover {
+    color: #ff7f00;
+  }
+  
+  .icon {
+    margin-right: 10px;
+  }
+  
+  /* Bouton inscription */
+  .signupbtn {
+    background-color: #ff7f00;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    margin-bottom: 15px;
+  }
+  
+  .signupbtn:hover {
+    background-color: #e67300;
+    transform: translateY(-2px);
+  }
+  
+  /* Icônes sociales */
+  .socialicons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .socialicon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .socialicon:hover {
+    background-color: #ff7f00;
+    transform: translateY(-3px);
+  }
+  
+  /* Bas de page */
+  .footerbottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+  
+  .footerlinks {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .footerlinks a {
+    color: #e0e0e0;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .footerlinks a:hover {
+    color: #ff7f00;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .footer-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .footerbottom {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+    }
+  }
