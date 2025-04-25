@@ -2,9 +2,8 @@
 import Head from 'next/head';
 import HeroCarousel from  './component/sectionone.js';
 import AnimalCareSection from  './component/sectiontwo.js';
-import AdoptionSection from  './component/sectionthree.js';
-import Footer  from  './component/footer.js';
-import Header  from  './component/navbar.js';
+import AdoptionSection from  './component/sectiontrois.js';
+
 
 
 
@@ -20,7 +19,7 @@ export default function Home() {
 
      
       <main>
-      < Header/>
+     
       <HeroCarousel/>
       <AnimalCareSection/>
       <AdoptionSection/>
@@ -28,7 +27,7 @@ export default function Home() {
     
         
       </main>
-      <Footer/>
+    
      
     </div>
   );

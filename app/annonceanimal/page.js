@@ -24,6 +24,7 @@ const AnimalForm = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // État pour la gestion des étapes
   const [currentStep, setCurrentStep] = useState(1);
@@ -122,22 +123,65 @@ const AnimalForm = () => {
     }
   };
   
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Ici vous pourriez ajouter le code pour envoyer les données à votre serveur
-    console.log('Données du formulaire:', formData);
-    console.log('Photos:', photos.map(p => p.file));
-    console.log('Vidéo:', videoFile);
+  // Modification simplifiée de handleSubmit dans AnimalForm.jsx
 
-    // Affiche la boîte de dialogue
+ // Ajoutez cette fonction au début de votre composant AnimalForm:
+
+// Dans la fonction handleSubmit, modifiez pour ajouter la gestion des erreurs et le feedback utilisateur:
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  
+  try {
+    // Validations
+    if (!formData.animalName || !formData.animalType || !formData.ownerName || !formData.ownerEmail || !formData.ownerPhone) {
+      throw new Error('Veuillez remplir tous les champs obligatoires');
+    }
+    
+    if (photos.length === 0) {
+      throw new Error('Veuillez ajouter au moins une photo de votre animal');
+    }
+    
+    // Créer un FormData pour envoyer les données
+    const formDataToSubmit = new FormData();
+    
+    // Ajouter les données textuelles
+    for (const [key, value] of Object.entries(formData)) {
+      formDataToSubmit.append(key, value);
+    }
+    
+    // Ajouter les photos
+    photos.forEach(photo => {
+      formDataToSubmit.append('photos', photo.file);
+    });
+    
+    // Ajouter la vidéo si présente
+    if (videoFile) {
+      formDataToSubmit.append('video', videoFile);
+    }
+    
+    console.log("Envoi de la requête...");
+    
+    // Envoyer les données à l'API
+    const response = await fetch('/api/animals', {
+      method: 'POST',
+      body: formDataToSubmit,
+      // Ne pas ajouter l'en-tête Content-Type car il est automatiquement défini avec FormData
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Erreur lors de la publication');
+    }
+    
+    const result = await response.json();
+    console.log('Annonce publiée avec succès:', result);
+    
+    // Afficher le modal de succès
     setShowModal(true);
     
-    // Reset the form after 3 seconds
+    // Réinitialiser le formulaire après succès
     setTimeout(() => {
-      setShowModal(false);
-      
-      // Réinitialiser le formulaire
       setFormData({
         animalName: '',
         animalType: '',
@@ -151,29 +195,24 @@ const AnimalForm = () => {
         ownerAddress: '',
       });
       
-      // Nettoyer les aperçus d'image
-      photos.forEach(photo => {
-        URL.revokeObjectURL(photo.preview);
-      });
+      // Libérer les URL objectURL pour éviter les fuites mémoire
+      photos.forEach(photo => URL.revokeObjectURL(photo.preview));
+      if (videoPreview) URL.revokeObjectURL(videoPreview);
       
       setPhotos([]);
-      
-      // Nettoyer l'aperçu vidéo
-      if (videoPreview) {
-        URL.revokeObjectURL(videoPreview);
-      }
-      
       setVideoFile(null);
       setVideoPreview('');
-      
-      // Réinitialiser les champs de fichier
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      if (videoInputRef.current) videoInputRef.current.value = '';
-      
-      // Revenir à la première étape
       setCurrentStep(1);
+      setShowModal(false);
     }, 3000);
-  };
+    
+  } catch (error) {
+    console.error('Erreur:', error);
+    alert('Erreur lors de la publication: ' + error.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   
   return (
     <div className={styles['animal-form-container']}>
@@ -196,17 +235,19 @@ const AnimalForm = () => {
         ))}
       </div>
       
-      {/* Modal de succès - maintenant visible lorsque showModal est vrai */}
+      {/* Modal de succès */}
       {showModal && (
         <div className={styles['success-modal']}>
           <div className={styles['modal-content']}>
             <div className={styles['success-icon']}>✓</div>
-            <p>Your ad has been successfully published!</p>
+            <p>Votre annonce a été publiée avec succès!</p>
           </div>
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
+        
+        
         {/* Section Informations sur l'animal */}
         <div className={`${styles['form-section']} ${currentStep === 1 ? styles.active : ''}`}>
           <h3 className={styles['section-title']}>Animal Information:</h3>
@@ -441,7 +482,13 @@ const AnimalForm = () => {
           </div>
           
           <div className={styles['form-actions']}>
-            <button type="submit" className={styles['submit-btn']}>Post Your Ad</button>
+            <button 
+              type="submit" 
+              className={styles['submit-btn']}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Publication en cours...' : 'Post Your Ad'}
+            </button>
           </div>
         </div>
       </form>

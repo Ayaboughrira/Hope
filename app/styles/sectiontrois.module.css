@@ -1,0 +1,310 @@
+/* styles/sectiontrois.module.css */
+.adoptionSectionContainer {
+    position: relative;
+    padding: 6rem 0;
+    margin: 6rem 0;
+    background: linear-gradient(135deg, #ff9933, #ff5500, #ff8800);
+    overflow: hidden;
+  }
+  
+  .waveBorder, .waveBorderBottom {
+    position: absolute;
+    width: 100%;
+    height: 150px;
+    left: 0;
+    z-index: 5;
+    overflow: hidden;
+  }
+  
+  .waveBorder {
+    top: 0;
+  }
+  
+  .waveBorderBottom {
+    bottom: 0;
+    transform: rotate(180deg);
+  }
+  
+  .waveBorder svg, .waveBorderBottom svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  .waveFill {
+    fill: #ffffff;
+  }
+  
+  .contentContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 4rem;
+    position: relative;
+    z-index: 10;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+  
+  .textSection {
+    flex: 1;
+    max-width: 600px;
+    color: white;
+    padding-right: 2rem;
+  }
+  
+  .sectionTitle {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .subtitle {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    color: white;
+  }
+  
+  .definitionBox {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .heartIcon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    color: #ffffff;
+    margin-right: 1rem;
+    margin-top: 0.2rem;
+  }
+  
+  .definition {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .objectivesContainer {
+    margin-bottom: 2rem;
+  }
+  
+  .objectivesTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: white;
+  }
+  
+  .objectivesList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .objectivesList li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .pawIcon {
+    width: 20px;
+    height: 20px;
+    color: #ffffff;
+    margin-right: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .discoverButton {
+    display: inline-flex;
+    align-items: center;
+    background-color: white;
+    color: #ff7700;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+  
+  .discoverButton:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    background-color: #fff8f0;
+  }
+  
+  .discoverButton:active {
+    transform: translateY(-2px);
+  }
+  
+  .arrowIcon {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .discoverButton:hover .arrowIcon {
+    transform: translateX(5px);
+  }
+  
+  .imageSection {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .beachDogImageContainer {
+    position: relative;
+    width: 400px;
+    height: 500px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border: 5px solid white;
+    transform: rotate(3deg);
+    transition: transform 0.3s ease;
+  }
+  
+  .beachDogImageContainer:hover {
+    transform: rotate(0deg) scale(1.02);
+  }
+  
+  .beachDogImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Effet plage et soleil */
+  .beachDogImageContainer::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to top, rgba(255, 208, 128, 0.6), transparent);
+    z-index: 2;
+  }
+  
+  .beachDogImageContainer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 255, 190, 0.9) 0%, rgba(255, 255, 0, 0) 70%);
+    border-radius: 50%;
+    z-index: 1;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsive design */
+  @media (max-width: 1024px) {
+    .contentContainer {
+      flex-direction: column;
+      padding: 2rem 2rem;
+    }
+    
+    .textSection {
+      max-width: 100%;
+      padding-right: 0;
+      margin-bottom: 3rem;
+    }
+    
+    .imageSection {
+      margin-top: 2rem;
+    }
+    
+    .waveBorder, .waveBorderBottom {
+      height: 100px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .adoptionSectionContainer {
+      padding: 4rem 0;
+    }
+    
+    .sectionTitle {
+      font-size: 2.8rem;
+    }
+    
+    .subtitle {
+      font-size: 1.3rem;
+    }
+    
+    .beachDogImageContainer {
+      width: 350px;
+      height: 400px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .adoptionSectionContainer {
+      padding: 3rem 0;
+    }
+    
+    .contentContainer {
+      padding: 1rem 1.5rem;
+    }
+    
+    .sectionTitle {
+      font-size: 2.3rem;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+    }
+    
+    .definitionBox {
+      padding: 1.2rem;
+    }
+    
+    .definition {
+      font-size: 1rem;
+    }
+    
+    .discoverButton {
+      width: 100%;
+      justify-content: center;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .beachDogImageContainer {
+      width: 280px;
+      height: 350px;
+    }
+    
+    .waveBorder, .waveBorderBottom {
+      height: 80px;
+    }
+  }

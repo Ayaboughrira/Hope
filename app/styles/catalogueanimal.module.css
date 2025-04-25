@@ -1,6 +1,6 @@
 .animalCatalog {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 80px auto 0;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -124,14 +124,22 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
   background-color: white;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .animalCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
+
+.animalLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
 
 .animalImage {
   height: 200px;

@@ -1,6 +1,6 @@
 import React from 'react';
 import  styles from '../styles/footer.module.css';
-
+import Link from  'next/link';
 
 const Footer = () => {
   return (
@@ -15,7 +15,7 @@ const Footer = () => {
         <div className={styles.footersection}>
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="#">Adoption Process</a></li>
+            <li><a href="/catalogueanimal">Adoption Process</a></li>
             <li><a href="#">Success Stories</a></li>
             <li><a href="#">Animal Care Tips</a></li>
             <li><a href="#">Donation</a></li>
@@ -31,7 +31,7 @@ const Footer = () => {
         
         <div className={styles.footersection}>
           <h3>Join Us</h3>
-          <button className={styles.signupbtn}>Sign Up</button>
+          <Link  href="/signuplogin" className={styles.signupbtn}>Sign Up</Link>
           <div className={styles.socialicons}>
             <a href="#" className={styles.socialicon}>FB</a>
             <a href="#" className={styles.socialicon}>IG</a>

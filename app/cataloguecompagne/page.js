@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../styles/cataloguecompagne.module.css'; 
 import campaignsData from './compagne.json';
-import Footer from '../component/footer'; 
+
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -133,7 +133,7 @@ export default function Campaigns() {
         </button>
       </div>
     </div>
-    <Footer />
+   
    </div>
     
    

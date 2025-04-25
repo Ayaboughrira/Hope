@@ -8,21 +8,22 @@ const HeroCarousel = () => {
   const slides = [
     {
       id: 1,
-      imageUrl: "/images/image1.jpg",
-      title: "Care of your Little<span>Pets</span>",
-      description: "Adoptez un animal de compagnie et changez une vie pour toujours. Nos chiens sont prêts à vous offrir un amour inconditionnel."
+      imageUrl: "/images/image7.jpg",
+      title:  "Open your heart, adopt a <span> furry </span> friend!",
+      description: "Every adoption story begins with a second chance."
     },
     {
       id: 2,
-      imageUrl: "/images/image5.jpg",
-      title: "Donnez une <span>seconde</span> chance",
-      description: "Chaque animal mérite un foyer chaleureux. Votre adoption peut sauver un animal et enrichir votre vie quotidienne."
+      imageUrl: "/images/image8.jpg",
+      title: "Find your perfect companion<span> today</span>",
+      description: "Pets are our passion and safety is our promise.",
+      
     },
     {
       id: 3,
-      imageUrl: "/images/imag43.jpg",
-      title: "Des compagnons <span>fidèles</span>",
-      description: "Nos animaux sont vaccinés, stérilisés et prêts à rejoindre votre famille. Venez les rencontrer et trouvez celui qui vous correspond."
+      imageUrl: "/images/image9.jpg",
+      title: "Forever <span> friends </span>",
+      description: "Every animal deserves a loving home. Your adoption can save a life and brighten your days."
     }
   ];
 
@@ -78,8 +79,8 @@ const HeroCarousel = () => {
               <div className={styles.content}>
                 <h2 className={styles.title} dangerouslySetInnerHTML={{ __html: slide.title }}></h2>
                 <p className={styles.description}>{slide.description}</p>
-                <Link href="/adoption" className={styles.adoptButton}>
-                  J'adopte
+                <Link href="/catalogueanimal" className={styles.adoptButton}>
+                  Adopt Now
                 </Link>
               </div>
             </div>

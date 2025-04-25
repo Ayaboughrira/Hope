@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/catalogueanimal.module.css'; 
 import animal from './animal.json';
+import Link from 'next/link';
 
 const AnimalCatalog = () => {
   // État pour stocker les données des animaux
@@ -201,57 +202,63 @@ const AnimalCatalog = () => {
                 ))}
               </div>
               
-              <div className={styles.animalsGrid}>
-                {filteredAnimals.length > 0 ? (
-                  filteredAnimals.map(animal => (
-                    <div key={animal.id} className={styles.animalCard}>
-                      <div className={styles.animalImage}>
-                        <img src={animal.image} alt={animal.name} />
-                        <button 
-                          className={`${styles.favoriteBtn} ${favorites[animal.id] ? styles.active : ''}`}
-                          onClick={() => toggleFavorite(animal.id)}
-                          aria-label={favorites[animal.id] ? "Retirer des favoris" : "Ajouter aux favoris"}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={favorites[animal.id] ? "red" : "none"} stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className={styles.animalInfo}>
-                        <h3>{animal.name}</h3>
-                        <div className={styles.infoRow}>
-                          <p><strong>Species:</strong> {animal.species}</p>
-                          <p className={styles.gender}>
-                            <strong>Gender:</strong> 
-                            <span className={styles.genderIcon}>
-                              {animal.gender === 'Male' ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="blue" strokeWidth="2">
-                                  <circle cx="10.5" cy="10.5" r="7.5" />
-                                  <line x1="18" y1="18" x2="22" y2="22" />
-                                  <line x1="22" y1="15" x2="22" y2="22" />
-                                  <line x1="15" y1="22" x2="22" y2="22" />
-                                </svg>
-                              ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgb(216, 15, 156)" strokeWidth="2">
-                                  <circle cx="12" cy="8" r="7" />
-                                  <line x1="12" y1="15" x2="12" y2="22" />
-                                  <line x1="9" y1="19" x2="15" y2="19" />
-                                </svg>
-                              )}
-                              {animal.gender}
-                            </span>
-                          </p>
-                        </div>
-                        <p><strong>Age:</strong> {animal.age} ans</p>
-                        <p><strong>Size:</strong> {animal.size}</p>
-                        <p>{animal.description}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className={styles.noResults}>No animals match your search criteria.</div>
-                )}
-              </div>
+             
+<div className={styles.animalsGrid}>
+  {filteredAnimals.length > 0 ? (
+    filteredAnimals.map(animal => (
+      <div key={animal.id} className={styles.animalCard}>
+        <Link href={`/catalogueanimal/${animal.id}`} className={styles.animalLink}>
+          <div className={styles.animalImage}>
+            <img src={animal.image} alt={animal.name} />
+            <button 
+              className={`${styles.favoriteBtn} ${favorites[animal.id] ? styles.active : ''}`}
+              onClick={(e) => {
+                e.preventDefault(); // Empêche la navigation vers la page détail
+                toggleFavorite(animal.id);
+              }}
+              aria-label={favorites[animal.id] ? "Retirer des favoris" : "Ajouter aux favoris"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={favorites[animal.id] ? "red" : "none"} stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+          </div>
+          <div className={styles.animalInfo}>
+            <h3>{animal.name}</h3>
+            <div className={styles.infoRow}>
+              <p><strong>Species:</strong> {animal.species}</p>
+              <p className={styles.gender}>
+                <strong>Gender:</strong> 
+                <span className={styles.genderIcon}>
+                  {animal.gender === 'Male' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="blue" strokeWidth="2">
+                      <circle cx="10.5" cy="10.5" r="7.5" />
+                      <line x1="18" y1="18" x2="22" y2="22" />
+                      <line x1="22" y1="15" x2="22" y2="22" />
+                      <line x1="15" y1="22" x2="22" y2="22" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgb(216, 15, 156)" strokeWidth="2">
+                      <circle cx="12" cy="8" r="7" />
+                      <line x1="12" y1="15" x2="12" y2="22" />
+                      <line x1="9" y1="19" x2="15" y2="19" />
+                    </svg>
+                  )}
+                  {animal.gender}
+                </span>
+              </p>
+            </div>
+            <p><strong>Age:</strong> {animal.age} ans</p>
+            <p><strong>Size:</strong> {animal.size}</p>
+            <p>{animal.description}</p>
+          </div>
+        </Link>
+      </div>
+    ))
+  ) : (
+    <div className={styles.noResults}>No animals match your search criteria.</div>
+  )}
+</div>
             </>
           )}
         </div>

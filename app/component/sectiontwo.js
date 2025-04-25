@@ -9,24 +9,24 @@ const AnimalCareSection = () => {
   const animals = [
     {
       id: 1,
-      name: "Dogs",
+      name: "Cats",
       image: "/images/image4.jpg",
-      description: "Conseils pour le bien-être de votre fidèle compagnon: nutrition, exercice et soins spécifiques.",
-      slug: "Dogs"
+      description: " Tips for your loyal companion’s well-being: Nutrition, exercise, and specialized care.",
+      slug: "cats"
     },
     {
       id: 2,
-      name: "Les chats",
+      name: "Dogs",
       image: "/images/cat-care.jpg",
-      description: "Comprendre les besoins uniques des félins pour une vie saine et heureuse à vos côtés.",
-      slug: "chats"
+      description: " Feline-specific care essentials: Building the foundation for lifelong health and happiness.",
+      slug: "dogs"
     },
     {
       id: 3,
-      name: "Les lapins",
+      name: "Birds",
       image: "/images/rabbit-care.jpg",
-      description: "Guide complet sur l'habitat, l'alimentation et les soins nécessaires pour vos lapins.",
-      slug: "lapins"
+      description: "Complete Guide to Habitat, Nutrition, and Essential Care for Your Birds.",
+      slug:"birds"
     },
     
     
@@ -35,15 +35,15 @@ const AnimalCareSection = () => {
   return (
     <section className={styles.careSection}>
       <div className={styles.container}>
-        <h2 className={styles.sectionTitle}>Prendre soin de vos animaux</h2>
+        <h2 className={styles.sectionTitle}>Taking care of your pets</h2>
         <p className={styles.sectionDescription}>
-          Découvrez nos guides pour offrir les meilleurs soins à vos compagnons et leur assurer une vie saine et heureuse.
+        Discover our guides to provide the best care for your companions and ensure they live a healthy, happy life.     
         </p>
         
         <div className={styles.cardsGrid}>
           {animals.map((animal) => (
             <Link 
-              href={`/soins/${animal.slug}`} 
+              href={`/prendresoin/${animal.slug}`} 
               key={animal.id}
               className={styles.cardLink}
             >
@@ -61,11 +61,11 @@ const AnimalCareSection = () => {
                 <div className={styles.contentContainer}>
                   <h3 className={styles.cardTitle}>{animal.name}</h3>
                   <p className={styles.cardDescription}>{animal.description}</p>
-                  <span className={styles.readMore}>En savoir plus</span>
+                  <span className={styles.readMore}>Discover more</span>
                 </div>
               </div>
             </Link>
-          ))}
+          )) }
         </div>
       </div>
     </section>

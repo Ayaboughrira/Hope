@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState } from 'react';
 import { 
   User, Mail, Lock, Phone, MapPin, 
@@ -6,12 +7,20 @@ import {
   ChevronLeft, ChevronRight, HeartPulse, Clock }  from 'lucide-react';
 import Image from 'next/image';
 import styles from '../styles/signuplogin.module.css';
+import { signup, login } from '../services/clientauthservices';
+import { useRouter } from 'next/navigation';
 
 const Signup = () => {
+  const router = useRouter();
+  
   // State management
   const [isLogin, setIsLogin] = useState(false);
   const [userType, setUserType] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState({});
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   // User type options
   const userTypes = [
     { id: 'owner', label: 'Pet Owner', icon: User },
@@ -57,6 +66,73 @@ const Signup = () => {
     ]
   };
 
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle login submission
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    
+    try {
+      const { email, password } = formData;
+      if (!email || !password) {
+        setError('Please enter both email and password');
+        setLoading(false);
+        return;
+      }
+      
+      const result = await login(email, password);
+      if (result.success) {
+        // Redirect to dashboard or home page
+        router.push('/');
+      } else {
+        setError(result.error || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle signup submission
+  const handleSignupSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    
+    try {
+      // Vérification des champs requis
+      const requiredFields = formFields[userType];
+      const missingFields = requiredFields.filter(f => !formData[f.name]);
+      
+      if (missingFields.length > 0) {
+        setError(`Please fill: ${missingFields.map(f => f.label).join(', ')}`);
+        return;
+      }
+  
+      // Appel au service
+      const result = await signup(userType, formData);
+      
+      if (result.success) {
+        router.push(`/${userType}-dashboard`); //hna lzm profile de usertype 
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Registration failed');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Helper function to get current fields
   const getCurrentFields = () => {
     if (!userType) return [];
@@ -86,30 +162,50 @@ const Signup = () => {
 
   // Component for login form
   const LoginForm = () => (
-    <form className={styles.loginForm}>
+    <form className={styles.loginForm} onSubmit={handleLoginSubmit}>
       <div className={styles.formField}>
         <div className={styles.inputWithIcon}>
           <Mail className={styles.fieldIcon} />
-          <input type="email" className={styles.fieldInput} placeholder="Email address" />
+          <input 
+            type="email" 
+            name="email"
+            value={formData.email || ''}
+            onChange={handleInputChange}
+            className={styles.fieldInput} 
+            placeholder="Email address" 
+          />
         </div>
       </div>
 
       <div className={styles.formField}>
         <div className={styles.inputWithIcon}>
           <Lock className={styles.fieldIcon} />
-          <input type="password" className={styles.fieldInput} placeholder="Your password" />
+          <input 
+            type="password" 
+            name="password"
+            value={formData.password || ''}
+            onChange={handleInputChange}
+            className={styles.fieldInput} 
+            placeholder="Your password" 
+          />
         </div>
       </div>
 
-      <button type="submit" className={styles.submitButton}>
-        Sign In
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
+      <button 
+        type="submit" 
+        className={styles.submitButton}
+        disabled={loading}
+      >
+        {loading ? 'Signing in...' : 'Sign In'}
       </button>
     </form>
   );
 
   // Component for signup form
   const SignupForm = () => (
-    <form className={styles.signupForm}>
+    <form className={styles.signupForm} onSubmit={currentStep === maxSteps - 1 ? handleSignupSubmit : null}>
       <div>
         {getCurrentFields().map((field) => (
           <div key={field.name} className={styles.formField}>
@@ -118,6 +214,8 @@ const Signup = () => {
               <input
                 type={field.type}
                 name={field.name}
+                value={formData[field.name] || ''}
+                onChange={handleInputChange}
                 className={styles.fieldInput}
                 placeholder={field.label}
               />
@@ -125,6 +223,8 @@ const Signup = () => {
           </div>
         ))}
       </div>
+
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.formNavigation}>
         <button
@@ -134,19 +234,26 @@ const Signup = () => {
             else setCurrentStep(currentStep - 1);
           }}
           className={styles.navButton}
+          disabled={loading}
         >
           <ChevronLeft className={styles.buttonIcon} />
           Back
         </button>
 
         <button
-          type="button"
+          type={currentStep === maxSteps - 1 ? 'submit' : 'button'}
           onClick={() => {
             if (currentStep < maxSteps - 1) setCurrentStep(currentStep + 1);
           }}
           className={styles.navButton}
+          disabled={loading}
         >
-          {currentStep === maxSteps - 1 ? 'Create Account' : 'Next'}
+          {loading 
+            ? 'Processing...' 
+            : currentStep === maxSteps - 1 
+              ? 'Create Account' 
+              : 'Next'
+          }
           {currentStep < maxSteps - 1 && <ChevronRight className={styles.buttonIcon} />}
         </button>
       </div>
@@ -196,6 +303,8 @@ const Signup = () => {
                   setIsLogin(!isLogin);
                   setUserType('');
                   setCurrentStep(0);
+                  setFormData({});
+                  setError('');
                 }}
                 className={styles.switchModeButton}
                 type="button"

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../../styles/compagneform.module.css';
-import Footer from '../../component/footer'; 
+
 
 
 export default function PostCampaignForm() {
@@ -49,7 +49,7 @@ export default function PostCampaignForm() {
     
     // Limiter à 3 images
     if (formData.images.length + files.length > 3) {
-      alert('Vous pouvez télécharger un maximum de 3 images');
+      alert('You can upload a maximum of 3 images.');
       return;
     }
 
@@ -79,19 +79,19 @@ export default function PostCampaignForm() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.title.trim()) newErrors.title = 'Le titre est requis';
-    if (!formData.startDate) newErrors.startDate = 'La date de début est requise';
-    if (!formData.endDate) newErrors.endDate = 'La date de fin est requise';
-    if (!formData.startTime) newErrors.startTime = 'L\'heure de début est requise';
-    if (!formData.location) newErrors.location = 'La localisation est requise';
-    if (!formData.description.trim()) newErrors.description = 'La description est requise';
-    if (!formData.objective.trim()) newErrors.objective = 'L\'objectif est requis';
+    if (!formData.title.trim()) newErrors.title = ' Title is required';
+    if (!formData.startDate) newErrors.startDate = 'Start date is required';
+    if (!formData.endDate) newErrors.endDate = 'End date is  requise';
+    if (!formData.startTime) newErrors.startTime = 'Start time is required';
+    if (!formData.location) newErrors.location = 'Location is required';
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.objective.trim()) newErrors.objective = 'Objective is required';
     
     // Validation de l'email
     if (!formData.email) {
-      newErrors.email = 'L\'email est requis';
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'L\'email est invalide';
+      newErrors.email = 'Email is invalid';
     }
     
     setErrors(newErrors);
@@ -114,7 +114,7 @@ export default function PostCampaignForm() {
         
         // Redirection après soumission réussie
         setTimeout(() => {
-          router.push('/campaigns');//hna lzm vers la page HOME apre la creer*******///
+          router.push('/');//hna lzm vers la page HOME apres la creer*******///
         }, 1000);
       } catch (error) {
         console.error('Erreur de soumission du formulaire:', error);
@@ -157,10 +157,10 @@ export default function PostCampaignForm() {
           
           <form className={styles.campaignForm} onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <h2 className={styles.sectionTitle}>campaign details</h2>
+              <h2 className={styles.sectionTitle}>Campaign Details :</h2>
               
               <div className={styles.inputGroup}>
-                <label htmlFor="title">Campaign title*</label>
+                <label htmlFor="title">Campaign Title* :</label>
                 <input
                   type="text"
                   id="title"
@@ -175,7 +175,7 @@ export default function PostCampaignForm() {
               
               <div className={styles.inputRow}>
                 <div className={styles.inputGroup}>
-                  <label htmlFor="startDate">Start date*</label>
+                  <label htmlFor="startDate">Start Date* :</label>
                   <input
                     type="date"
                     id="startDate"
@@ -188,7 +188,7 @@ export default function PostCampaignForm() {
                 </div>
                 
                 <div className={styles.inputGroup}>
-                  <label htmlFor="endDate">End date*</label>
+                  <label htmlFor="endDate">End Date* :</label>
                   <input
                     type="date"
                     id="endDate"
@@ -201,7 +201,7 @@ export default function PostCampaignForm() {
                 </div>
                 
                 <div className={styles.inputGroup}>
-                  <label htmlFor="startTime">Start time*</label>
+                  <label htmlFor="startTime">Start Time* :</label>
                   <input
                     type="time"
                     id="startTime"
@@ -215,7 +215,7 @@ export default function PostCampaignForm() {
               </div>
               
               <div className={styles.inputGroup}>
-                <label htmlFor="location">location (Wilaya)*</label>
+                <label htmlFor="location">Location (Wilaya)* :</label>
                 <select
                   id="location"
                   name="location"
@@ -233,10 +233,10 @@ export default function PostCampaignForm() {
             </div>
             
             <div className={styles.formGroup}>
-              <h2 className={styles.sectionTitle}>campaign information</h2>
+              <h2 className={styles.sectionTitle}>Campaign Information :</h2>
               
               <div className={styles.inputGroup}>
-                <label htmlFor="description">Description*</label>
+                <label htmlFor="description">Description* :</label>
                 <textarea
                   id="description"
                   name="description"
@@ -250,7 +250,7 @@ export default function PostCampaignForm() {
               </div>
               
               <div className={styles.inputGroup}>
-                <label htmlFor="objective">objective of the campaign*</label>
+                <label htmlFor="objective"> Campaign Objective* :</label>
                 <textarea
                   id="objective"
                   name="objective"
@@ -264,7 +264,7 @@ export default function PostCampaignForm() {
               </div>
               
               <div className={styles.formGroup}>
-                <h2 className={styles.sectionTitle}>campaign images</h2>
+                <h2 className={styles.sectionTitle}>Campaign Images :</h2>
                 
                 <div className={styles.imageUpload}>
                   <input
@@ -307,10 +307,10 @@ export default function PostCampaignForm() {
             </div>
             
             <div className={styles.formGroup}>
-              <h2 className={styles.sectionTitle}> Contact information</h2>
+              <h2 className={styles.sectionTitle}> Contact Information :</h2>
               
               <div className={styles.inputGroup}>
-                <label htmlFor="email">Association email*</label>
+                <label htmlFor="email">Association Email* :</label>
                 <input
                   type="email"
                   id="email"
@@ -324,7 +324,7 @@ export default function PostCampaignForm() {
               </div>
               
               <div className={styles.inputGroup}>
-                <label htmlFor="phone">Phone number (optional)</label>
+                <label htmlFor="phone">Phone Number (optional) :</label>
                 <input
                   type="tel"
                   id="phone"
@@ -339,9 +339,10 @@ export default function PostCampaignForm() {
             {errors.form && <div className={styles.formError}>{errors.form}</div>}
             
             <div className={styles.formActions}>
-              <Link href="/campaigns" className={styles.cancelButton}> {/* href="/Home   nrmlm mais lzm la creer d'abord*/ }
+              <Link href="/" className={styles.cancelButton}> {/* href="/Home   nrmlm mais lzm la creer d'abord*/ }
                 Cancel
               </Link>
+              
               <button 
                 type="submit" 
                 className={styles.submitButton} 
@@ -355,7 +356,7 @@ export default function PostCampaignForm() {
       )}
     </div>
    </div>
-   <Footer />
+  
    </div>
   );
 }

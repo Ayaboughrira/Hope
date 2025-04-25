@@ -5,6 +5,7 @@
   justify-content: center;
   padding: 3rem 1rem;
   background-color: #ff8c00;
+  margin: 60px auto 0;
 }
 
 .authWrapper {
@@ -414,4 +415,27 @@
   .switchModeButton {
     font-size: 0.75rem;
   }
+}
+
+
+
+
+/* Ajoutez ces styles à votre fichier CSS existant */
+
+.errorMessage {
+  color: #e53e3e;
+  background-color: #fff5f5;
+  border: 1px solid #fc8181;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Style pour les boutons désactivés */
+.navButton:disabled,
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }

@@ -1,0 +1,65 @@
+{
+    "cats": [
+      {
+        "id": 1,
+        "title": "Alimentation optimale pour les chats d'intérieur",
+        "excerpt": "Découvrez les meilleurs conseils pour nourrir votre chat d'intérieur et maintenir son poids idéal.",
+        
+        "type": "nourriture",
+        "author": "Marie Dubois"
+      },
+      {
+        "id": 2,
+        "title": "Signes d'anxiété chez les chats",
+        "excerpt": "Comment reconnaître et aider votre chat lorsqu'il souffre d'anxiété ou de stress.",
+        "type": "sante",
+        "author": "Pierre Martin"
+      },
+      {
+        "id": 3,
+        "title": "Entretien du pelage félin",
+        "excerpt": "Guide complet pour le brossage et les soins du pelage de votre chat selon sa race.",
+        "type": "soin",
+        "author": "Sophie Laurent"
+      },
+      {
+        "id": 4,
+        "title": "Vaccins essentiels pour les chats",
+        "excerpt": "Calendrier vaccinal recommandé et informations importantes sur la santé préventive féline.",
+        "type": "sante",
+        "author": "Thomas Bernard"
+      }
+    ],
+    "dogs": [
+      {
+        "id": 1,
+        "title": "Nutrition adaptée aux chiens seniors",
+        "excerpt": "Comment ajuster l'alimentation de votre chien âgé pour maintenir sa santé et sa vitalité.",
+        "type": "nourriture",
+        "author": "Julie Moreau"
+      },
+      {
+        "id": 2,
+        "title": "Hygiène dentaire canine",
+        "excerpt": "Techniques efficaces pour prendre soin des dents de votre chien et prévenir les problèmes dentaires.",
+        "type": "soin",
+        "author": "Michel Dupont"
+      }
+    ],
+    "birds": [
+      {
+        "id": 1,
+        "title": "Enrichissement pour oiseaux en cage",
+        "excerpt": "Idées et astuces pour stimuler mentalement votre oiseau et éviter l'ennui.",
+        "type": "soin",
+        "author": "Clara Petit"
+      },
+      {
+        "id": 2,
+        "title": "Régime alimentaire équilibré pour perroquets",
+        "excerpt": "Guide nutritionnel complet pour assurer la santé de votre perroquet à long terme.",
+        "type": "nourriture",
+        "author": "Luc Garcia"
+      }
+    ]
+  }

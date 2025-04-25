@@ -4,11 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import styles from '../../styles/compagnedetail.module.css';
-import Footer from '../../component/footer'; 
 import campaignsData from '../compagne.json';
 
-// Ajoutez ici un import pour le service d'authentification (à adapter selon votre système)
-import { getAuthUser } from '../../services/auth'; // Créez ce service si nécessaire
 
 // Fonction de formatage de date stable entre serveur et client
 function formatDate(dateString) {
@@ -274,12 +271,12 @@ export default function CampaignDetail() {
             
             {submitSuccess ? (
               <div className={styles.successMessage}>
-                <p>Votre demande de participation a été envoyée avec succès à {campaign.association}!</p>
+                <p>Your request to participate has been successfully sent to {campaign.association}!</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
                 <div className={styles.formGroup}>
-                  <label htmlFor="firstName">Prénom:</label>
+                  <label htmlFor="firstName"> Last Name:</label>
                   <input 
                     type="text"
                     id="firstName"
@@ -291,7 +288,7 @@ export default function CampaignDetail() {
                 </div>
                 
                 <div className={styles.formGroup}>
-                  <label htmlFor="lastName">Nom:</label>
+                  <label htmlFor="lastName">First Name:</label>
                   <input 
                     type="text"
                     id="lastName"
@@ -315,13 +312,13 @@ export default function CampaignDetail() {
                 </div>
                 
                 <div className={styles.formGroup}>
-                  <label htmlFor="message">Message (optionnel):</label>
+                  <label htmlFor="number">Phone Number:</label>
                   <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
+                    id="number"
+                    name="number"
+                    value={formData.number}
                     onChange={handleInputChange}
-                    rows="4"
+                    required
                   />
                 </div>
                 
@@ -337,7 +334,7 @@ export default function CampaignDetail() {
                     className={styles.submitButton}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Envoi en cours...' : 'Valider'}
+                    {isSubmitting ? 'Sending in progress...' : 'Sent'}
                   </button>
                 </div>
               </form>
@@ -370,7 +367,7 @@ export default function CampaignDetail() {
           }
         </div>
       </div>
-      <Footer />
+    
     </div>
   );
 }

@@ -1,0 +1,110 @@
+/* styles/PrendreSoinSection.module.css */
+.careSectionContainer {
+    padding: 3rem 1.5rem;
+    background-color: #f8f9fa;
+    text-align: center;
+  }
+  
+  .sectionTitle {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .sectionDescription {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+  }
+  
+  .cardsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .careCard {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .careCard:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .iconContainer {
+    margin-bottom: 1.5rem;
+  }
+  
+  .icon {
+    width: 70px;
+    height: 70px;
+    color: #4a90e2;
+  }
+  
+  .careCard:nth-child(1) .icon {
+    color: #f06292; /* Rose pour les chats */
+  }
+  
+  .careCard:nth-child(2) .icon {
+    color: #7986cb; /* Bleu pour les chiens */
+  }
+  
+  .careCard:nth-child(3) .icon {
+    color: #4db6ac; /* Vert-bleu pour les oiseaux */
+  }
+  
+  .cardTitle {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .cardDescription {
+    flex-grow: 1;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  
+  .moreButton {
+    padding: 0.8rem 1.5rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+  }
+  
+  .moreButton:hover {
+    background-color: #3a7bc8;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .cardsContainer {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .careCard {
+      width: 100%;
+      max-width: 400px;
+    }
+  }

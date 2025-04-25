@@ -1,9 +1,9 @@
 /* Adoption Campaign Cards - Prefix: adopt- */
 .adopt-container {
   max-width: 1200px;
-  margin: 0 auto;
   padding: 2rem;
   background-color: #fafafa;
+  margin: 90px auto 0;
   font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
