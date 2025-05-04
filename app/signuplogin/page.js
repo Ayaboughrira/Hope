@@ -88,8 +88,8 @@ const Signup = () => {
       
       const result = await login(email, password);
       if (result.success) {
-        // Redirect to dashboard or home page
-        router.push('/');
+        // Redirection vers la page de profil avec le type et l'ID utilisateur
+        router.push(`/profile/${result.userType}/${result.userId}`);
       } else {
         setError(result.error || 'Login failed. Please try again.');
       }
@@ -108,22 +108,24 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      // Vérification des champs requis
+      // Validation des champs requis
       const requiredFields = formFields[userType];
       const missingFields = requiredFields.filter(f => !formData[f.name]);
       
       if (missingFields.length > 0) {
         setError(`Please fill: ${missingFields.map(f => f.label).join(', ')}`);
+        setLoading(false);
         return;
       }
   
-      // Appel au service
+      // Appel au service d'inscription
       const result = await signup(userType, formData);
       
       if (result.success) {
-        router.push(`/${userType}-dashboard`); //hna lzm profile de usertype 
+        // Redirection vers la page de profil avec le type et l'ID utilisateur
+        router.push(`/profile/${userType}/${result.userId}`);
       } else {
-        setError(result.error);
+        setError(result.error || 'Registration failed');
       }
     } catch (err) {
       setError('Registration failed');

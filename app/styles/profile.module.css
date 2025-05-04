@@ -1,0 +1,243 @@
+/* profile.module.css */
+/* Variables de couleur - design professionnel avec nuances gris-bleu */
+:root {
+  --primary-color: #ff5a00;
+  --primary-light: #ff7a2f;
+  --primary-dark: #e64500;
+  --off-white: #f7f8fa;
+  --blue-gray-100: #e9eef2;
+  --blue-gray-200: #d5dde6;
+  --blue-gray-300: #b8c4d0;
+  --blue-gray-500: #8896a6;
+  --blue-gray-700: #5e6977;
+  --blue-gray-900: #323b45;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+  --error-color: #dc3545;
+}
+
+/* Conteneur principal - off-white au lieu de blanc */
+.profileContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px); /* Ajustement pour la navbar */
+  margin-top: 60px; /* Espace pour la navbar */
+  padding: 2rem;
+  background-color: var(--off-white);
+}
+
+/* Carte de profil */
+.profileCard {
+  width: 100%;
+  max-width: 680px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+/* En-tête de profil */
+.profileHeader {
+  background-color: var(--primary-color);
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+/* Avatar de profil */
+.profileAvatar {
+  width: 100px;
+  height: 100px;
+  background-color: #ffffff;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  position: absolute;
+  bottom: -50px;
+  box-shadow: var(--shadow-md);
+}
+
+.profileAvatar svg {
+  width: 50%;
+  height: 50%;
+  color: var(--primary-color);
+}
+
+/* Informations de profil */
+.profileInfo {
+  padding: 3.5rem 2rem 2rem;
+}
+
+.profileType {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: var(--blue-gray-900);
+  font-size: 1.5rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.profileType::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+/* Champs d'information - fond gris-bleu */
+.infoField {
+  display: flex;
+  margin-bottom: 1.25rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background-color: var(--blue-gray-100); /* Fond gris-bleu */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.infoField:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+  background-color: var(--blue-gray-200);
+}
+
+.fieldIcon {
+  color: var(--primary-color);
+  width: 20px;
+  height: 20px;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.fieldContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  color: var(--blue-gray-700);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.fieldValue {
+  color: var(--blue-gray-900);
+  font-size: 1rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* États de chargement et d'erreur - ajustés pour la navbar */
+.loading, .error {
+  text-align: center;
+  padding: 3rem;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: var(--shadow-md);
+  font-size: 1rem;
+  color: var(--blue-gray-700);
+  margin-top: 60px; /* Espace pour la navbar */
+}
+
+.loading {
+  position: relative;
+}
+
+.loading::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 1.5rem auto 0;
+  background-color: var(--primary-color);
+  border-radius: 2px;
+  animation: loading 1.5s infinite ease-in-out;
+}
+
+.error {
+  color: var(--error-color);
+  border-left: 3px solid var(--error-color);
+}
+
+/* Animation de chargement */
+@keyframes loading {
+  0% {
+    width: 20px;
+  }
+  50% {
+    width: 100px;
+  }
+  100% {
+    width: 20px;
+  }
+}
+
+/* Adaptations responsives */
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: 1rem;
+  }
+  
+  .profileInfo {
+    padding: 3rem 1.5rem 1.5rem;
+  }
+  
+  .profileType {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  
+  .infoField {
+    padding: 0.875rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileHeader {
+    height: 80px;
+  }
+  
+  .profileAvatar {
+    width: 80px;
+    height: 80px;
+    bottom: -40px;
+    font-size: 2rem;
+  }
+  
+  .profileInfo {
+    padding: 2.5rem 1rem 1rem;
+  }
+  
+  .profileType {
+    font-size: 1.125rem;
+  }
+  
+  .infoField {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .fieldLabel {
+    font-size: 0.7rem;
+  }
+  
+  .fieldValue {
+    font-size: 0.875rem;
+  }
+}

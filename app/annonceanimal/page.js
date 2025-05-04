@@ -95,12 +95,13 @@ const AnimalForm = () => {
     setPhotos(updatedPhotos);
   };
   
+  {/*
   const removeVideo = () => {
     if (videoPreview) URL.revokeObjectURL(videoPreview);
     setVideoFile(null);
     setVideoPreview('');
     if (videoInputRef.current) videoInputRef.current.value = '';
-  };
+  };*/}
   
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -123,11 +124,7 @@ const AnimalForm = () => {
     }
   };
   
-  // Modification simplifiée de handleSubmit dans AnimalForm.jsx
-
- // Ajoutez cette fonction au début de votre composant AnimalForm:
-
-// Dans la fonction handleSubmit, modifiez pour ajouter la gestion des erreurs et le feedback utilisateur:
+  
 const handleSubmit = async (e) => {
   e.preventDefault();
   setIsSubmitting(true);
@@ -135,11 +132,11 @@ const handleSubmit = async (e) => {
   try {
     // Validations
     if (!formData.animalName || !formData.animalType || !formData.ownerName || !formData.ownerEmail || !formData.ownerPhone) {
-      throw new Error('Veuillez remplir tous les champs obligatoires');
+      throw new Error('Please fill in all required fields.');
     }
     
     if (photos.length === 0) {
-      throw new Error('Veuillez ajouter au moins une photo de votre animal');
+      throw new Error('Please add at least one photo of your pet.');
     }
     
     // Créer un FormData pour envoyer les données
@@ -200,8 +197,8 @@ const handleSubmit = async (e) => {
       if (videoPreview) URL.revokeObjectURL(videoPreview);
       
       setPhotos([]);
-      setVideoFile(null);
-      setVideoPreview('');
+      //setVideoFile(null);
+      //setVideoPreview('');
       setCurrentStep(1);
       setShowModal(false);
     }, 3000);
@@ -240,7 +237,7 @@ const handleSubmit = async (e) => {
         <div className={styles['success-modal']}>
           <div className={styles['modal-content']}>
             <div className={styles['success-icon']}>✓</div>
-            <p>Votre annonce a été publiée avec succès!</p>
+            <p>Your ad has been published successfully!</p>
           </div>
         </div>
       )}
@@ -339,7 +336,7 @@ const handleSubmit = async (e) => {
         
         {/* Section Photos et Vidéos */}
         <div className={`${styles['form-section']} ${currentStep === 2 ? styles.active : ''}`}>
-          <h3 className={styles['section-title']}>Photos and Videos:</h3>
+          <h3 className={styles['section-title']}>Photos :</h3>
           
           <div className={styles['form-group']}>
             <label>Photos (max 5)</label>
@@ -379,7 +376,7 @@ const handleSubmit = async (e) => {
               </div>
             )}
           </div>
-          
+          {/*
           <div className={styles['form-group']}>
             <label>Video (optional)</label>
             <div className={styles['upload-container']}>
@@ -413,7 +410,7 @@ const handleSubmit = async (e) => {
               </div>
             )}
           </div>
-          
+          */}
           <div className={styles['form-navigation']}>
             <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Previous</button>
             <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Next</button>
@@ -487,7 +484,7 @@ const handleSubmit = async (e) => {
               className={styles['submit-btn']}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Publication en cours...' : 'Post Your Ad'}
+              {isSubmitting ? 'Publication pending...' : 'Post Your Ad'}
             </button>
           </div>
         </div>

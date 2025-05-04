@@ -1,27 +1,42 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import styles from '../styles/annoncerproduit.module.css';
-import { db, storage } from '../config/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 export default function ProductForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    libelle: '',
-    prix: '',
+    label: '',
+    price: '',
     promotion: '',
     description: '',
-    categorie: 'dog',
+    category: 'dog',
     image: null
   });
   
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false); 
+
+  // Effet pour empêcher le défilement quand la modale est ouverte
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+      
+      // Fermeture automatique après 3 secondes
+      const timer = setTimeout(() => {
+        closeModal();
+      }, 3000);
+      
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [showModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,58 +63,62 @@ export default function ProductForm() {
     }
   };
 
+  // Fonction pour fermer la modale et rediriger
+  const closeModal = () => {
+    setShowModal(false);
+    router.push('/');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     
     try {
-      // 1. Télécharger l'image dans Firebase Storage
-      let imageUrl = null;
+      // 1. Préparer les données du formulaire avec FormData pour l'upload d'image
+      const formDataToSend = new FormData();
+      formDataToSend.append('label', formData.label);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('promotion', formData.promotion || '0');
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('category', formData.category);
+      
       if (formData.image) {
-        // Créer une référence unique pour l'image
-        const imageRef = ref(storage, `products/${Date.now()}-${formData.image.name}`);
-        
-        // Télécharger l'image
-        const uploadResult = await uploadBytes(imageRef, formData.image);
-        
-        // Obtenir l'URL de téléchargement
-        imageUrl = await getDownloadURL(uploadResult.ref);
+        formDataToSend.append('image', formData.image);
       }
       
-      // 2. Créer l'objet produit à sauvegarder dans Firestore
-      const productData = {
-        libelle: formData.libelle,
-        prix: parseFloat(formData.prix),
-        promotion: formData.promotion ? parseFloat(formData.promotion) : 0,  //valeur par defaut 0
-        descriptionProduit: formData.description,
-        categorie: formData.categorie,
-        photosProduit: imageUrl,
-        createdAt: serverTimestamp()
-      };
+      // 2. Envoyer les données à notre API route qui s'occupera de Cloudinary et MongoDB
+      const response = await fetch('/api/produits', {
+        method: 'POST',
+        body: formDataToSend,
+        // Ne pas définir Content-Type header quand on utilise FormData,
+        // le navigateur le fait automatiquement avec la boundary correcte
+      });
       
-      // 3. Ajouter le document à la collection "produits" dans Firestore
-      const docRef = await addDoc(collection(db, "produits"), productData);
-      console.log("Produit ajouté avec ID: ", docRef.id);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la création du produit');
+      }
       
-      // 4. Réinitialiser le formulaire après soumission
+      const result = await response.json();
+      
+      // 3. Réinitialiser le formulaire après soumission
       setFormData({
-        libelle: '',
-        prix: '',
+        label: '',
+        price: '',
         promotion: '',
         description: '',
-        categorie: 'dog',
+        category: 'dog',
         image: null
       });
       setImagePreview(null);
       
-      // 5. Afficher un message de succès et rediriger
-      alert("Produit partagé avec succès!");
-      router.push('/'); // Redirection vers la page d'accueil
+    
+      setShowModal(true);
       
     } catch (error) {
       console.error("Erreur lors du partage du produit:", error);
-      setError("Une erreur est survenue lors du partage du produit.");
+      setError("Une erreur est survenue lors du partage du produit: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -107,7 +126,7 @@ export default function ProductForm() {
 
   return (
     <div className={styles.formContainer}>
-      <h1 className={styles.title}>Share Product</h1>
+      <h1 className={styles.title}>Publish product</h1>
       
       {error && <div className={styles.errorMessage}>{error}</div>}
       
@@ -116,9 +135,9 @@ export default function ProductForm() {
           <label htmlFor="libelle">Product label :</label>
           <input
             type="text"
-            id="libelle"
-            name="libelle"
-            value={formData.libelle}
+            id="label"
+            name="label"
+            value={formData.label}
             onChange={handleChange}
             required
             className={styles.input}
@@ -130,11 +149,11 @@ export default function ProductForm() {
             <label htmlFor="prix">Price : </label>
             <input
               type="number"
-              id="prix"
-              name="prix"
+              id="price"
+              name="price"
               min="0"
               step="0.01"
-              value={formData.prix}
+              value={formData.price}
               onChange={handleChange}
               required
               className={styles.input}
@@ -172,20 +191,20 @@ export default function ProductForm() {
         <div className={styles.formGroup}>
           <label htmlFor="categorie">Category :</label>
           <select
-            id="categorie"
-            name="categorie"
-            value={formData.categorie}
+            id="category"
+            name="category"
+            value={formData.category}
             onChange={handleChange}
             className={styles.select}
           >
-            <option value="dog">Dogs</option>
-            <option value="cats">Cats</option>
+            <option value="dog">Dog</option>
+            <option value="cats">Cat</option>
             <option value="birds">Birds</option>
           </select>
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="image">Product image</label>
+          <label htmlFor="image">product image </label>
           <input
             type="file"
             id="image"
@@ -208,9 +227,23 @@ export default function ProductForm() {
           className={styles.submitButton}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Partage en cours...' : 'Publish product'}
+          {isSubmitting ? 'Published in progress...' : 'Publish product '}
         </button>
       </form>
+
+      {/* Fenêtre modale de succès */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={closeModal}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalSuccessIcon}>✓</div>
+            <h2 className={styles.modalTitle}>success!</h2>
+            <p className={styles.modalMessage}>Successfully Published product!</p>
+            <button className={styles.modalButton} onClick={closeModal}>
+             Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -38,7 +38,7 @@ const AdoptionSection = () => {
               </li>
               <li>
                 <PawPrint className={styles.pawIcon} />
-                <span>Facilitate the search for a life partner that suits you .</span>
+                <span>Facilitate the search for a life partner that suits you.</span>
               </li>
             </ul>
           </div>

@@ -1,8 +1,11 @@
+//api pour post l'annonce  et Get l'annonce 
+
 import { MongoClient } from 'mongodb';
 import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
 import { Readable } from 'stream';
 import { createAnimalObject, validateAnimal } from '../../models/animals';
+import { File } from 'node:buffer';
 
 
 const uri = process.env.MONGODB_URI;
@@ -98,8 +101,8 @@ export async function POST(request) {
       ownerPhone: formData.get('ownerPhone'),
       ownerAddress: formData.get('ownerAddress'),
       photos: [],
-      videoUrl: '',
-      videoPublicId: ''
+      //videoUrl: '',
+      //videoPublicId: ''
     };
 
     // Traiter les photos
@@ -107,7 +110,7 @@ export async function POST(request) {
     
     if (photoFiles && photoFiles.length > 0) {
       for (const photoFile of photoFiles) {
-        if (photoFile instanceof File) {
+         if (photoFile && typeof photoFile.arrayBuffer === 'function') {
           // Convertir le fichier en ArrayBuffer puis en Buffer
           const arrayBuffer = await photoFile.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
@@ -124,19 +127,19 @@ export async function POST(request) {
       }
     }
 
-    // Traiter la vidéo si elle existe
-    const videoFile = formData.get('video');
-    if (videoFile instanceof File) {
-      const arrayBuffer = await videoFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+     //Traiter la vidéo si elle existe
+   // const videoFile = formData.get('video');
+    //if (videoFile instanceof File) {
+    //  const arrayBuffer = await videoFile.arrayBuffer();
+    //  const buffer = Buffer.from(arrayBuffer);
       
       // Upload sur Cloudinary
-      const result = await uploadToCloudinary(buffer, 'video');
+    //  const result = await uploadToCloudinary(buffer, 'video');
       
       // Ajouter l'URL à notre document
-      animalData.videoUrl = result.secure_url;
-      animalData.videoPublicId = result.public_id;
-    }
+      //animalData.videoUrl = result.secure_url;
+     // animalData.videoPublicId = result.public_id;
+    //}
 
     // Créer l'objet animal avec notre modèle
     const animalInfo = createAnimalObject(animalData);
@@ -168,6 +171,33 @@ export async function POST(request) {
     return NextResponse.json({
       success: false,
       message: `Erreur lors de la publication: ${error.message}`
+    }, { status: 500 });
+  }
+}
+
+
+
+
+
+
+//fonction pour recuperer les annonces 
+export async function GET() {
+  try {
+    const db = await connectDB();
+    const animalsCollection = db.collection('animals');
+    
+    // Récupérer tous les animaux depuis la collection
+    const animals = await animalsCollection.find({}).toArray();
+    
+    return NextResponse.json({ 
+      success: true, 
+      data: animals 
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des animaux:', error);
+    return NextResponse.json({
+      success: false,
+      message: `Erreur lors de la récupération des animaux: ${error.message}`
     }, { status: 500 });
   }
 }

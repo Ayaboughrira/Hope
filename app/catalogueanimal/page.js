@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/catalogueanimal.module.css'; 
-import animal from './animal.json';
 import Link from 'next/link';
 
 const AnimalCatalog = () => {
@@ -18,20 +17,41 @@ const AnimalCatalog = () => {
   const [loading, setLoading] = useState(true);
   // État pour gérer les animaux favoris
   const [favorites, setFavorites] = useState({});
+  // État pour gérer les erreurs
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    // Charger les favoris depuis le localStorage au démarrage
+    const savedFavorites = localStorage.getItem('animalFavorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+    
+    const fetchAnimals = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setAnimals(animal);
-        setLoading(false);
-      } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
+        setLoading(true);
+        const response = await fetch('/api/animals');
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const { success, data } = await response.json();
+        
+        if (success) {
+          setAnimals(data);
+        } else {
+          throw new Error('Échec de la récupération des données');
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement des animaux:', err);
+        setError('Impossible de charger les animaux. Veuillez réessayer plus tard.');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchAnimals();
   }, []);
 
   // Handler pour les changements de filtres
@@ -52,14 +72,21 @@ const AnimalCatalog = () => {
 
   // Gérer les favoris
   const toggleFavorite = (id) => {
-    setFavorites(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setFavorites(prev => {
+      const newFavorites = {
+        ...prev,
+        [id]: !prev[id]
+      };
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('animalFavorites', JSON.stringify(newFavorites));
+      
+      return newFavorites;
+    });
   };
 
   const getAgeRanges = (species) => {
-    switch (species.toLowerCase()) {
+    switch (species?.toLowerCase()) {
       case 'cat':
         return {
           young: { min: 0, max: 6 },
@@ -83,20 +110,27 @@ const AnimalCatalog = () => {
 
   // Déterminer la catégorie d'âge d'un animal
   const getAgeCategory = (animal) => {
+    if (!animal.age) return 'unknown';
+    
     const ageNum = parseInt(animal.age);
-    const ranges = getAgeRanges(animal.species);
+    if (isNaN(ageNum)) return 'unknown';
+    
+    const ranges = getAgeRanges(animal.animalType || animal.species);
     
     if (ageNum >= ranges.young.min && ageNum <= ranges.young.max) return 'young';
     if (ageNum >= ranges.adult.min && ageNum <= ranges.adult.max) return 'adult';
     if (ageNum >= ranges.senior.min) return 'senior';
     
-    return 'unknown'; // Au cas où
+    return 'unknown';
   };
 
   // Filtrer les animaux selon les critères
   const filteredAnimals = animals.filter(animal => {
+    const animalType = animal.animalType || animal.species;
+    const animalName = animal.animalName || animal.name;
+    
     // Filtre par espèce
-    if (filters.species !== 'all' && animal.species !== filters.species) return false;
+    if (filters.species !== 'all' && animalType !== filters.species) return false;
     
     // Filtre par âge en utilisant la fonction getAgeCategory
     if (filters.age !== 'all' && getAgeCategory(animal) !== filters.age) return false;
@@ -105,14 +139,14 @@ const AnimalCatalog = () => {
     if (filters.size !== 'all' && animal.size !== filters.size) return false;
     
     // Recherche par terme
-    if (filters.searchTerm && !animal.name.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
+    if (filters.searchTerm && !animalName?.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
     
     return true;
   });
 
   // Extraire les options uniques pour les filtres
-  const speciesOptions = ['all', ...new Set(animals.map(animal => animal.species))];
-  const sizeOptions = [...new Set(animals.map(animal => animal.size))];
+  const speciesOptions = ['all', ...new Set(animals.map(animal => animal.animalType || animal.species).filter(Boolean))];
+  const sizeOptions = [...new Set(animals.map(animal => animal.size).filter(Boolean))];
 
   return (
     <div className={styles.animalCatalog}>
@@ -187,6 +221,8 @@ const AnimalCatalog = () => {
         <div className={styles.contentArea}>
           {loading ? (
             <div className={styles.loading}>Chargement des données...</div>
+          ) : error ? (
+            <div className={styles.error}>{error}</div>
           ) : (
             <>
               {/* bare de filtrage horizontale par especes */}
@@ -202,63 +238,73 @@ const AnimalCatalog = () => {
                 ))}
               </div>
               
-             
-<div className={styles.animalsGrid}>
-  {filteredAnimals.length > 0 ? (
-    filteredAnimals.map(animal => (
-      <div key={animal.id} className={styles.animalCard}>
-        <Link href={`/catalogueanimal/${animal.id}`} className={styles.animalLink}>
-          <div className={styles.animalImage}>
-            <img src={animal.image} alt={animal.name} />
-            <button 
-              className={`${styles.favoriteBtn} ${favorites[animal.id] ? styles.active : ''}`}
-              onClick={(e) => {
-                e.preventDefault(); // Empêche la navigation vers la page détail
-                toggleFavorite(animal.id);
-              }}
-              aria-label={favorites[animal.id] ? "Retirer des favoris" : "Ajouter aux favoris"}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={favorites[animal.id] ? "red" : "none"} stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </button>
-          </div>
-          <div className={styles.animalInfo}>
-            <h3>{animal.name}</h3>
-            <div className={styles.infoRow}>
-              <p><strong>Species:</strong> {animal.species}</p>
-              <p className={styles.gender}>
-                <strong>Gender:</strong> 
-                <span className={styles.genderIcon}>
-                  {animal.gender === 'Male' ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="blue" strokeWidth="2">
-                      <circle cx="10.5" cy="10.5" r="7.5" />
-                      <line x1="18" y1="18" x2="22" y2="22" />
-                      <line x1="22" y1="15" x2="22" y2="22" />
-                      <line x1="15" y1="22" x2="22" y2="22" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgb(216, 15, 156)" strokeWidth="2">
-                      <circle cx="12" cy="8" r="7" />
-                      <line x1="12" y1="15" x2="12" y2="22" />
-                      <line x1="9" y1="19" x2="15" y2="19" />
-                    </svg>
-                  )}
-                  {animal.gender}
-                </span>
-              </p>
-            </div>
-            <p><strong>Age:</strong> {animal.age} ans</p>
-            <p><strong>Size:</strong> {animal.size}</p>
-            <p>{animal.description}</p>
-          </div>
-        </Link>
-      </div>
-    ))
-  ) : (
-    <div className={styles.noResults}>No animals match your search criteria.</div>
-  )}
-</div>
+              <div className={styles.animalsGrid}>
+                {filteredAnimals.length > 0 ? (
+                  filteredAnimals.map(animal => {
+                    const animalId = animal._id || animal.id;
+                    const animalName = animal.animalName || animal.name;
+                    const animalType = animal.animalType || animal.species;
+                    // Gérer les différentes structures de photos possibles
+                    const imageUrl = animal.photos && animal.photos.length > 0 
+                      ? (animal.photos[0].url || animal.photos[0]) 
+                      : animal.image || '/placeholder-animal.jpg';
+                    
+                    return (
+                      <div key={animalId} className={styles.animalCard}>
+                        <Link href={`/catalogueanimal/${animalId}`} className={styles.animalLink}>
+                          <div className={styles.animalImage}>
+                            <img src={imageUrl} alt={animalName} />
+                            <button 
+                              className={`${styles.favoriteBtn} ${favorites[animalId] ? styles.active : ''}`}
+                              onClick={(e) => {
+                                e.preventDefault(); // Empêche la navigation vers la page détail
+                                toggleFavorite(animalId);
+                              }}
+                              aria-label={favorites[animalId] ? "Retirer des favoris" : "Ajouter aux favoris"}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={favorites[animalId] ? "red" : "none"} stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className={styles.animalInfo}>
+                            <h3>{animalName}</h3>
+                            <div className={styles.infoRow}>
+                              <p><strong>Species:</strong> {animalType}</p>
+                              <p className={styles.gender}>
+                                <strong>Gender:</strong> 
+                                <span className={styles.genderIcon}>
+                                  {(animal.gender === 'male' || animal.gender === 'Male') ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="blue" strokeWidth="2">
+                                      <circle cx="10.5" cy="10.5" r="7.5" />
+                                      <line x1="18" y1="18" x2="22" y2="22" />
+                                      <line x1="22" y1="15" x2="22" y2="22" />
+                                      <line x1="15" y1="22" x2="22" y2="22" />
+                                    </svg>
+                                  ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgb(216, 15, 156)" strokeWidth="2">
+                                      <circle cx="12" cy="8" r="7" />
+                                      <line x1="12" y1="15" x2="12" y2="22" />
+                                      <line x1="9" y1="19" x2="15" y2="19" />
+                                    </svg>
+                                  )}
+                                  {animal.gender}
+                                </span>
+                              </p>
+                            </div>
+                            <p><strong>Age:</strong> {animal.age} ans</p>
+                            {animal.size && <p><strong>Size:</strong> {animal.size}</p>}
+                            {animal.race && <p><strong>Race:</strong> {animal.race}</p>}
+                            <p>{animal.description}</p>
+                          </div>
+                        </Link>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className={styles.noResults}>No animals match your search criteria.</div>
+                )}
+              </div>
             </>
           )}
         </div>

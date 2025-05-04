@@ -16,8 +16,7 @@
  * @property {string} ownerPhone - Téléphone du propriétaire
  * @property {string} ownerAddress - Adresse du propriétaire
  * @property {Array<Object>} photos - Liste des photos avec URL et ID public
- * @property {string} videoUrl - URL de la vidéo (si disponible)
- * @property {string} videoPublicId - ID public de la vidéo sur Cloudinary
+
  * @property {Date} createdAt - Date de création de l'annonce
  */
 
@@ -61,8 +60,8 @@ export function validateAnimal(animal) {
       ownerPhone: data.ownerPhone || '',
       ownerAddress: data.ownerAddress || '',
       photos: data.photos || [],
-      videoUrl: data.videoUrl || '',
-      videoPublicId: data.videoPublicId || '',
+      //videoUrl: data.videoUrl || '',
+      //videoPublicId: data.videoPublicId || '',
       createdAt: new Date()
     };
   }

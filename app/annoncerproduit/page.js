@@ -8,7 +8,7 @@ export default function ShareProduct() {
     <div className={styles.container}>
       <Head>
         <title>Partager un produit</title>
-        <meta name="description" content="Partagez vos produits pour animaux" />
+        <meta name="description" content="Share your pet products." />
        <link rel="icon" href="/favicon.ico" />
       </Head>
 
