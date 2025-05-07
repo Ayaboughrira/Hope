@@ -31,6 +31,3 @@ process.on('SIGTERM', async () => {
     if (client) await client.close();
     console.log('Connexion MongoDB fermée');
 });
-
-
-

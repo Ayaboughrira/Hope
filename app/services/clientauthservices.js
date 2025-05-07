@@ -1,9 +1,9 @@
-// services/clientauthservices.js
+/* services/clientauthservices.js*/
 
 export async function signup(userType, userData) {
   try {
     console.log('Envoi de la requête d\'inscription:', userType, userData.email);
-    
+
     const response = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: {
@@ -11,22 +11,22 @@ export async function signup(userType, userData) {
       },
       body: JSON.stringify({ userType, ...userData }),
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error('Erreur de réponse serveur:', response.status, data);
       return { 
         success: false, 
-        error: data.error || `Erreur du serveur: ${response.status}`
+        error: data.error ||'Erreur du serveur: ${response.status}'
       };
     }
-    
+
     // Stockage des informations utilisateur après une inscription réussie
     if (data.success && data.userId) {
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('userType', userType);
-      
+
       // Si un token est fourni, le stocker également
       if (data.token) {
         localStorage.setItem('token', data.token);
@@ -46,7 +46,7 @@ export async function signup(userType, userData) {
 export async function login(email, password) {
   try {
     console.log('Envoi de la requête de connexion pour:', email);
-    
+
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
@@ -54,22 +54,22 @@ export async function login(email, password) {
       },
       body: JSON.stringify({ email, password }),
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error('Erreur de réponse serveur:', response.status, data);
       return { 
         success: false, 
-        error: data.error || `Erreur du serveur: ${response.status}`
+        error: data.error || 'Erreur du serveur: ${response.status}'
       };
     }
-    
+
     // Stockage des informations utilisateur après une connexion réussie
     if (data.success && data.userId) {
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('userType', data.userType);
-      
+
       // Si un token est fourni, le stocker également
       if (data.token) {
         localStorage.setItem('token', data.token);
@@ -93,7 +93,7 @@ export function logout() {
   localStorage.removeItem('userId');
   localStorage.removeItem('userType');
   localStorage.removeItem('token');
-  
+
   // Redirection vers la page d'accueil
   window.location.href = '/';
 }
@@ -105,10 +105,10 @@ export function logout() {
 export function getCurrentUser() {
   const userId = localStorage.getItem('userId');
   const userType = localStorage.getItem('userType');
-  
+
   if (!userId || !userType) {
     return null;
   }
-  
+
   return { userId, userType };
 }

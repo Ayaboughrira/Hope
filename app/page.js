@@ -11,12 +11,7 @@ import AdoptionSection from  './component/sectiontrois.js';
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <Head>
-        <title>Adopte un Animal | Trouvez votre compagnon idéal</title>
-        <meta name="description" content="Plateforme d'adoption d'animaux pour trouver votre nouveau compagnon" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
+      
      
       <main>
      
