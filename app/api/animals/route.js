@@ -1,12 +1,10 @@
-//api pour post l'annonce  et Get l'annonce 
-
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
 import { Readable } from 'stream';
 import { createAnimalObject, validateAnimal } from '../../models/animals';
-import { File } from 'node:buffer';
-
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 const uri = process.env.MONGODB_URI;
 
@@ -34,14 +32,11 @@ export async function connectDB() {
   }
 }
 
-
 // Ferme la connexion quand l'application se termine
 process.on('SIGTERM', async () => {
     if (client) await client.close();
     console.log('Connexion MongoDB fermée');
 });
-
-
 
 // Configuration de Cloudinary
 cloudinary.config({
@@ -75,8 +70,47 @@ async function uploadToCloudinary(buffer, fileType) {
   });
 }
 
+// Fonction pour vérifier si l'utilisateur est authentifié
+async function isAuthenticated(request) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return { authenticated: false };
+  }
+  return { 
+    authenticated: true,
+    user: session.user
+  };
+}
+
+// Fonction pour mapper le type d'utilisateur aux noms de collection
+function mapUserTypeToCollection(userType) {
+  switch (userType) {
+    case 'owner':
+      return 'user';
+    case 'vet':
+      return 'veterinaire';
+    case 'association':
+      return 'association';
+    case 'store':
+      return 'animalerie';
+    default:
+      return userType;
+  }
+}
+
 export async function POST(request) {
   try {
+    // Vérifier l'authentification
+    const auth = await isAuthenticated(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({
+        success: false,
+        message: 'Authentification requise pour publier une annonce'
+      }, { status: 401 });
+    }
+    
+    const { user } = auth;
+    
     // Se connecter à MongoDB
     const db = await connectDB();
     
@@ -101,8 +135,10 @@ export async function POST(request) {
       ownerPhone: formData.get('ownerPhone'),
       ownerAddress: formData.get('ownerAddress'),
       photos: [],
-      //videoUrl: '',
-      //videoPublicId: ''
+      // Ajouter les informations sur le publicateur
+      publishType: user.userType,
+      publishId: user.id,
+      publishDate: new Date(),
     };
 
     // Traiter les photos
@@ -126,20 +162,6 @@ export async function POST(request) {
         }
       }
     }
-
-     //Traiter la vidéo si elle existe
-   // const videoFile = formData.get('video');
-    //if (videoFile instanceof File) {
-    //  const arrayBuffer = await videoFile.arrayBuffer();
-    //  const buffer = Buffer.from(arrayBuffer);
-      
-      // Upload sur Cloudinary
-    //  const result = await uploadToCloudinary(buffer, 'video');
-      
-      // Ajouter l'URL à notre document
-      //animalData.videoUrl = result.secure_url;
-     // animalData.videoPublicId = result.public_id;
-    //}
 
     // Créer l'objet animal avec notre modèle
     const animalInfo = createAnimalObject(animalData);
@@ -175,19 +197,30 @@ export async function POST(request) {
   }
 }
 
-
-
-
-
-
-//fonction pour recuperer les annonces 
-export async function GET() {
+// Récupérer toutes les annonces
+export async function GET(request) {
   try {
     const db = await connectDB();
     const animalsCollection = db.collection('animals');
     
-    // Récupérer tous les animaux depuis la collection
-    const animals = await animalsCollection.find({}).toArray();
+    // Vérifier si un filtre est appliqué pour le type de publicateur
+    const { searchParams } = new URL(request.url);
+    const publishType = searchParams.get('publishType');
+    const publishId = searchParams.get('publishId');
+    
+    let query = {};
+    
+    // Ajouter les filtres si spécifiés
+    if (publishType) {
+      query.publishType = publishType;
+    }
+    
+    if (publishId) {
+      query.publishId = publishId;
+    }
+    
+    // Récupérer les animaux depuis la collection avec les filtres
+    const animals = await animalsCollection.find(query).toArray();
     
     return NextResponse.json({ 
       success: true, 
@@ -198,6 +231,41 @@ export async function GET() {
     return NextResponse.json({
       success: false,
       message: `Erreur lors de la récupération des animaux: ${error.message}`
+    }, { status: 500 });
+  }
+}
+
+// Route pour récupérer les annonces d'un utilisateur spécifique
+export async function GET_MY_ANIMALS(request) {
+  try {
+    // Vérifier l'authentification
+    const auth = await isAuthenticated(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({
+        success: false,
+        message: 'Authentification requise pour accéder à vos annonces'
+      }, { status: 401 });
+    }
+    
+    const { user } = auth;
+    const db = await connectDB();
+    const animalsCollection = db.collection('animals');
+    
+    // Récupérer les annonces publiées par cet utilisateur
+    const animals = await animalsCollection.find({ 
+      publishType: user.userType,
+      publishId: user.id
+    }).toArray();
+    
+    return NextResponse.json({ 
+      success: true, 
+      data: animals 
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de vos animaux:', error);
+    return NextResponse.json({
+      success: false,
+      message: `Erreur: ${error.message}`
     }, { status: 500 });
   }
 }

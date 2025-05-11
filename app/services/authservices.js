@@ -18,7 +18,8 @@ const COLLECTION_MAP = {
 export async function signup(userType, userData) {
   try {
     console.log('Tentative d\'inscription pour:', userType, userData.email);
-    
+   
+    //Vérifie que le userType existe dans COLLECTION_MAP
     if (!COLLECTION_MAP[userType]) {
       return { success: false, error: 'Type d\'utilisateur invalide' };
     }
@@ -30,15 +31,14 @@ export async function signup(userType, userData) {
     const existingUser = await db.collection(collectionName).findOne({ 
       email: userData.email 
     });
-
     if (existingUser) {
       return { success: false, error: 'Email déjà utilisé' };
     }
 
-    // Hachage du mot de passe
+    // Hachage du mot de passe avec 12 iterations 
     const hashedPassword = await bcrypt.hash(userData.password, SALT_ROUNDS);
 
-    // Insertion dans la collection 
+    // Insertion du nv user dans la collection 
     const result = await db.collection(collectionName).insertOne({
       ...userData,
       password: hashedPassword,
@@ -70,7 +70,7 @@ export async function login(email, password) {
     
     const db = await connectDB();
 
-    // Cherche dans toutes les collections
+    // Cherche dans toutes les collections dans COLLECTION_MAP
     for (const [type, collection] of Object.entries(COLLECTION_MAP)) {
       const user = await db.collection(collection).findOne({ email });
 

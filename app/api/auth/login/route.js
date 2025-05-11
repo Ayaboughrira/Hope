@@ -1,4 +1,4 @@
-// app/api/auth/login/route.js (notez le nom 'route.js')
+// app/api/auth/login/route.js 
 import { login } from '../../../services/authservices';
 import { NextResponse } from 'next/server';
 

@@ -1,25 +1,45 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '../../config/mongodb';
 
-
 export async function POST(request) {
   try {
-    const articleData = await request.json();
+    // Parse the JSON request body
+    const data = await request.json();
     
+    // Check if all required fields are present
+    if (!data.titre || !data.excerpt || !data.contenu || !data.typeArticle || !data.typeAnimal) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+    
+    // Connect to database
     const db = await connectDB();
     
-    const result = await db.collection('article').insertOne(articleData);
+    // Create new article object
+    const newArticle = {
+      titre: data.titre,
+      excerpt: data.excerpt,
+      contenu: data.contenu,
+      typeArticle: data.typeArticle,
+      typeAnimal: data.typeAnimal,
+      dateCreation: new Date()
+    };
     
-    return NextResponse.json({ 
-      success: true, 
-      id: result.insertedId,
-      message: 'Article ajouté avec succès'
+    // Insert the article into the database
+    const result = await db.collection('article').insertOne(newArticle);
+    
+    // Return success response with the created article
+    return NextResponse.json({
+      success: true,
+      message: 'Article created successfully',
+      article: {
+        ...newArticle,
+        id: result.insertedId.toString(),
+        _id: result.insertedId.toString()
+      }
     }, { status: 201 });
+    
   } catch (error) {
-    console.error('Erreur dans l\'API articles:', error);
-    return NextResponse.json({ 
-      message: 'Erreur lors de l\'ajout de l\'article', 
-      error: error.message 
-    }, { status: 500 });
+    console.error("API Error:", error);
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

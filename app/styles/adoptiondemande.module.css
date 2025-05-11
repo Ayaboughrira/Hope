@@ -1,0 +1,358 @@
+/* styles/adoptionrequests.module.css */
+.adoptionRequestsContainer {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.filtersContainer {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.filterButton:hover {
+  background-color: #f7f7f7;
+}
+
+.filterButton.active {
+  background-color: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.requestCard {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.requestHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f7f7f7;
+}
+
+.animalInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.animalImage {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.animalName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.animalSpecies {
+  margin: 4px 0 0;
+  color: #666;
+}
+
+.statusBadge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.statusPending {
+  background-color: #fff8e1;
+  color: #f57c00;
+  border: 1px solid #ffcc80;
+}
+
+.statusApproved {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.statusRejected {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.requestInfo {
+  padding: 16px;
+}
+
+.requesterInfo {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.requestDate {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.messageContainer, .responseContainer {
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.messageContainer h3, .responseContainer h3 {
+  margin-top: 0;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.requestMessage, .responseMessage {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.approveButton, .rejectButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.approveButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.approveButton:hover {
+  background-color: #388e3c;
+}
+
+.rejectButton {
+  background-color: #f44336;
+  color: white;
+}
+
+.rejectButton:hover {
+  background-color: #d32f2f;
+}
+
+.viewAnimalLink {
+  display: inline-block;
+  margin-top: 12px;
+  color: #4a90e2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.viewAnimalLink:hover {
+  text-decoration: underline;
+}
+
+.responseModal {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 600px;
+  padding: 0;
+}
+
+.responseModal::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalContent {
+  padding: 24px;
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.responseMessageInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelButton, .submitButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.cancelButton {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.cancelButton:hover {
+  background-color: #e0e0e0;
+}
+
+.noRequests {
+  text-align: center;
+  padding: 40px 0;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px 0;
+  font-size: 1.125rem;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* Styles pour les écrans plus petits */
+@media (max-width: 768px) {
+  .requestHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .statusBadge {
+    align-self: flex-start;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .approveButton, .rejectButton, .submitButton, .cancelButton {
+    width: 100%;
+  }
+  
+  .modalButtons {
+    flex-direction: column;
+  }
+}
+
+/* styles/useradoptionrequests.module.css - Similaire mais avec quelques différences */
+.userRequestsContainer {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Les autres styles sont identiques à adoptionrequests.module.css */
+/* Ajouter uniquement ces styles spécifiques */
+
+.browseLink {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.browseLink:hover {
+  background-color: #3a7bc8;
+}
+
+.nextStepsContainer {
+  background-color: #e8f5e9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  border-left: 4px solid #4caf50;
+}
+
+.nextStepsContainer h3 {
+  margin-top: 0;
+  color: #2e7d32;
+}
+
+.noResponseMessage {
+  font-style: italic;
+  color: #666;
+}

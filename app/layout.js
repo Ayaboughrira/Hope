@@ -2,9 +2,9 @@ import { Inter } from "next/font/google";
 import { Roboto_Mono} from "next/font/google";
 import "./globals.css";
 import DonateButton from  './component/boutondon.js';
-import Header  from './component/navbar.js';
+import Navbar  from './component/navbar.js';
 import Footer   from   './component/footer.js';
-import { AuthProvider } from './services/authcontext';
+import { Providers } from './providers';
 
 const inter = Inter({
  /* variable: "--font-inter",*/
@@ -27,12 +27,12 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${inter.className} ${robotoMono.className}`}>
         
-        <AuthProvider>
+       <Providers>
           {children}
-          <Header/>
+          <Navbar/>
           <DonateButton />
           <Footer/>
-        </AuthProvider>
+       </Providers>
 
       </body>
     </html>

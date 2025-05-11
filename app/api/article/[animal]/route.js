@@ -1,10 +1,11 @@
+/*app/api/article/[animals]/route.js */
 import { NextResponse } from 'next/server';
 import { connectDB } from '../../../config/mongodb';
 
 export async function GET(request, context) {
   try {
     // Extraire le paramètre animal de l'URL
-    const { animal } = context.params;
+    const {animal} = context.params;
     
     // Obtenir le paramètre type de la requête
     const { searchParams } = new URL(request.url);

@@ -439,3 +439,51 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+
+
+.errorInput {
+  border: 1px solid #e53e3e !important;
+  box-shadow: 0 0 0 1px rgba(229, 62, 62, 0.3);
+}
+
+.fieldError {
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding-left: 2.5rem;
+  text-align: left;
+}
+
+.errorMessage {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* redirectMessage.css */
+.redirectMessage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.25rem;
+  color: #4f46e5;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

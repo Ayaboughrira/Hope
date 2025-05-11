@@ -1,25 +1,60 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, Mail, Lock, Phone, MapPin, 
   Building, FileText, Store, Heart,
   ChevronLeft, ChevronRight, HeartPulse, Clock }  from 'lucide-react';
 import Image from 'next/image';
 import styles from '../styles/signuplogin.module.css';
-import { signup, login } from '../services/clientauthservices';
+import redirectStyles from '../styles/signuplogin.module.css';
+import { signup } from '../services/clientauthservices';
 import { useRouter } from 'next/navigation';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 const Signup = () => {
   const router = useRouter();
+  
+  const { data: session, status } = useSession();
   
   // State management
   const [isLogin, setIsLogin] = useState(false);
   const [userType, setUserType] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Redirection si déjà connecté
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      router.push('/');  // Redirection vers la page d'accueil
+    }
+  }, [status, session, router]);
+  
+  // Validation patterns
+  const validationPatterns = {
+    email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    phone: /^(0)(5|6|7)[0-9]{8}$/,  // Algerian mobile numbers (05, 06, 07)
+    licenseNumber: /^ONV-[0-9]{2}-[0-9]{4}$/  // Format ONV-xx-yyyy where xx and yyyy are digits
+  };
+
+  // Validation function
+  const validateField = (name, value) => {
+    if (!value) return "This field is required";
+    
+    switch (name) {
+      case 'email':
+        return validationPatterns.email.test(value) ? "" : "Please enter a valid email address";
+      case 'phone':
+        return validationPatterns.phone.test(value) ? "" : "Please enter a valid Algerian phone number (e.g., 0561234567)";
+      case 'licenseNumber':
+        return validationPatterns.licenseNumber.test(value) ? "" : "Please enter a valid license number (format: ONV-xx-yyyy)";
+      default:
+        return "";
+    }
+  };
   
   // User type options
   const userTypes = [
@@ -44,9 +79,9 @@ const Signup = () => {
       { name: 'licenseNumber', label: 'License Number', type: 'text', icon: FileText },
       { name: 'email', label: 'Email', type: 'email', icon: Mail },
       { name: 'password', label: 'Password', type: 'password', icon: Lock },
-      { name: 'phone', label: 'Phone Number', type: 'tel', icon: Phone },
+      { name: 'phone', label: 'Contact', type: 'tel', icon: Phone },
       { name: 'address', label: 'Clinic Address', type: 'text', icon: MapPin },
-      {name:'description' , label:'Description' , type :'text', icon: FileText }
+      { name: 'description', label: 'Description', type: 'text', icon: FileText }
     ],
     association: [
       { name: 'associationName', label: 'Association Name', type: 'text', icon: Building },
@@ -54,11 +89,11 @@ const Signup = () => {
       { name: 'email', label: 'Email', type: 'email', icon: Mail },
       { name: 'password', label: 'Password', type: 'password', icon: Lock },
       { name: 'phone', label: 'Contact', type: 'tel', icon: Phone },
-      {name:'description' , label:'Description' , type :'text', icon: FileText }
+      { name: 'description', label: 'Description', type: 'text', icon: FileText }
     ],
     store: [
       { name: 'storeName', label: 'Store Name', type: 'text', icon: Building },
-      { name: 'openingtime', label: 'Opening time', type: 'time', icon: Clock },
+      { name: 'openingTime', label: 'Opening Time', type: 'text', icon: Clock },
       { name: 'email', label: 'Email', type: 'email', icon: Mail },
       { name: 'password', label: 'Password', type: 'password', icon: Lock },
       { name: 'phone', label: 'Contact', type: 'tel', icon: Phone },
@@ -66,10 +101,31 @@ const Signup = () => {
     ]
   };
 
-  // Handle input changes
+  // Handle input changes with validation
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Validate field if it's one of our special validation fields
+    if (['email', 'phone', 'licenseNumber'].includes(name)) {
+      const validationError = validateField(name, value);
+      setErrors(prev => ({
+        ...prev,
+        [name]: validationError
+      }));
+    }
+  };
+
+  // Handle input blur for validation
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    
+    // Validate all fields on blur
+    const validationError = validateField(name, value);
+    setErrors(prev => ({
+      ...prev,
+      [name]: validationError
+    }));
   };
 
   // Handle login submission
@@ -81,20 +137,34 @@ const Signup = () => {
     try {
       const { email, password } = formData;
       if (!email || !password) {
-        setError('Please enter both email and password');
+        setError('Please enter your Email and Password');
         setLoading(false);
         return;
       }
       
-      const result = await login(email, password);
-      if (result.success) {
-        // Redirection vers la page de profil avec le type et l'ID utilisateur
-        router.push(`/profile/${result.userType}/${result.userId}`);
+      // Validate email
+      const emailError = validateField('email', email);
+      if (emailError) {
+        setError(emailError);
+        setLoading(false);
+        return;
+      }
+      
+      // Utiliser directement signIn de NextAuth
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
+      });
+      
+      if (result.error) {
+        setError('incorrect Id. Try again.');
       } else {
-        setError(result.error || 'Login failed. Please try again.');
+        // La redirection sera gérée par useSession dans useEffect
+        router.push('/');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError('Une erreur inattendue s\'est produite');
       console.error(err);
     } finally {
       setLoading(false);
@@ -113,22 +183,62 @@ const Signup = () => {
       const missingFields = requiredFields.filter(f => !formData[f.name]);
       
       if (missingFields.length > 0) {
-        setError(`Please fill: ${missingFields.map(f => f.label).join(', ')}`);
+        setError(`Please enter : ${missingFields.map(f => f.label).join(', ')}`);
         setLoading(false);
         return;
+      }
+      
+      // Validate email, phone, and license number if present
+      if (formData.email) {
+        const emailError = validateField('email', formData.email);
+        if (emailError) {
+          setError(emailError);
+          setLoading(false);
+          return;
+        }
+      }
+      
+      if (formData.phone) {
+        const phoneError = validateField('phone', formData.phone);
+        if (phoneError) {
+          setError(phoneError);
+          setLoading(false);
+          return;
+        }
+      }
+      
+      if (formData.licenseNumber) {
+        const licenseError = validateField('licenseNumber', formData.licenseNumber);
+        if (licenseError) {
+          setError(licenseError);
+          setLoading(false);
+          return;
+        }
       }
   
       // Appel au service d'inscription
       const result = await signup(userType, formData);
       
       if (result.success) {
-        // Redirection vers la page de profil avec le type et l'ID utilisateur
-        router.push(`/profile/${userType}/${result.userId}`);
+        // Connexion automatique après inscription réussie
+        const { email, password } = formData;
+        const loginResult = await signIn('credentials', {
+          email,
+          password,
+          redirect: false
+        });
+        
+        if (loginResult.error) {
+          setError('Inscription réussie mais erreur lors de la connexion automatique');
+        } else {
+          // Redirection vers la page d'accueil
+          router.push('/');
+        }
       } else {
-        setError(result.error || 'Registration failed');
+        setError(result.error || 'Failed to register');
       }
     } catch (err) {
-      setError('Registration failed');
+      setError('Failed to register');
       console.error(err);
     } finally {
       setLoading(false);
@@ -154,6 +264,7 @@ const Signup = () => {
           key={id}
           onClick={() => setUserType(id)}    
           className={styles.userTypeButton}
+          type="button"
         >
           <Icon className={styles.userTypeIcon} />
           {label}
@@ -173,10 +284,12 @@ const Signup = () => {
             name="email"
             value={formData.email || ''}
             onChange={handleInputChange}
-            className={styles.fieldInput} 
-            placeholder="Email address" 
+            onBlur={handleBlur}
+            className={`${styles.fieldInput} ${errors.email ? styles.errorInput : ''}`} 
+            placeholder="Your Email" 
           />
         </div>
+        {errors.email && <div className={styles.fieldError}>{errors.email}</div>}
       </div>
 
       <div className={styles.formField}>
@@ -188,7 +301,7 @@ const Signup = () => {
             value={formData.password || ''}
             onChange={handleInputChange}
             className={styles.fieldInput} 
-            placeholder="Your password" 
+            placeholder="Your Password" 
           />
         </div>
       </div>
@@ -200,7 +313,7 @@ const Signup = () => {
         className={styles.submitButton}
         disabled={loading}
       >
-        {loading ? 'Signing in...' : 'Sign In'}
+        {loading ? 'Current Connection...' : 'Sign in'}
       </button>
     </form>
   );
@@ -218,10 +331,12 @@ const Signup = () => {
                 name={field.name}
                 value={formData[field.name] || ''}
                 onChange={handleInputChange}
-                className={styles.fieldInput}
+                onBlur={handleBlur}
+                className={`${styles.fieldInput} ${errors[field.name] ? styles.errorInput : ''}`}
                 placeholder={field.label}
               />
             </div>
+            {errors[field.name] && <div className={styles.fieldError}>{errors[field.name]}</div>}
           </div>
         ))}
       </div>
@@ -239,7 +354,7 @@ const Signup = () => {
           disabled={loading}
         >
           <ChevronLeft className={styles.buttonIcon} />
-          Back
+          Retour
         </button>
 
         <button
@@ -253,7 +368,7 @@ const Signup = () => {
           {loading 
             ? 'Processing...' 
             : currentStep === maxSteps - 1 
-              ? 'Create Account' 
+              ? 'Creat your Account' 
               : 'Next'
           }
           {currentStep < maxSteps - 1 && <ChevronRight className={styles.buttonIcon} />}
@@ -262,6 +377,17 @@ const Signup = () => {
     </form>
   );
 
+  // Si déjà connecté, afficher un message de redirection
+  if (status === 'authenticated') {
+    return (
+      <div className={styles.authContainer}>
+        <div className={redirectStyles.redirectMessage}>
+          Vous êtes déjà connecté. Redirection vers la page d'accueil...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.authContainer}>
       <div className={styles.authWrapper}>
@@ -269,7 +395,7 @@ const Signup = () => {
           <div className={styles.authImage}>
             <Image
               src='/images/image11.jpg'
-              alt="Pets"
+              alt="Animaux"
               fill
               className={styles.imageCover}
             />
@@ -286,10 +412,10 @@ const Signup = () => {
                 className={styles.appLogo}
               />
               <h2 className={styles.formTitle}>
-                {isLogin ? 'Welcome Back' : 'Create Account'}
+                {isLogin ? 'Welcome back' : 'Creat your Account '}
               </h2>
               <p className={styles.formSubtitle}>
-                {isLogin ? 'Sign in to access your account' : 'Join our pet community today'}
+                {isLogin ? 'Sign in to access your account' : 'Join to our community today'}
               </p>
             </div>
 
@@ -307,11 +433,12 @@ const Signup = () => {
                   setCurrentStep(0);
                   setFormData({});
                   setError('');
+                  setErrors({});
                 }}
                 className={styles.switchModeButton}
                 type="button"
               >
-                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                {isLogin ? "Don't have an account ? Sign up" : "already have an account ? Sign in"}
               </button>
             </div>
           </div>

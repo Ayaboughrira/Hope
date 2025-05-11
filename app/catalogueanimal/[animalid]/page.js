@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import styles from '../../styles/animaldetail.module.css';
 
@@ -8,12 +9,15 @@ const AnimalDetail = () => {
   const router = useRouter();
   const params = useParams();
   const id = params.animalid;
+  const { data: session, status } = useSession();
   
   const [animal, setAnimal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [adoptionMessage, setAdoptionMessage] = useState('');
 
   useEffect(() => {
     // Vérifier si l'ID est disponible (important pour le SSR)
@@ -34,7 +38,7 @@ const AnimalDetail = () => {
         
         if (success && data) {
           // Préparer les images pour l'affichage dans le carousel
-          const images = [];
+          const images = []; 
           
           // Traiter les photos selon leur format (string ou objet avec URL)
           if (data.photos && data.photos.length > 0) {
@@ -119,62 +123,113 @@ const AnimalDetail = () => {
     );
   };
 
- 
-
-// Remplacer la fonction handleContactOwner par celle-ci
-const handleContactOwner = () => {
-  // Vérifier si l'animal existe d'abord
-  if (!animal) {
-    console.log("Aucun animal trouvé");
-    return;
-  }
-  
-  console.log("Tentative d'envoi d'email au propriétaire:", animal.ownerEmail);
-  
-  // Vérifier explicitement si l'email du propriétaire existe
-  if (animal.ownerEmail) {
-    // Créer un sujet d'email formaté
-    const emailSubject = `Intérêt pour l'adoption de ${animal.name}`;
-    
-    // Créer un corps d'email formaté
-    const emailBody = `
-   Bonjour,
-
-   Je suis intéressé(e) par l'adoption de ${animal.name}, ${animal.gender === 'Male' ? 'le' : 'la'} ${animal.species} de ${animal.age} ans que vous avez mis(e) à l'adoption.
-
-   J'aimerais avoir plus d'informations concernant ${animal.name} et éventuellement organiser une rencontre pour faire sa connaissance.
-
-    Pourriez-vous me préciser:
-    - Les conditions d'adoption
-    - Si ${animal.name} s'entend bien avec d'autres animaux
-    - Les habitudes et besoins spécifiques de ${animal.name}
-
-    Je vous remercie par avance pour votre réponse et reste disponible pour échanger.
-
-    Cordialement,
-    [Votre nom] `;
-    
-    // Encodage des paramètres pour l'URL mailto
-    const encodedSubject = encodeURIComponent(emailSubject);
-    const encodedBody = encodeURIComponent(emailBody);
-    
-    // Ouvrir le client mail avec le template
-    const mailtoUrl = `mailto:${animal.ownerEmail}?subject=${encodedSubject}&body=${encodedBody}`;
-    console.log("Ouverture du client email avec URL:", mailtoUrl);
-    
-    // Utiliser une nouvelle façon d'ouvrir le client mail
-    try {
-      window.location.href = mailtoUrl;
-    } catch (error) {
-      console.error("Erreur lors de l'ouverture du client email:", error);
-      alert("Une erreur s'est produite lors de l'ouverture de votre client email. Veuillez essayer à nouveau ou copier l'adresse: " + animal.ownerEmail);
+  const handleContactOwner = () => {
+    // Si l'utilisateur n'est pas connecté, le rediriger vers la page de connexion
+    if (status !== 'authenticated') {
+      router.push(`/auth/signin?callbackUrl=/animals/${id}`);
+      return;
     }
-  } else {
-    // Message d'alerte si pas d'email disponible
-    console.log("Pas d'email trouvé pour l'animal:", animal);
-    alert("Désolé, aucune adresse email n'est disponible pour ce contact. Veuillez utiliser notre formulaire de contact.");
-  }
- };
+    
+    // Ouvrir une modal ou rediriger vers un formulaire d'adoption
+    document.getElementById('adoptionModal').showModal();
+  };
+
+  const handleAdoptionRequest = async (e) => {
+    e.preventDefault();
+    
+    if (!animal || !session) return;
+    
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch('/api/adoptiondemande', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          animalId: id,
+          ownerId: animal.ownerId,
+          requesterId: session.user.id,
+          requesterEmail: session.user.email,
+          requesterName: session.user.name,
+          message: adoptionMessage,
+          animalName: animal.name,
+          animalSpecies: animal.species,
+          animalImage: animal.images[0]
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Votre demande d\'adoption a été envoyée avec succès!');
+        document.getElementById('adoptionModal').close();
+        setAdoptionMessage('');
+      } else {
+        throw new Error(data.message || 'Une erreur est survenue lors de l\'envoi de la demande');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de la demande d\'adoption:', error);
+      alert(`Erreur: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEmailContact = () => {
+    // Vérifier si l'animal existe d'abord
+    if (!animal) {
+      console.log("Aucun animal trouvé");
+      return;
+    }
+    
+    console.log("Tentative d'envoi d'email au propriétaire:", animal.ownerEmail);
+    
+    // Vérifier explicitement si l'email du propriétaire existe
+    if (animal.ownerEmail) {
+      // Créer un sujet d'email formaté
+      const emailSubject = `Intérêt pour l'adoption de ${animal.name}`;
+      
+      // Créer un corps d'email formaté
+      const emailBody = `
+     Bonjour,
+
+     Je suis intéressé(e) par l'adoption de ${animal.name}, ${animal.gender === 'Male' ? 'le' : 'la'} ${animal.species} de ${animal.age} ans que vous avez mis(e) à l'adoption.
+
+     J'aimerais avoir plus d'informations concernant ${animal.name} et éventuellement organiser une rencontre pour faire sa connaissance.
+
+      Pourriez-vous me préciser:
+      - Les conditions d'adoption
+      - Si ${animal.name} s'entend bien avec d'autres animaux
+      - Les habitudes et besoins spécifiques de ${animal.name}
+
+      Je vous remercie par avance pour votre réponse et reste disponible pour échanger.
+
+      Cordialement,
+      ${session?.user?.name || '[Votre nom]'} `;
+      
+      // Encodage des paramètres pour l'URL mailto
+      const encodedSubject = encodeURIComponent(emailSubject);
+      const encodedBody = encodeURIComponent(emailBody);
+      
+      // Ouvrir le client mail avec le template
+      const mailtoUrl = `mailto:${animal.ownerEmail}?subject=${encodedSubject}&body=${encodedBody}`;
+      
+      // Utiliser une nouvelle façon d'ouvrir le client mail
+      try {
+        window.location.href = mailtoUrl;
+      } catch (error) {
+        console.error("Erreur lors de l'ouverture du client email:", error);
+        alert("Une erreur s'est produite lors de l'ouverture de votre client email. Veuillez essayer à nouveau ou copier l'adresse: " + animal.ownerEmail);
+      }
+    } else {
+      // Message d'alerte si pas d'email disponible
+      console.log("Pas d'email trouvé pour l'animal:", animal);
+      alert("Désolé, aucune adresse email n'est disponible pour ce contact. Veuillez utiliser notre formulaire d'adoption.");
+    }
+  };
+
   if (loading) {
     return <div className={styles.loading}>Chargement des détails de l'animal...</div>;
   }
@@ -189,8 +244,6 @@ const handleContactOwner = () => {
   
   return (
     <div className={styles.animalDetailContainer}>  
-      
-      
       <div className={styles.animalDetailCard}>
         <div className={styles.animalImageGallery}>
           <div className={styles.mainImageContainer}>
@@ -328,12 +381,59 @@ const handleContactOwner = () => {
               </div>
             )}
             
-            <button className={styles.contactButton} onClick={handleContactOwner}>
-              {animal.ownerEmail ? 'Contact by email' : 'Contact'}
-            </button>
+            <div className={styles.contactButtons}>
+              <button className={styles.contactButton} onClick={handleContactOwner}>
+                Demande d'adoption
+              </button>
+              
+              {animal.ownerEmail && (
+                <button className={styles.emailButton} onClick={handleEmailContact}>
+                  Contact par email
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Modal de demande d'adoption */}
+      <dialog id="adoptionModal" className={styles.adoptionModal}>
+        <div className={styles.modalContent}>
+          <h2>Demande d'adoption pour {animal.name}</h2>
+          
+          <form onSubmit={handleAdoptionRequest}>
+            <div className={styles.formGroup}>
+              <label htmlFor="adoptionMessage">Message pour le propriétaire:</label>
+              <textarea 
+                id="adoptionMessage"
+                className={styles.adoptionMessage}
+                value={adoptionMessage}
+                onChange={(e) => setAdoptionMessage(e.target.value)}
+                placeholder={`Bonjour, je suis intéressé(e) par l'adoption de ${animal.name}...`}
+                rows={6}
+                required
+              />
+            </div>
+            
+            <div className={styles.modalButtons}>
+              <button 
+                type="button" 
+                className={styles.cancelButton}
+                onClick={() => document.getElementById('adoptionModal').close()}
+              >
+                Annuler
+              </button>
+              <button 
+                type="submit" 
+                className={styles.submitButton}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </dialog>
     </div>
   );
 };

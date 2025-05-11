@@ -1,27 +1,22 @@
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react';
-import { AiFillHeart } from 'react-icons/ai';
-import { FaBars, FaUser, FaTimes } from 'react-icons/fa';
-import styles from '../styles/navbar.module.css';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../services/authcontext'; 
+import { useSession, signOut } from 'next-auth/react';
+import { FaUser, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaTools, FaBars, FaHeart, FaCalendarAlt, FaPaw, FaShoppingCart, FaStore, FaHandHoldingHeart } from 'react-icons/fa';
+import styles from '../styles/navbar.module.css';
 
-const Header = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [heartHovered, setHeartHovered] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const Navbar = () => {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === 'authenticated';
   const [userModalOpen, setUserModalOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const userModalRef = useRef(null);
-  const router = useRouter();
-  
-  // Récupération de l'utilisateur connecté depuis le contexte d'authentification
-  const { user, logout } = useAuth();
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
+    // Gérer le défilement pour changer l'apparence du navbar
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setScrolled(true);
@@ -29,25 +24,24 @@ const Header = () => {
         setScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
   useEffect(() => {
-    // Gérer les clics en dehors du menu pour le fermer
+    // Gérer les clics en dehors du modal et du menu latéral pour les fermer
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target) && 
-          !event.target.classList.contains(styles['menu-button'])) {
-        setMobileMenuOpen(false);
+      if (userModalRef.current && !userModalRef.current.contains(event.target) &&
+          !event.target.closest(`.${styles.userButton}`)) {
+        setUserModalOpen(false);
       }
       
-      if (userModalRef.current && !userModalRef.current.contains(event.target) &&
-          !event.target.closest(`.${styles['user-section']}`)) {
-        setUserModalOpen(false);
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&
+          !event.target.closest(`.${styles.menuButton}`)) {
+        setMobileMenuOpen(false);
       }
     };
 
@@ -57,9 +51,9 @@ const Header = () => {
     };
   }, []);
 
-  // Empêcher le défilement du corps lorsque le menu mobile ou modal est ouvert
+  // Empêcher le défilement du corps lorsque le modal ou le menu latéral est ouvert
   useEffect(() => {
-    if (mobileMenuOpen || userModalOpen) {
+    if (userModalOpen || mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -68,57 +62,57 @@ const Header = () => {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [mobileMenuOpen, userModalOpen]);
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  }, [userModalOpen, mobileMenuOpen]);
 
   const toggleUserModal = () => {
     setUserModalOpen(!userModalOpen);
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   const handleLogout = () => {
-    logout();
+    signOut({ callbackUrl: '/' });
     setUserModalOpen(false);
-    router.push('/');
+    setMobileMenuOpen(false);
   };
 
   // Fonction pour obtenir les fonctionnalités spécifiques au type d'utilisateur
   const getUserTypeLinks = () => {
-    if (!user) return [];
+    if (!session?.user) return [];
     
     const commonLinks = [
-      { label: 'Mes favoris', href: '/favorites' },
-      { label: 'Modifier mon profil', href: `/profile/${user.userType}/${user._id}` },
+      { label: 'My favorites', href: '/favorites', icon: <FaHeart /> },
+      { label: 'Edit my profil', href: `/profile/${session.user.userType}/${session.user.id}`, icon: <FaUser /> },
     ];
     
-    switch (user.userType) {
+    switch (session.user.userType) {
       case 'owner':
         return [
           ...commonLinks,
-          { label: 'Mes animaux', href: '/my-pets' },
-          { label: 'Mes adoptions', href: '/my-adoptions' }
+          { label: 'My pets', href: '/my-pets', icon: <FaPaw /> },
+          { label: 'Mes adoptions', href: '/my-adoptions', icon: <FaHandHoldingHeart /> }
         ];
       case 'vet':
         return [
           ...commonLinks,
-          { label: 'Mes patients', href: '/my-patients' },
-          { label: 'Calendrier', href: '/calendar' },
+          { label: 'Mes patients', href: '/my-patients', icon: <FaPaw /> },
+          { label: 'Calendrier', href: '/calendar', icon: <FaCalendarAlt /> },
         ];
       case 'association':
         return [
           ...commonLinks,
-          { label: 'Gérer les animaux', href: '/manage-animals' },
-          { label: 'Demandes d\'adoption', href: '/adoption-requests' },
-          { label: 'Événements', href: '/events' }
+          { label: 'Gérer les animaux', href: '/manage-animals', icon: <FaPaw /> },
+          { label: 'Demandes d\'adoption', href: '/adoption-requests', icon: <FaHandHoldingHeart /> },
+          { label: 'Événements', href: '/events', icon: <FaCalendarAlt /> }
         ];
       case 'store':
         return [
           ...commonLinks,
-          { label: 'Gérer les produits', href: '/manage-products' },
-          { label: 'Promotions', href: '/promotions' },
-          { label: 'Commandes', href: '/orders' }
+          { label: 'Publish products', href: '/annoncerproduit', icon: <FaStore /> },
+          { label: 'Promotions', href: '/promotions', icon: <FaShoppingCart /> },
+          { label: 'Commandes', href: '/orders', icon: <FaShoppingCart /> }
         ];
       default:
         return commonLinks;
@@ -126,175 +120,199 @@ const Header = () => {
   };
 
   return (
-    <header className={`${styles.header} ${scrolled ? styles['header-scrolled'] : ''}`}>
-      <div className={styles['header-left']}>
-        <Link href="/" className={styles['logo-container']}>
-          <span className={styles['logo-placeholder']}>LOGO</span>
-        </Link>
+    <header className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
+      <div className={styles.container}>
+        {/* Bouton du menu hamburger */}
         <button 
-          className={styles['menu-button']} 
+          className={styles.menuButton} 
           onClick={toggleMobileMenu}
           aria-expanded={mobileMenuOpen}
-          aria-label="Menu principal"
+          aria-label="Main Menu"
         >
           {mobileMenuOpen ? (
-            <FaTimes className={`${styles.icon} ${styles['menu-icon']}`} />
+            <FaTimes className={styles.menuIcon} />
           ) : (
-            <FaBars className={`${styles.icon} ${styles['menu-icon']}`} />
+            <FaBars className={styles.menuIcon} />
           )}
         </button>
-      </div>
-      
-      <div className={styles['header-center']}>
-        <nav className={styles['main-nav']}>
-          <ul>
-            <li><Link href="/report">Report</Link></li>
-            <li><Link href="/donate">Donate</Link></li>
-            <li><Link href="/advertise">Advertise Animal for Adoption</Link></li>
-          </ul>
-        </nav>
-      </div>
-      
-      <div className={styles['header-right']}>
-        <div className={styles['dropdown-container']}>
-          <div 
-            className={styles['dropdown-header']} 
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-          >
-            <span className={`${styles['dropdown-triangle']} ${dropdownOpen ? styles.open : ''}`}>▼</span>
+        
+        {/* Logo et liens */}
+        <div className={styles.logoSection}>
+          <Link href="/" className={styles.logoWrapper}>
+            <div className={styles.logo}>
+              {/* Emplacement pour votre logo */}
+              <div className={styles.logoPlaceholder}>LOGO</div>
+            </div>
+          </Link>
+          <div className={styles.links}>
+            <Link href="/" className={styles.link}>
+              <FaHome className={styles.linkIcon} />
+              <span>Home</span>
+            </Link>
+            <Link href="/Report" className={styles.link}>
+              <FaTools className={styles.linkIcon} />
+              <span>Report</span>
+            </Link>
+            <Link href="/cataloguedon" className={styles.link}>
+              <FaInfoCircle className={styles.linkIcon} />
+              <span>Donate</span>
+            </Link>
+            <Link href="/" className={styles.link}>
+              <FaEnvelope className={styles.linkIcon} />
+              <span>Advertise Animal for Adoption</span>
+            </Link>
           </div>
-          {dropdownOpen && (
-            <ul className={styles['dropdown-menu']}>
-              <li><Link href="/directory/veterinarian">Veterinarian</Link></li>
-              <li><Link href="/directory/association">Association</Link></li>
-              <li><Link href="/directory/store">Pet Store</Link></li>
-            </ul>
+        </div>
+
+        {/* Boutons d'authentification */}
+        <div className={styles.authSection}>
+          {isAuthenticated ? (
+            <>
+              <button onClick={toggleUserModal} className={styles.userButton}>
+                <FaUser className={styles.userIcon} />
+                <span>My Space</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className={styles.logoutButton}
+              >
+               Log out
+              </button>
+            </>
+          ) : (
+            <Link href="/signuplogin" className={styles.authButton}>
+             Sign up
+            </Link>
           )}
         </div>
-        <Link href={user ? "/favorites" : "/signuplogin"} className={styles['favorites-section']}>
-          <div 
-            onMouseEnter={() => setHeartHovered(true)}
-            onMouseLeave={() => setHeartHovered(false)}
-          >
-            <AiFillHeart className={`${styles['heart-icon']} ${heartHovered ? styles['heart-hovered'] : ''}`} />
-          </div>
-        </Link>
-        <div 
-          className={styles['user-section']} 
-          onClick={user ? toggleUserModal : () => router.push('/signuplogin')}
-        >
-          <FaUser className={`${styles.icon} ${styles['user-icon']}`} />
-          <span>{user ? 'My Space' : 'Connexion'}</span>
-        </div>
       </div>
-
-      {/* Menu mobile déroulant vertical */}
+      
+      {/* Menu latéral en dehors du header */}
       {mobileMenuOpen && (
-        <div className={styles.mobileMenuOverlay}>
+        <div className={styles.sidebarOverlay}>
           <div 
-            ref={menuRef}
-            className={styles.mobileMenu}
+            ref={sidebarRef}
+            className={styles.sidebar}
           >
-            <div className={styles.mobileMenuHeader}>
-              <span className={styles.mobileMenuTitle}>Menu</span>
+            <div className={styles.sidebarHeader}>
+              <h3>Menu</h3>
               <button 
                 className={styles.closeButton}
                 onClick={() => setMobileMenuOpen(false)}
-                aria-label="Fermer le menu"
+                aria-label="Close the Menu"
               >
                 <FaTimes />
               </button>
             </div>
-            <nav className={styles.mobileNavigation}>
-              <ul>
-                <li>
-                  <Link href="/" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/catalogueanimal" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                    Adopt
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/donate" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                    Donate Catalogue
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/advertise" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                    Advertise Animal for Adoption
-                  </Link>
-                </li>
-                {user && (
+            
+            <div className={styles.sidebarContent}>
+              {isAuthenticated && (
+                <div className={styles.userInfo}>
+                  <div className={styles.userAvatar}>
+                    <FaUser size={32} />
+                  </div>
+                  <div className={styles.userDetails}>
+                    <h4>{session.user.name}</h4>
+                    <p>{session.user.email}</p>
+                  </div>
+                </div>
+              )}
+              
+              <nav className={styles.sidebarNav}>
+                <ul className={styles.sidebarLinks}>
                   <li>
+                    <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                      <FaHome className={styles.sidebarLinkIcon} />
+                      <span>Home</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                      <FaTools className={styles.sidebarLinkIcon} />
+                      <span>Report</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                      <FaInfoCircle className={styles.sidebarLinkIcon} />
+                      <span>Donate</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                      <FaEnvelope className={styles.sidebarLinkIcon} />
+                      <span>Advertise Animal for Adoption</span>
+                    </Link>
+                  </li>
+                  
+                  {/* Fonctionnalités spécifiques au type d'utilisateur */}
+                  {isAuthenticated && (
+                    <>
+                      <li className={styles.sidebarDivider}>
+                        <span>My Space {session.user.userType === 'vet' ? 'Veterinarian' : 
+                                        session.user.userType === 'association' ? 'Asociation' : 
+                                        session.user.userType === 'store' ? 'Pet Store' : 
+                                        'Pet Owner' }</span>
+                      </li>
+                      {getUserTypeLinks().map((link, index) => (
+                        <li key={index}>
+                          <Link 
+                            href={link.href} 
+                            className={styles.sidebarLink}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            {link.icon}
+                            <span>{link.label}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </>
+                  )}
+                </ul>
+              </nav>
+              
+              <div className={styles.sidebarFooter}>
+                {isAuthenticated ? (
+                  <button 
+                    onClick={handleLogout}
+                    className={styles.sidebarLogoutButton}
+                  >
+                   Log out
+                  </button>
+                ) : (
+                  <div className={styles.sidebarAuthButtons}>
                     <Link 
-                      href={`/profile/${user.userType}/${user._id}`} 
-                      className={styles.mobileNavLink} 
+                      href="/signuplogin" 
+                      className={styles.sidebarAuthButton}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Mon profil
+                      Sign up
                     </Link>
-                  </li>
+                    
+                  </div>
                 )}
-                <li>
-                  <Link href="/catalogueproduit" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                    Special Offers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/favorites" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                    Favorites
-                  </Link>
-                </li>
-                
-                {/* Afficher les fonctionnalités supplémentaires en fonction du type d'utilisateur */}
-                {user && getUserTypeLinks().map((link, index) => (
-                  <li key={index}>
-                    <Link href={link.href} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-            <div className={styles.mobileMenuButtons}>
-              {!user ? (
-                <>
-                  <Link href="/signuplogin" className={styles.mobileMenuButton} onClick={() => setMobileMenuOpen(false)}>
-                    Login
-                  </Link>
-                  <Link href="/signuplogin" className={`${styles.mobileMenuButton} ${styles.primary}`} onClick={() => setMobileMenuOpen(false)}>
-                    Sign Up
-                  </Link>
-                </>
-              ) : (
-                <button onClick={handleLogout} className={`${styles.mobileMenuButton} ${styles.primary}`}>
-                  Déconnexion
-                </button>
-              )}
+              </div>
             </div>
           </div>
         </div>
       )}
-      
-      {/* Modal pour My Space */}
-      {userModalOpen && user && (
+
+      {/* Modal pour Mon Espace */}
+      {userModalOpen && session?.user && (
         <div className={styles.userModalOverlay}>
           <div 
             ref={userModalRef}
             className={styles.userModal}
           >
             <div className={styles.userModalHeader}>
-              <h3>Mon espace {user.userType === 'vet' ? 'Vétérinaire' : 
-                            user.userType === 'association' ? 'Association' : 
-                            user.userType === 'store' ? 'Animalerie' : 
-                            'Utilisateur'}</h3>
+              <h3>My Space {session.user.userType === 'vet' ? 'Veterinarian' : 
+                            session.user.userType === 'association' ? 'Association' : 
+                            session.user.userType === 'store' ? 'Pet Store' : 
+                            'Pet Owner'}</h3>
               <button 
                 className={styles.closeButton}
                 onClick={() => setUserModalOpen(false)}
-                aria-label="Fermer"
+                aria-label="Close"
               >
                 <FaTimes />
               </button>
@@ -303,11 +321,11 @@ const Header = () => {
             <div className={styles.userModalContent}>
               <div className={styles.userInfo}>
                 <div className={styles.userAvatar}>
-                  <FaUser size={50} />
+                  <FaUser size={32} />
                 </div>
                 <div className={styles.userDetails}>
-                  <h4>{user.nom} {user.prenom}</h4>
-                  <p>{user.email}</p>
+                  <h4>{session.user.name}</h4>
+                  <p>{session.user.email}</p>
                 </div>
               </div>
               
@@ -319,7 +337,8 @@ const Header = () => {
                       className={styles.userLink}
                       onClick={() => setUserModalOpen(false)}
                     >
-                      {link.label}
+                      {link.icon}
+                      <span>{link.label}</span>
                     </Link>
                   </li>
                 ))}
@@ -330,7 +349,7 @@ const Header = () => {
                   onClick={handleLogout}
                   className={styles.logoutButton}
                 >
-                  Déconnexion
+                  Log out
                 </button>
               </div>
             </div>
@@ -341,4 +360,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Navbar;

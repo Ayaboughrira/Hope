@@ -1,9 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import styles from '../styles/annonceanimal.module.css';
 
 const AnimalForm = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  
   const [formData, setFormData] = useState({
     // Info sur l'animal
     animalName: '',
@@ -12,8 +17,10 @@ const AnimalForm = () => {
     age: '',
     gender: '',
     description: '',
+    publishType: '',
+    publishId:'',
     
-    // Info sur le propriétaire
+    // Info sur le propriétaire - seront pré-remplies si l'utilisateur est connecté
     ownerName: '',
     ownerEmail: '',
     ownerPhone: '',
@@ -21,17 +28,35 @@ const AnimalForm = () => {
   });
   
   const [photos, setPhotos] = useState([]);
-  const [videoFile, setVideoFile] = useState(null);
-  const [videoPreview, setVideoPreview] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   
   // État pour la gestion des étapes
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
   
   const fileInputRef = useRef(null);
-  const videoInputRef = useRef(null);
+  
+  // Vérifier si l'utilisateur est connecté
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+    if (status === 'unauthenticated') {
+      router.push('/signuplogin?callbackUrl=/annonceanimal');
+      return;
+    }
+    
+    // Pré-remplir les données du propriétaire si l'utilisateur est connecté
+    if (session && session.user) {
+      setFormData(prevData => ({
+        ...prevData,
+        ownerName: session.user.name || '',
+        ownerEmail: session.user.email || '',
+      }));
+    }
+  }, [session, status, router]);
   
   // Mise à jour des classes des sections lors du changement d'étape
   useEffect(() => {
@@ -80,28 +105,12 @@ const AnimalForm = () => {
     setPhotos([...photos, ...newPhotos]);
   };
   
-  const handleVideoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setVideoFile(file);
-      setVideoPreview(URL.createObjectURL(file));
-    }
-  };
-  
   const removePhoto = (index) => {
     const updatedPhotos = [...photos];
     URL.revokeObjectURL(updatedPhotos[index].preview);
     updatedPhotos.splice(index, 1);
     setPhotos(updatedPhotos);
   };
-  
-  {/*
-  const removeVideo = () => {
-    if (videoPreview) URL.revokeObjectURL(videoPreview);
-    setVideoFile(null);
-    setVideoPreview('');
-    if (videoInputRef.current) videoInputRef.current.value = '';
-  };*/}
   
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -124,96 +133,103 @@ const AnimalForm = () => {
     }
   };
   
-  
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  
-  try {
-    // Validations
-    if (!formData.animalName || !formData.animalType || !formData.ownerName || !formData.ownerEmail || !formData.ownerPhone) {
-      throw new Error('Please fill in all required fields.');
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
     
-    if (photos.length === 0) {
-      throw new Error('Please add at least one photo of your pet.');
-    }
-    
-    // Créer un FormData pour envoyer les données
-    const formDataToSubmit = new FormData();
-    
-    // Ajouter les données textuelles
-    for (const [key, value] of Object.entries(formData)) {
-      formDataToSubmit.append(key, value);
-    }
-    
-    // Ajouter les photos
-    photos.forEach(photo => {
-      formDataToSubmit.append('photos', photo.file);
-    });
-    
-    // Ajouter la vidéo si présente
-    if (videoFile) {
-      formDataToSubmit.append('video', videoFile);
-    }
-    
-    console.log("Envoi de la requête...");
-    
-    // Envoyer les données à l'API
-    const response = await fetch('/api/animals', {
-      method: 'POST',
-      body: formDataToSubmit,
-      // Ne pas ajouter l'en-tête Content-Type car il est automatiquement défini avec FormData
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erreur lors de la publication');
-    }
-    
-    const result = await response.json();
-    console.log('Annonce publiée avec succès:', result);
-    
-    // Afficher le modal de succès
-    setShowModal(true);
-    
-    // Réinitialiser le formulaire après succès
-    setTimeout(() => {
-      setFormData({
-        animalName: '',
-        animalType: '',
-        race: '',
-        age: '',
-        gender: '',
-        description: '',
-        ownerName: '',
-        ownerEmail: '',
-        ownerPhone: '',
-        ownerAddress: '',
+    try {
+      // Validations
+      if (!formData.animalName || !formData.animalType || !formData.ownerName || !formData.ownerEmail || !formData.ownerPhone) {
+        throw new Error('Veuillez remplir tous les champs obligatoires.');
+      }
+      
+      if (photos.length === 0) {
+        throw new Error('Veuillez ajouter au moins une photo de votre animal.');
+      }
+      
+      // Créer un FormData pour envoyer les données
+      const formDataToSubmit = new FormData();
+      
+      // Ajouter les données textuelles
+      for (const [key, value] of Object.entries(formData)) {
+        formDataToSubmit.append(key, value);
+      }
+      
+      // Ajouter les photos
+      photos.forEach(photo => {
+        formDataToSubmit.append('photos', photo.file);
       });
       
-      // Libérer les URL objectURL pour éviter les fuites mémoire
-      photos.forEach(photo => URL.revokeObjectURL(photo.preview));
-      if (videoPreview) URL.revokeObjectURL(videoPreview);
+      console.log("Envoi de la requête...");
       
-      setPhotos([]);
-      //setVideoFile(null);
-      //setVideoPreview('');
-      setCurrentStep(1);
-      setShowModal(false);
-    }, 3000);
-    
-  } catch (error) {
-    console.error('Erreur:', error);
-    alert('Erreur lors de la publication: ' + error.message);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      // Envoyer les données à l'API
+      const response = await fetch('/api/animals', {
+        method: 'POST',
+        body: formDataToSubmit,
+        // Ne pas ajouter l'en-tête Content-Type car il est automatiquement défini avec FormData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la publication');
+      }
+      
+      const result = await response.json();
+      console.log('Annonce publiée avec succès:', result);
+      
+      // Afficher le modal de succès
+      setShowModal(true);
+      
+      // Réinitialiser le formulaire après succès
+      setTimeout(() => {
+        setFormData({
+          animalName: '',
+          animalType: '',
+          race: '',
+          age: '',
+          gender: '',
+          description: '',
+          ownerName: session?.user?.name || '',
+          ownerEmail: session?.user?.email || '',
+          ownerPhone: '',
+          ownerAddress: '',
+        });
+        
+        // Libérer les URL objectURL pour éviter les fuites mémoire
+        photos.forEach(photo => URL.revokeObjectURL(photo.preview));
+        
+        setPhotos([]);
+        setCurrentStep(1);
+        setShowModal(false);
+        
+        // Rediriger vers la page des annonces
+        router.push('/catalogueanimal');
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
+  // Afficher un message de chargement pendant la vérification de session
+  if (status === 'loading') {
+    return <div className={styles['loading']}>Chargement...</div>;
+  }
+  
+  // Le composant principal ne sera rendu que si l'utilisateur est connecté
   return (
     <div className={styles['animal-form-container']}>
-      <h1 className={styles.heading}>Post an ad for your pet</h1>
+      <h1 className={styles.heading}>Publier une annonce pour votre animal</h1>
+      
+      {error && (
+        <div className={styles['error-message']}>
+          {error}
+        </div>
+      )}
       
       {/* Barre de progression */}
       <div className={styles['progress-bar']}>
@@ -226,7 +242,7 @@ const handleSubmit = async (e) => {
           >
             {index + 1}
             <span className={styles['step-label']}>
-              {index === 0 ? 'Animal Info' : index === 1 ? 'Media' : 'Contact'}
+              {index === 0 ? 'Info Animal' : index === 1 ? 'Photos' : 'Contact'}
             </span>
           </div>
         ))}
@@ -237,24 +253,22 @@ const handleSubmit = async (e) => {
         <div className={styles['success-modal']}>
           <div className={styles['modal-content']}>
             <div className={styles['success-icon']}>✓</div>
-            <p>Your ad has been published successfully!</p>
+            <p>Votre annonce a été publiée avec succès !</p>
           </div>
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
-        
-        
         {/* Section Informations sur l'animal */}
         <div className={`${styles['form-section']} ${currentStep === 1 ? styles.active : ''}`}>
-          <h3 className={styles['section-title']}>Animal Information:</h3>
+          <h3 className={styles['section-title']}>Informations sur l'animal :</h3>
           
           <div className={styles['form-group']}>
             <input
               type="text"
               id="animalName"
               name="animalName"
-              placeholder='Animal Name'
+              placeholder='Nom de animal'
               value={formData.animalName}
               onChange={handleChange}
               required
@@ -271,9 +285,9 @@ const handleSubmit = async (e) => {
               required
               className={styles['select-field']}
             >
-              <option value="">Select Type</option>
-              <option value="cat">Cat</option>
-              <option value="dog">Dog</option>
+              <option value="">Type d'animal</option>
+              <option value="cat">Chat</option>
+              <option value="dog">Chien</option>
             </select>
           </div>
           
@@ -282,7 +296,7 @@ const handleSubmit = async (e) => {
               type="text" 
               id="race"
               name="race"
-              placeholder='Breed'
+              placeholder='Race'
               value={formData.race}
               onChange={handleChange}
               className={styles['input-field']}
@@ -295,7 +309,7 @@ const handleSubmit = async (e) => {
                 type="text"
                 id="age"
                 name="age"
-                placeholder='Age'
+                placeholder='Âge'
                 value={formData.age}
                 onChange={handleChange}
                 className={styles['input-field']}
@@ -310,9 +324,9 @@ const handleSubmit = async (e) => {
                 onChange={handleChange}
                 className={styles['select-field']}
               >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
+                <option value="">Genre</option>
+                <option value="male">Mâle</option>
+                <option value="female">Femelle</option>
               </select>
             </div>
           </div>
@@ -330,11 +344,11 @@ const handleSubmit = async (e) => {
           </div>
           
           <div className={styles['form-navigation']}>
-            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Next</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Suivant</button>
           </div>
         </div>
         
-        {/* Section Photos et Vidéos */}
+        {/* Section Photos */}
         <div className={`${styles['form-section']} ${currentStep === 2 ? styles.active : ''}`}>
           <h3 className={styles['section-title']}>Photos :</h3>
           
@@ -347,7 +361,7 @@ const handleSubmit = async (e) => {
                 onClick={() => fileInputRef.current.click()}
                 disabled={photos.length >= 5}
               >
-                Upload Photos ({5 - photos.length} remaining)
+                Ajouter des photos ({5 - photos.length} restantes)
               </button>
               <input
                 type="file"
@@ -363,7 +377,7 @@ const handleSubmit = async (e) => {
               <div className={styles['preview-container']}>
                 {photos.map((photo, index) => (
                   <div key={index} className={styles['preview-item']}>
-                    <img src={photo.preview} alt={`Preview ${index + 1}`} />
+                    <img src={photo.preview} alt={`Aperçu ${index + 1}`} />
                     <button
                       type="button"
                       className={styles['remove-btn']}
@@ -376,57 +390,23 @@ const handleSubmit = async (e) => {
               </div>
             )}
           </div>
-          {/*
-          <div className={styles['form-group']}>
-            <label>Video (optional)</label>
-            <div className={styles['upload-container']}>
-              <button
-                type="button"
-                className={styles['upload-btn']}
-                onClick={() => videoInputRef.current.click()}
-                disabled={videoFile !== null}
-              >
-                Upload Video
-              </button>
-              <input
-                type="file"
-                accept="video/*"
-                ref={videoInputRef}
-                onChange={handleVideoUpload}
-                style={{ display: 'none' }}
-              />
-            </div>
-            
-            {videoPreview && (
-              <div className={styles['video-preview']}>
-                <video controls src={videoPreview} />
-                <button
-                  type="button"
-                  className={styles['remove-btn']}
-                  onClick={removeVideo}
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-          */}
+          
           <div className={styles['form-navigation']}>
-            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Previous</button>
-            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Next</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Précédent</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Suivant</button>
           </div>
         </div>
         
         {/* Section Informations du propriétaire */}
         <div className={`${styles['form-section']} ${currentStep === 3 ? styles.active : ''} ${currentStep === 3 ? styles['last-step'] : ''}`}>
-          <h3 className={styles['section-title']}>Owner Information:</h3>
+          <h3 className={styles['section-title']}>Informations de contact :</h3>
           
           <div className={styles['form-group']}>
             <input
               type="text"
               id="ownerName"
               name="ownerName"
-              placeholder='Full Name'
+              placeholder='Nom complet'
               value={formData.ownerName}
               onChange={handleChange}
               required
@@ -440,7 +420,7 @@ const handleSubmit = async (e) => {
                 type="email"
                 id="ownerEmail"
                 name="ownerEmail"
-                placeholder='Your Email'
+                placeholder='Email'
                 value={formData.ownerEmail}
                 onChange={handleChange}
                 required
@@ -453,7 +433,7 @@ const handleSubmit = async (e) => {
                 type="tel"
                 id="ownerPhone"
                 name="ownerPhone"
-                placeholder='Phone'
+                placeholder='Téléphone'
                 value={formData.ownerPhone}
                 onChange={handleChange}
                 required
@@ -467,7 +447,7 @@ const handleSubmit = async (e) => {
               type="text"
               id="ownerAddress"
               name="ownerAddress"
-              placeholder='Address'
+              placeholder='Adresse'
               value={formData.ownerAddress}
               onChange={handleChange}
               className={styles['input-field']}
@@ -475,7 +455,7 @@ const handleSubmit = async (e) => {
           </div>
           
           <div className={styles['form-navigation']}>
-            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Previous</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Précédent</button>
           </div>
           
           <div className={styles['form-actions']}>
@@ -484,7 +464,7 @@ const handleSubmit = async (e) => {
               className={styles['submit-btn']}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Publication pending...' : 'Post Your Ad'}
+              {isSubmitting ? 'Publication en cours...' : 'Publier l\'annonce'}
             </button>
           </div>
         </div>

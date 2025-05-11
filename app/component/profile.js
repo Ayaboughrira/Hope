@@ -3,11 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import { User, Mail, Phone, MapPin, Building, FileText, Store, Clock } from 'lucide-react';
 import { getUserData } from '../services/userservices';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styles from '../styles/profile.module.css';
 
 const Profile = () => {
   const params = useParams();
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,6 +20,23 @@ const Profile = () => {
   const { userType, id } = params;
   
   useEffect(() => {
+    // Vérifier l'authentification - rediriger si non connecté
+    if (status === 'unauthenticated') {
+      router.push('/');
+      return;
+    }
+    
+    // Vérifier si l'utilisateur tente d'accéder à un profil qui n'est pas le sien
+    if (status === 'authenticated' && session.user) {
+      if (session.user.id !== id || session.user.userType !== userType) {
+        // Option 1: Rediriger vers son propre profil
+        // router.push(`/profile/${session.user.userType}/${session.user.id}`);
+        
+        // Option 2: Permettre la consultation mais afficher une alerte
+        console.warn("Consultation d'un profil d'un autre utilisateur");
+      }
+    }
+
     const fetchUserData = async () => {
       try {
         if (!userType || !id) {
@@ -38,8 +59,10 @@ const Profile = () => {
       }
     };
 
-    fetchUserData();
-  }, [userType, id]);
+    if (userType && id) {
+      fetchUserData();
+    }
+  }, [userType, id, status, session, router]);
 
   // Rendre différentes informations de profil en fonction du type d'utilisateur
   const renderProfileInfo = () => {
@@ -56,12 +79,12 @@ const Profile = () => {
         { label: 'Clinic Name', value: userData.clinicName, icon: Building },
         { label: 'License Number', value: userData.licenseNumber, icon: FileText },
         { label: 'Email', value: userData.email, icon: Mail },
-        { label: 'Phone Number', value: userData.phone, icon: Phone },
+        { label: 'Contact', value: userData.phone, icon: Phone },
         { label: 'Address', value: userData.address, icon: MapPin },
         { label: 'Description', value: userData.description, icon: FileText }
       ],
       association: [
-        { label: 'Association Name', value: userData.associationName, icon: Building },
+        { label: 'Association', value: userData.associationName, icon: Building },
         { label: 'Email', value: userData.email, icon: Mail },
         { label: 'Contact', value: userData.phone, icon: Phone },
         { label: 'Association Address', value: userData.address, icon: MapPin },
@@ -69,10 +92,10 @@ const Profile = () => {
       ],
       store: [
         { label: 'Store Name', value: userData.storeName, icon: Building },
-        { label: 'Opening time', value: userData.openingtime, icon: Clock },
+        { label: 'Opening Time', value: userData.openingtime, icon: Clock },
         { label: 'Email', value: userData.email, icon: Mail },
         { label: 'Contact', value: userData.phone, icon: Phone },
-        { label: 'Store Address', value: userData.address, icon: MapPin }
+        { label: 'Address', value: userData.address, icon: MapPin }
       ]
     };
 
@@ -81,10 +104,10 @@ const Profile = () => {
     return (
       <div className={styles.profileInfo}>
         <h2 className={styles.profileType}>
-          {userType === 'owner' && ' Owner Profil'}
-          {userType === 'vet' && 'Veterinarian Profil '}
-          {userType === 'association' && 'Association Profil'}
-          {userType === 'store' && 'Pet Store Profil'}
+          {userType === 'owner' && 'Owner Profil '}
+          {userType === 'vet' && 'Veterinarian Profil'}
+          {userType === 'association' && 'Association Profile'}
+          {userType === 'store' && 'Pet Store Profile'}
         </h2>
         
         {fields.map((field, index) => (
@@ -92,16 +115,17 @@ const Profile = () => {
             <field.icon className={styles.fieldIcon} />
             <div className={styles.fieldContent}>
               <span className={styles.fieldLabel}>{field.label}:</span>
-              <span className={styles.fieldValue}>{field.value}</span>
+              <span className={styles.fieldValue}>{field.value || 'Non spécifié'}</span>
             </div>
           </div>
         ))}
+        
       </div>
     );
   };
 
-  if (loading) {
-    return <div className={styles.loading}>Loading profil data...</div>;
+  if (status === 'loading' || loading) {
+    return <div className={styles.loading}>Loading data profile...</div>;
   }
 
   if (error) {
@@ -121,6 +145,16 @@ const Profile = () => {
         </div>
         
         {renderProfileInfo()}
+        
+        {/* Boutons d'action */}
+        <div className={styles.profileActions}>
+          <button 
+            className={styles.editButton}
+            onClick={() => router.push(`/profile/edit/${userType}/${id}`)}
+          >
+            Edit my profile
+          </button>
+        </div>
       </div>
     </div>
   );

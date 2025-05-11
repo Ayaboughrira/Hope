@@ -11,8 +11,8 @@ export default function CreateArticle() {
     excerpt: '',
     contenu: '',
     typeArticle: 'care',
-    animal: 'cats'
-  });l
+    typeAnimal: 'cats'  // Changed from 'animal' to 'typeAnimal' to match API
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ message: '', type: '' });
   const [showModal, setShowModal] = useState(false);
@@ -31,16 +31,16 @@ export default function CreateArticle() {
     setIsSubmitting(true);
     setFeedback({ message: '', type: '' });
     
-    // Sauvegarder l'animal sélectionné lors de la soumission
-    setSubmittedAnimal(formData.animal);
+    // Save the selected animal type for redirection
+    setSubmittedAnimal(formData.typeAnimal);
 
     try {
-      // Valider les données
+      // Validate data
       if (!formData.titre || !formData.excerpt || !formData.contenu) {
-        throw new Error(' Please fill in all required fields');
+        throw new Error('Please fill in all required fields');
       }
 
-      // Envoyer les données à l'API
+      // Send data to API
       const response = await fetch('/api/article', {
         method: 'POST',
         headers: {
@@ -49,47 +49,47 @@ export default function CreateArticle() {
         body: JSON.stringify(formData),
       });
 
-      // Vérifier si la réponse est OK
+      // Check if response is OK
       if (!response.ok) {
         const errorText = await response.text();
-        let errorMessage = 'Erreur lors de la création de l\'article';
+        let errorMessage = 'Error creating article';
         
         try {
-          // Essayer de parser le texte en JSON
+          // Try to parse JSON error
           const errorJson = JSON.parse(errorText);
           errorMessage = errorJson.message || errorMessage;
         } catch (parseError) {
-          // Si le parsing échoue, utiliser le texte brut
-          console.error('Erreur de parsing JSON:', parseError);
+          // If parsing fails, use raw text
+          console.error('JSON parsing error:', parseError);
           errorMessage = errorText || errorMessage;
         }
         
         throw new Error(errorMessage);
       }
 
-      // Si la réponse est OK, parser le JSON
+      // If response is OK, parse JSON
       const result = await response.json();
       
-      // Réinitialiser le formulaire
+      // Reset form
       setFormData({
         titre: '',
         excerpt: '',
         contenu: '',
         typeArticle: 'care',
-        animal: 'cats'
+        typeAnimal: 'cats'  // Changed from 'animal' to 'typeAnimal'
       });
       
-      // Afficher la modale de succès
+      // Show success modal
       setFeedback({
-        message: 'Article added with success !',
+        message: 'Article added with success!',
         type: 'success'
       });
       setShowModal(true);
       
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Error:", error);
       setFeedback({
-        message: error.message || 'Une erreur s\'est produite',
+        message: error.message || 'An error occurred',
         type: 'error'
       });
     } finally {
@@ -99,11 +99,11 @@ export default function CreateArticle() {
 
   const closeModal = () => {
     setShowModal(false);
-    // Rediriger en utilisant la valeur de l'animal soumis
+    // Redirect using the submitted animal type
     router.push(`/prendresoin/${submittedAnimal}`);
   };
 
-  // Fermer la modale après 3 secondes
+  // Close modal after 3 seconds
   useEffect(() => {
     let timer;
     if (showModal) {
@@ -116,7 +116,7 @@ export default function CreateArticle() {
 
   return (
     <div className={styles.formContainer}>
-      <h1 className={styles.pageTitle}>Creat a new article</h1>
+      <h1 className={styles.pageTitle}>Create a new article</h1>
       
       {feedback.type === 'error' && (
         <div className={`${styles.feedback} ${styles.error}`}>
@@ -124,7 +124,7 @@ export default function CreateArticle() {
         </div>
       )}
       
-      {/* Modal de succès */}
+      {/* Success Modal */}
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -146,12 +146,12 @@ export default function CreateArticle() {
       
       <form onSubmit={handleSubmit} className={styles.articleForm}>
         <div className={styles.formGroup}>
-          <label htmlFor="animal" className={styles.formLabel}>
-            Animal Type : 
+          <label htmlFor="typeAnimal" className={styles.formLabel}>
+            Animal Type: 
             <select
-              id="animal"
-              name="animal"
-              value={formData.animal}
+              id="typeAnimal"
+              name="typeAnimal"
+              value={formData.typeAnimal}
               onChange={handleChange}
               className={styles.formSelect}
               required
@@ -165,7 +165,7 @@ export default function CreateArticle() {
 
         <div className={styles.formGroup}>
           <label htmlFor="typeArticle" className={styles.formLabel}>
-           Article Type :
+           Article Type:
             <select
               id="typeArticle"
               name="typeArticle"
@@ -183,7 +183,7 @@ export default function CreateArticle() {
 
         <div className={styles.formGroup}>
           <label htmlFor="titre" className={styles.formLabel}>
-            Article Title :
+            Article Title:
             <input
               type="text"
               id="titre"
@@ -199,14 +199,14 @@ export default function CreateArticle() {
 
         <div className={styles.formGroup}>
           <label htmlFor="excerpt" className={styles.formLabel}>
-            Excerpt :
+            Excerpt:
             <textarea
               id="excerpt"
               name="excerpt"
               value={formData.excerpt}
               onChange={handleChange}
               className={styles.formTextarea}
-              placeholder="Bref summary of the article"
+              placeholder="Brief summary of the article"
               rows="3"
               required
             />
@@ -215,14 +215,14 @@ export default function CreateArticle() {
 
         <div className={styles.formGroup}>
           <label htmlFor="contenu" className={styles.formLabel}>
-            Content :
+            Content:
             <textarea
               id="contenu"
               name="contenu"
               value={formData.contenu}
               onChange={handleChange}
               className={styles.formTextarea}
-              placeholder="Detailled content of the article"
+              placeholder="Detailed content of the article"
               rows="10"
               required
             />
@@ -235,7 +235,7 @@ export default function CreateArticle() {
             className={styles.submitButton}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Published in progress...' : 'Publish article'}
+            {isSubmitting ? 'Publishing in progress...' : 'Publish article'}
           </button>
         </div>
       </form>

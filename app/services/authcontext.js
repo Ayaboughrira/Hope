@@ -1,4 +1,4 @@
-'use client'
+/*'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { login as loginService, signup as signupService, logout as logoutService, getCurrentUser } from './clientauthservices';
@@ -103,3 +103,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
+*/
