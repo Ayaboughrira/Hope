@@ -4,24 +4,26 @@ import styles from '../styles/catalogueanimal.module.css';
 import Link from 'next/link';
 
 const AnimalCatalog = () => {
-  // État pour stocker les données des animaux
+  // State for storing animal data
   const [animals, setAnimals] = useState([]);
-  // État pour stocker les filtres
+  // State for filters
   const [filters, setFilters] = useState({
     species: 'all',
     age: 'all',
-    size: 'all',
+    gender: 'all',
     searchTerm: ''
   });
-  // État pour indiquer le chargement
+  // Loading state
   const [loading, setLoading] = useState(true);
-  // État pour gérer les animaux favoris
+  // Favorites state
   const [favorites, setFavorites] = useState({});
-  // État pour gérer les erreurs
+  // Error state
   const [error, setError] = useState(null);
+  // Species options state
+  const [speciesOptions, setSpeciesOptions] = useState(['all']);
 
   useEffect(() => {
-    // Charger les favoris depuis le localStorage au démarrage
+    // Load favorites from localStorage on startup
     const savedFavorites = localStorage.getItem('animalFavorites');
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites));
@@ -33,19 +35,26 @@ const AnimalCatalog = () => {
         const response = await fetch('/api/animals');
         
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+          throw new Error(`HTTP Error: ${response.status}`);
         }
         
         const { success, data } = await response.json();
         
         if (success) {
           setAnimals(data);
+          
+          // Extract unique species from the data
+          const uniqueSpecies = ['all', ...new Set(data.map(animal => 
+            animal.speciesDetails?.code || animal.speciesCode || 'unknown'
+          ).filter(Boolean))];
+          
+          setSpeciesOptions(uniqueSpecies);
         } else {
-          throw new Error('Échec de la récupération des données');
+          throw new Error('Failed to retrieve data');
         }
       } catch (err) {
-        console.error('Erreur lors du chargement des animaux:', err);
-        setError('Impossible de charger les animaux. Veuillez réessayer plus tard.');
+        console.error('Error loading animals:', err);
+        setError('Unable to load animals. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -54,7 +63,7 @@ const AnimalCatalog = () => {
     fetchAnimals();
   }, []);
 
-  // Handler pour les changements de filtres
+  // Filter change handler
   const handleFilterChange = (filterType, value) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -62,7 +71,7 @@ const AnimalCatalog = () => {
     }));
   };
 
-  // Handler pour la recherche
+  // Search handler
   const handleSearch = (e) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -70,7 +79,7 @@ const AnimalCatalog = () => {
     }));
   };
 
-  // Gérer les favoris
+  // Toggle favorite
   const toggleFavorite = (id) => {
     setFavorites(prev => {
       const newFavorites = {
@@ -78,13 +87,14 @@ const AnimalCatalog = () => {
         [id]: !prev[id]
       };
       
-      // Sauvegarder dans localStorage
+      // Save to localStorage
       localStorage.setItem('animalFavorites', JSON.stringify(newFavorites));
       
       return newFavorites;
     });
   };
 
+  // Get age ranges by species
   const getAgeRanges = (species) => {
     switch (species?.toLowerCase()) {
       case 'cat':
@@ -108,14 +118,18 @@ const AnimalCatalog = () => {
     }
   };
 
-  // Déterminer la catégorie d'âge d'un animal
+  // Determine the age category of an animal
   const getAgeCategory = (animal) => {
     if (!animal.age) return 'unknown';
     
     const ageNum = parseInt(animal.age);
     if (isNaN(ageNum)) return 'unknown';
     
-    const ranges = getAgeRanges(animal.animalType || animal.species);
+    const species = animal.speciesCode || 
+                   animal.speciesDetails?.code || 
+                   'unknown';
+    
+    const ranges = getAgeRanges(species);
     
     if (ageNum >= ranges.young.min && ageNum <= ranges.young.max) return 'young';
     if (ageNum >= ranges.adult.min && ageNum <= ranges.adult.max) return 'adult';
@@ -124,42 +138,51 @@ const AnimalCatalog = () => {
     return 'unknown';
   };
 
-  // Filtrer les animaux selon les critères
+  // Get species display name
+  const getSpeciesDisplayName = (code) => {
+    const speciesMap = {
+      'dog': 'Dog',
+      'cat': 'Cat',
+      'bird': 'Bird'
+    };
+    return speciesMap[code] || code;
+  };
+
+  // Filter animals according to criteria
   const filteredAnimals = animals.filter(animal => {
-    const animalType = animal.animalType || animal.species;
-    const animalName = animal.animalName || animal.name;
+    const animalSpecies = animal.speciesCode || animal.speciesDetails?.code || 'unknown';
+    const animalName = animal.animalName || '';
     
-    // Filtre par espèce
-    if (filters.species !== 'all' && animalType !== filters.species) return false;
+    // Filter by species
+    if (filters.species !== 'all' && animalSpecies !== filters.species) return false;
     
-    // Filtre par âge en utilisant la fonction getAgeCategory
+    // Filter by age using the getAgeCategory function
     if (filters.age !== 'all' && getAgeCategory(animal) !== filters.age) return false;
     
-    // Filtre par taille
-    if (filters.size !== 'all' && animal.size !== filters.size) return false;
+    // Filter by gender
+    if (filters.gender !== 'all' && animal.gender?.toLowerCase() !== filters.gender) return false;
     
-    // Recherche par terme
-    if (filters.searchTerm && !animalName?.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
+    // Search by term
+    if (filters.searchTerm && !animalName.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
     
     return true;
   });
 
-  // Extraire les options uniques pour les filtres
-  const speciesOptions = ['all', ...new Set(animals.map(animal => animal.animalType || animal.species).filter(Boolean))];
-  const sizeOptions = [...new Set(animals.map(animal => animal.size).filter(Boolean))];
+  // Get gender options
+  const genderOptions = ['all', 'male', 'female'];
 
   return (
     <div className={styles.animalCatalog}>
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
-          <h1>Animal Catalog </h1>
+          <h1>Animal Catalog</h1>
           <div className={styles.adoptionInfo}>
             <h2>Responsible Adoption</h2>
             <p>
               Adopting an animal is a long-term commitment that requires love, patience and responsibility. 
               Each animal deserves a loving home where it will be cared for and respected. Before adopting, 
-              Make sure you are prepared to offer the necessary time, space and resources to ensure the well-being 
-              of your new friend. Together, we can create Happy adoptions that last a lifetime.
+              make sure you are prepared to offer the necessary time, space and resources to ensure the well-being 
+              of your new friend. Together, we can create happy adoptions that last a lifetime.
             </p>
           </div>
         </div>
@@ -167,7 +190,7 @@ const AnimalCatalog = () => {
       
       <div className={styles.mainContent}>
         <div className={styles.sidebar}>
-          <h3>Filtre by</h3>
+          <h3>Filter by</h3>
           <div className={styles.filterGroup}>
             <label htmlFor="species-filter">Species:</label>
             <select 
@@ -175,33 +198,40 @@ const AnimalCatalog = () => {
               value={filters.species} 
               onChange={(e) => handleFilterChange('species', e.target.value)}
             >
-              <option value="all">all species</option>
+              <option value="all">All species</option>
               {speciesOptions.filter(species => species !== 'all').map(species => (
-                <option key={species} value={species}>{species}</option>
+                <option key={species} value={species}>
+                  {getSpeciesDisplayName(species)}
+                </option>
               ))}
             </select>
           </div>
           
           <div className={styles.filterGroup}>
             <label htmlFor="age-filter">Age:</label>
-            <select id="age-filter" value={filters.age} onChange={(e) => handleFilterChange('age', e.target.value)}>
+            <select 
+              id="age-filter" 
+              value={filters.age} 
+              onChange={(e) => handleFilterChange('age', e.target.value)}
+            >
               <option value="all">All ages</option>
-              <option value="young">young </option>
+              <option value="young">Young</option>
               <option value="adult">Adult</option>
-              <option value="senior">Senior </option>
+              <option value="senior">Senior</option>
             </select>
           </div>
           
           <div className={styles.filterGroup}>
-            <label htmlFor="size-filter">Size:</label>
+            <label htmlFor="gender-filter">Gender:</label>
             <select 
-              id="size-filter" 
-              value={filters.size} 
-              onChange={(e) => handleFilterChange('size', e.target.value)}
+              id="gender-filter" 
+              value={filters.gender} 
+              onChange={(e) => handleFilterChange('gender', e.target.value)}
             >
-              <option value="all">All sizes</option>
-              {sizeOptions.map(size => (
-                <option key={size} value={size}>{size}</option>
+              {genderOptions.map(gender => (
+                <option key={gender} value={gender}>
+                  {gender === 'all' ? 'All genders' : gender.charAt(0).toUpperCase() + gender.slice(1)}
+                </option>
               ))}
             </select>
           </div>
@@ -211,7 +241,7 @@ const AnimalCatalog = () => {
             <input 
               id="search-input"
               type="text" 
-              placeholder="Search by name.." 
+              placeholder="Search by name..." 
               value={filters.searchTerm} 
               onChange={handleSearch}
             />
@@ -220,12 +250,12 @@ const AnimalCatalog = () => {
         
         <div className={styles.contentArea}>
           {loading ? (
-            <div className={styles.loading}>Chargement des données...</div>
+            <div className={styles.loading}>Loading data...</div>
           ) : error ? (
             <div className={styles.error}>{error}</div>
           ) : (
             <>
-              {/* bare de filtrage horizontale par especes */}
+              {/* Horizontal species filter bar */}
               <div className={styles.speciesFilterBar}>
                 {speciesOptions.map(species => (
                   <button
@@ -233,7 +263,7 @@ const AnimalCatalog = () => {
                     className={`${styles.speciesFilterButton} ${filters.species === species ? styles.active : ''}`}
                     onClick={() => handleFilterChange('species', species)}
                   >
-                    {species === 'all' ? 'All species' : species}
+                    {species === 'all' ? 'All species' : getSpeciesDisplayName(species)}
                   </button>
                 ))}
               </div>
@@ -241,26 +271,37 @@ const AnimalCatalog = () => {
               <div className={styles.animalsGrid}>
                 {filteredAnimals.length > 0 ? (
                   filteredAnimals.map(animal => {
-                    const animalId = animal._id || animal.id;
-                    const animalName = animal.animalName || animal.name;
-                    const animalType = animal.animalType || animal.species;
-                    // Gérer les différentes structures de photos possibles
-                    const imageUrl = animal.photos && animal.photos.length > 0 
-                      ? (animal.photos[0].url || animal.photos[0]) 
-                      : animal.image || '/placeholder-animal.jpg';
+                    const animalId = animal._id;
+                    const animalName = animal.animalName || '';
+                    const animalSpecies = animal.speciesDetails?.name || 
+                                          getSpeciesDisplayName(animal.speciesCode) || 
+                                          'Unknown';
+                    
+                    // Handle different photo structures
+                    let imageUrl = '/placeholder-animal.jpg';
+                    if (animal.photos && animal.photos.length > 0) {
+                      if (typeof animal.photos[0] === 'string') {
+                        imageUrl = animal.photos[0];
+                      } else if (animal.photos[0].url) {
+                        imageUrl = animal.photos[0].url;
+                      }
+                    }
+                    
+                    const animalRace = animal.raceDetails?.name || 
+                                      (animal.raceCode ? animal.raceCode.replace(/^[^_]+_/, '') : null);
                     
                     return (
                       <div key={animalId} className={styles.animalCard}>
                         <Link href={`/catalogueanimal/${animalId}`} className={styles.animalLink}>
                           <div className={styles.animalImage}>
-                            <img src={imageUrl} alt={animalName} />
+                            <img src={imageUrl} alt={animalName || 'Animal'} />
                             <button 
                               className={`${styles.favoriteBtn} ${favorites[animalId] ? styles.active : ''}`}
                               onClick={(e) => {
-                                e.preventDefault(); // Empêche la navigation vers la page détail
+                                e.preventDefault(); // Prevent navigation to the detail page
                                 toggleFavorite(animalId);
                               }}
-                              aria-label={favorites[animalId] ? "Retirer des favoris" : "Ajouter aux favoris"}
+                              aria-label={favorites[animalId] ? "Remove from favorites" : "Add to favorites"}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={favorites[animalId] ? "red" : "none"} stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -268,13 +309,13 @@ const AnimalCatalog = () => {
                             </button>
                           </div>
                           <div className={styles.animalInfo}>
-                            <h3>{animalName}</h3>
+                            <h3>{animalName || 'Unnamed'}</h3>
                             <div className={styles.infoRow}>
-                              <p><strong>Species:</strong> {animalType}</p>
+                              <p><strong>Species:</strong> {animalSpecies}</p>
                               <p className={styles.gender}>
                                 <strong>Gender:</strong> 
                                 <span className={styles.genderIcon}>
-                                  {(animal.gender === 'male' || animal.gender === 'Male') ? (
+                                  {(animal.gender?.toLowerCase() === 'male') ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="blue" strokeWidth="2">
                                       <circle cx="10.5" cy="10.5" r="7.5" />
                                       <line x1="18" y1="18" x2="22" y2="22" />
@@ -288,14 +329,13 @@ const AnimalCatalog = () => {
                                       <line x1="9" y1="19" x2="15" y2="19" />
                                     </svg>
                                   )}
-                                  {animal.gender}
+                                  {animal.gender || 'Unknown'}
                                 </span>
                               </p>
                             </div>
-                            <p><strong>Age:</strong> {animal.age} ans</p>
-                            {animal.size && <p><strong>Size:</strong> {animal.size}</p>}
-                            {animal.race && <p><strong>Race:</strong> {animal.race}</p>}
-                            <p>{animal.description}</p>
+                            <p><strong>Age:</strong> {animal.age || 'Unknown'} {animal.age === '1' ? 'an' : 'ans'}</p>
+                            {animalRace && <p><strong>Race:</strong> {animalRace}</p>}
+                            <p className={styles.description}>{animal.description ? `${animal.description.substring(0, 100)}${animal.description.length > 100 ? '...' : ''}` : ''}</p>
                           </div>
                         </Link>
                       </div>

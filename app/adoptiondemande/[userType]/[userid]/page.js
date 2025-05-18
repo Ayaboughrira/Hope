@@ -1,12 +1,14 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import styles from '../styles/adoptiondemande.module.css';
+import styles from '../../../../styles/adoptionrequest.module.css';
 
-const AdoptionRequests = () => {
+const UserSpecificAdoptionRequests = () => {
   const router = useRouter();
+  const params = useParams();
+  const { userType, userId } = params;
   const { data: session, status } = useSession();
   
   const [requests, setRequests] = useState([]);
@@ -16,18 +18,35 @@ const AdoptionRequests = () => {
   const [responseMessage, setResponseMessage] = useState('');
   const [activeRequestId, setActiveRequestId] = useState(null);
   
+  // Traduire userType pour l'interface
+  const getUserTypeLabel = (type) => {
+    switch(type) {
+      case 'owner': return 'Propriétaire';
+      case 'vet': return 'Vétérinaire';
+      case 'association': return 'Association';
+      case 'store': return 'Animalrie';
+      default: return type;
+    }
+  };
+  
   useEffect(() => {
     // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
     if (status === 'unauthenticated') {
-      router.push('/auth/signun?callbackUrl=/adoptiondemande');
+      router.push(`/auth/signin?callbackUrl=/${userType}/${userId}/adoption-requests`);
       return;
     }
     
-    // Si le chargement de la session est terminé et que l'utilisateur est connecté
+    // Vérifier que l'utilisateur a le droit d'accéder à cette page
     if (status === 'authenticated') {
+      if (session.user.id !== userId) {
+        // Rediriger si ce n'est pas le bon utilisateur
+        router.push('/dashboard');
+        return;
+      }
+      
       fetchRequests(activeTab);
     }
-  }, [status, activeTab, router]);
+  }, [status, activeTab, router, session, userId, userType]);
   
   const fetchRequests = async (statusFilter) => {
     try {
@@ -118,7 +137,9 @@ const AdoptionRequests = () => {
   
   return (
     <div className={styles.adoptionRequestsContainer}>
-      <h1 className={styles.pageTitle}>Demandes d'adoption reçues</h1>
+      <h1 className={styles.pageTitle}>
+        Demandes d'adoption - {getUserTypeLabel(userType)}
+      </h1>
       
       <div className={styles.tabsContainer}>
         <button 
@@ -267,4 +288,4 @@ const AdoptionRequests = () => {
   );
 };
 
-export default AdoptionRequests;
+export default UserSpecificAdoptionRequests;

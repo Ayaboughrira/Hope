@@ -186,6 +186,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  margin: 90px auto 0;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
   display: flex;
@@ -230,6 +231,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
+  margin:405px auto 0;
   background: linear-gradient(90deg, #3a86ff, #8338ec);
   color: white;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);

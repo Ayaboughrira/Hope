@@ -302,3 +302,182 @@
     font-size: 0.9rem;
   }
 }
+
+
+
+
+
+
+
+/* styles pour la page Mes Animaux */
+
+/* Styles pour les boutons d'action */
+.actionButtons {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #e0e0e0;
+}
+
+.editButton, .deleteButton, .addButton {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.editButton {
+  background-color: #4b70e2;
+  color: white;
+  border: none;
+  flex: 1;
+}
+
+.editButton:hover {
+  background-color: #3a5bc0;
+}
+
+.deleteButton {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  flex: 1;
+}
+
+.deleteButton:hover {
+  background-color: #c0392b;
+}
+
+.addButton {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.addButton:hover {
+  background-color: #27ae60;
+}
+
+/* Styles pour le modal de confirmation */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancelButton, .confirmButton {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton {
+  background-color: #e0e0e0;
+  border: none;
+  color: #333;
+}
+
+.cancelButton:hover {
+  background-color: #d0d0d0;
+}
+
+.confirmButton {
+  background-color: #e74c3c;
+  border: none;
+  color: white;
+}
+
+.confirmButton:hover {
+  background-color: #c0392b;
+}
+
+/* Style pour le message de confirmation */
+.confirmationMessage {
+  background-color: #2ecc71;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  animation: fadeOut 3s forwards;
+  text-align: center;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Style pour l'affichage quand il n'y a pas d'annonces */
+.noResults {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.noResults p {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .modal {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .modalButtons {
+    flex-direction: column;
+  }
+  
+  .confirmButton, .cancelButton {
+    width: 100%;
+  }
+}

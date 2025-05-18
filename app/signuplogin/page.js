@@ -36,8 +36,8 @@ const Signup = () => {
   // Validation patterns
   const validationPatterns = {
     email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    phone: /^(0)(5|6|7)[0-9]{8}$/,  // Algerian mobile numbers (05, 06, 07)
-    licenseNumber: /^ONV-[0-9]{2}-[0-9]{4}$/  // Format ONV-xx-yyyy where xx and yyyy are digits
+    phone: /^(0)(5|6|7)[0-9]{8}$/,  
+    licenseNumber: /^ONV-[0-9]{2}-[0-9]{4}$/  
   };
 
   // Validation function
@@ -158,9 +158,9 @@ const Signup = () => {
       });
       
       if (result.error) {
-        setError('incorrect Id. Try again.');
+        setError('Email ou mot de passe incorrect');
       } else {
-        // La redirection sera gérée par useSession dans useEffect
+        // Redirection vers la page d'accueil
         router.push('/');
       }
     } catch (err) {
@@ -170,6 +170,7 @@ const Signup = () => {
       setLoading(false);
     }
   };
+
 
   // Handle signup submission
   const handleSignupSubmit = async (e) => {

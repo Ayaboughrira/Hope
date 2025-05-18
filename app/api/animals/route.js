@@ -1,3 +1,4 @@
+// app/api/animals/route.js
 import { MongoClient, ObjectId } from 'mongodb';
 import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
@@ -82,22 +83,6 @@ async function isAuthenticated(request) {
   };
 }
 
-// Fonction pour mapper le type d'utilisateur aux noms de collection
-function mapUserTypeToCollection(userType) {
-  switch (userType) {
-    case 'owner':
-      return 'user';
-    case 'vet':
-      return 'veterinaire';
-    case 'association':
-      return 'association';
-    case 'store':
-      return 'animalerie';
-    default:
-      return userType;
-  }
-}
-
 export async function POST(request) {
   try {
     // Vérifier l'authentification
@@ -114,19 +99,82 @@ export async function POST(request) {
     // Se connecter à MongoDB
     const db = await connectDB();
     
-    // Créer la collection si elle n'existe pas
-    if (!(await db.listCollections({ name: 'animals' }).toArray()).length) {
-      await db.createCollection('animals');
+    // Créer les collections si elles n'existent pas
+    for (const collection of ['animals', 'species', 'races']) {
+      if (!(await db.listCollections({ name: collection }).toArray()).length) {
+        await db.createCollection(collection);
+      }
     }
     
     // Récupérer les données du formulaire multipart
     const formData = await request.formData();
     
+    // Récupérer les IDs de l'espèce et de la race
+    const speciesId = formData.get('speciesId');
+    const raceId = formData.get('raceId');
+    
+    // Vérifier et récupérer l'espèce (ou la créer si elle n'existe pas)
+    const speciesCollection = db.collection('species');
+    let speciesObjectId;
+    let speciesDoc;
+    
+    // Recherche l'espèce par son code (dog, cat, etc.)
+    speciesDoc = await speciesCollection.findOne({ code: speciesId });
+    
+    if (!speciesDoc) {
+      // Si l'espèce n'existe pas, on la crée
+      const speciesName = getSpeciesName(speciesId);
+      
+      const insertResult = await speciesCollection.insertOne({
+        code: speciesId,
+        name: speciesName,
+        createdAt: new Date()
+      });
+      
+      speciesObjectId = insertResult.insertedId;
+      speciesDoc = { _id: speciesObjectId, code: speciesId, name: speciesName };
+    } else {
+      speciesObjectId = speciesDoc._id;
+    }
+    
+    // Vérifier et récupérer la race (ou la créer si elle n'existe pas)
+    let raceObjectId = null;
+    
+    if (raceId) {
+      const racesCollection = db.collection('races');
+      let raceDoc;
+      
+      // Recherche la race par son code (dog_labrador, etc.)
+      raceDoc = await racesCollection.findOne({ 
+        code: raceId,
+        speciesCode: speciesId
+      });
+      
+      if (!raceDoc) {
+        // Si la race n'existe pas, on la crée
+        const raceName = getRaceName(raceId);
+        
+        const insertResult = await racesCollection.insertOne({
+          code: raceId,
+          name: raceName,
+          speciesCode: speciesId,
+          speciesId: speciesObjectId,
+          createdAt: new Date()
+        });
+        
+        raceObjectId = insertResult.insertedId;
+      } else {
+        raceObjectId = raceDoc._id;
+      }
+    }
+    
     // Préparer les données pour l'animal
     const animalData = {
       animalName: formData.get('animalName'),
-      animalType: formData.get('animalType'),
-      race: formData.get('race'),
+      speciesId: speciesObjectId,  // Utiliser l'ObjectId MongoDB de l'espèce
+      speciesCode: speciesId,      // Conserver aussi le code d'origine pour référence
+      raceId: raceObjectId,        // Utiliser l'ObjectId MongoDB de la race
+      raceCode: raceId || null,    // Conserver aussi le code d'origine pour référence
       age: formData.get('age'),
       gender: formData.get('gender'),
       description: formData.get('description'),
@@ -197,16 +245,58 @@ export async function POST(request) {
   }
 }
 
-// Récupérer toutes les annonces
+// Fonction auxiliaire pour obtenir le nom de l'espèce à partir de son code
+function getSpeciesName(speciesCode) {
+  const speciesMap = {
+    'dog': 'Chien',
+    'cat': 'Chat',
+    'bird': 'Oiseau'
+  };
+  return speciesMap[speciesCode] || speciesCode;
+}
+
+// Fonction auxiliaire pour obtenir le nom de la race à partir de son code
+function getRaceName(raceCode) {
+  const raceMap = {
+    // Races de chiens
+    'dog_labrador': 'Labrador Retriever',
+    'dog_germanshepherd': 'Berger Allemand',
+    'dog_goldenretriever': 'Golden Retriever',
+    'dog_bulldog': 'Bulldog',
+    'dog_beagle': 'Beagle',
+    'dog_poodle': 'Caniche',
+    
+    // Races de chats
+    'cat_persian': 'Persan',
+    'cat_siamese': 'Siamois',
+    'cat_mainecoon': 'Maine Coon',
+    'cat_ragdoll': 'Ragdoll',
+    'cat_bengal': 'Bengal',
+    'cat_sphynx': 'Sphynx',
+    
+    // Races d'oiseaux
+    'bird_canary': 'Canari',
+    'bird_parakeet': 'Perruche',
+    'bird_cockatiel': 'Cockatiel',
+    'bird_lovebird': 'Inséparable',
+    'bird_finch': 'Pinson',
+    'bird_parrot': 'Perroquet'
+  };
+  return raceMap[raceCode] || raceCode;
+}
+
+// Récupérer toutes les annonces avec informations détaillées sur l'espèce et la race
 export async function GET(request) {
   try {
     const db = await connectDB();
     const animalsCollection = db.collection('animals');
     
-    // Vérifier si un filtre est appliqué pour le type de publicateur
+    // Vérifier si un filtre est appliqué
     const { searchParams } = new URL(request.url);
     const publishType = searchParams.get('publishType');
     const publishId = searchParams.get('publishId');
+    const speciesId = searchParams.get('speciesId');
+    const raceId = searchParams.get('raceId');
     
     let query = {};
     
@@ -219,8 +309,58 @@ export async function GET(request) {
       query.publishId = publishId;
     }
     
-    // Récupérer les animaux depuis la collection avec les filtres
-    const animals = await animalsCollection.find(query).toArray();
+    if (speciesId) {
+      // Recherche par code d'espèce ou par ObjectId si c'est un format valide
+      if (ObjectId.isValid(speciesId)) {
+        query.speciesId = new ObjectId(speciesId);
+      } else {
+        query.speciesCode = speciesId;
+      }
+    }
+    
+    if (raceId) {
+      // Recherche par code de race ou par ObjectId si c'est un format valide
+      if (ObjectId.isValid(raceId)) {
+        query.raceId = new ObjectId(raceId);
+      } else {
+        query.raceCode = raceId;
+      }
+    }
+    
+    // Pipeline d'agrégation pour joindre les informations d'espèce et de race
+    const pipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: 'species',
+          localField: 'speciesId',
+          foreignField: '_id',
+          as: 'speciesDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$speciesDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'races',
+          localField: 'raceId',
+          foreignField: '_id',
+          as: 'raceDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$raceDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    ];
+    
+    const animals = await animalsCollection.aggregate(pipeline).toArray();
     
     return NextResponse.json({ 
       success: true, 
@@ -251,11 +391,45 @@ export async function GET_MY_ANIMALS(request) {
     const db = await connectDB();
     const animalsCollection = db.collection('animals');
     
-    // Récupérer les annonces publiées par cet utilisateur
-    const animals = await animalsCollection.find({ 
-      publishType: user.userType,
-      publishId: user.id
-    }).toArray();
+    // Pipeline d'agrégation pour joindre les informations d'espèce et de race
+    const pipeline = [
+      { 
+        $match: { 
+          publishType: user.userType,
+          publishId: user.id
+        } 
+      },
+      {
+        $lookup: {
+          from: 'species',
+          localField: 'speciesId',
+          foreignField: '_id',
+          as: 'speciesDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$speciesDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'races',
+          localField: 'raceId',
+          foreignField: '_id',
+          as: 'raceDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$raceDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    ];
+    
+    const animals = await animalsCollection.aggregate(pipeline).toArray();
     
     return NextResponse.json({ 
       success: true, 

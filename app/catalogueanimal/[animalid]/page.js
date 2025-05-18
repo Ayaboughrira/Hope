@@ -19,6 +19,16 @@ const AnimalDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [adoptionMessage, setAdoptionMessage] = useState('');
 
+  // Fonction pour obtenir le nom d'affichage d'une espèce
+  const getSpeciesDisplayName = (code) => {
+    const speciesMap = {
+      'dog': 'Chien',
+      'cat': 'Chat',
+      'bird': 'Oiseau'
+    };
+    return speciesMap[code] || code;
+  };
+
   useEffect(() => {
     // Vérifier si l'ID est disponible (important pour le SSR)
     if (!id) return;
@@ -37,6 +47,14 @@ const AnimalDetail = () => {
         const { success, data } = await response.json();
         
         if (success && data) {
+          // Extraire les informations des relations d'espèce et de race
+          const speciesName = data.speciesDetails?.name || 
+                            getSpeciesDisplayName(data.speciesCode) || 
+                            'Espèce inconnue';
+          
+          const raceName = data.raceDetails?.name || 
+                          (data.raceCode ? data.raceCode.replace(/^[^_]+_/, '') : null);
+
           // Préparer les images pour l'affichage dans le carousel
           const images = []; 
           
@@ -61,7 +79,9 @@ const AnimalDetail = () => {
           const formattedAnimal = {
             ...data,
             name: data.animalName || data.name,
-            species: data.animalType || data.species,
+            species: speciesName,
+            race: raceName,
+            speciesCode: data.speciesCode || data.speciesDetails?.code,
             images: limitedImages
           };
           
@@ -126,7 +146,7 @@ const AnimalDetail = () => {
   const handleContactOwner = () => {
     // Si l'utilisateur n'est pas connecté, le rediriger vers la page de connexion
     if (status !== 'authenticated') {
-      router.push(`/auth/signin?callbackUrl=/animals/${id}`);
+      router.push(`/signuplogin?callbackUrl=/animals/${id}`);
       return;
     }
     
@@ -149,14 +169,12 @@ const AnimalDetail = () => {
         },
         body: JSON.stringify({
           animalId: id,
-          ownerId: animal.ownerId,
-          requesterId: session.user.id,
-          requesterEmail: session.user.email,
-          requesterName: session.user.name,
+          ownerId: animal.ownerId || animal.publishId,
+          ownerType: animal.ownerType || animal.publishType, 
           message: adoptionMessage,
           animalName: animal.name,
           animalSpecies: animal.species,
-          animalImage: animal.images[0]
+          animalImage: animal.images && animal.images.length > 0 ? animal.images[0] : null
         }),
       });
       
@@ -180,14 +198,15 @@ const AnimalDetail = () => {
   const handleEmailContact = () => {
     // Vérifier si l'animal existe d'abord
     if (!animal) {
-      console.log("Aucun animal trouvé");
+      console.log("No animal found");
       return;
     }
     
-    console.log("Tentative d'envoi d'email au propriétaire:", animal.ownerEmail);
+    const ownerEmail = animal.ownerEmail || (animal.publishEmail || null);
+    console.log("Tentative d'envoi d'email au propriétaire:", ownerEmail);
     
     // Vérifier explicitement si l'email du propriétaire existe
-    if (animal.ownerEmail) {
+    if (ownerEmail) {
       // Créer un sujet d'email formaté
       const emailSubject = `Intérêt pour l'adoption de ${animal.name}`;
       
@@ -214,14 +233,14 @@ const AnimalDetail = () => {
       const encodedBody = encodeURIComponent(emailBody);
       
       // Ouvrir le client mail avec le template
-      const mailtoUrl = `mailto:${animal.ownerEmail}?subject=${encodedSubject}&body=${encodedBody}`;
+      const mailtoUrl = `mailto:${ownerEmail}?subject=${encodedSubject}&body=${encodedBody}`;
       
       // Utiliser une nouvelle façon d'ouvrir le client mail
       try {
         window.location.href = mailtoUrl;
       } catch (error) {
         console.error("Erreur lors de l'ouverture du client email:", error);
-        alert("Une erreur s'est produite lors de l'ouverture de votre client email. Veuillez essayer à nouveau ou copier l'adresse: " + animal.ownerEmail);
+        alert("Une erreur s'est produite lors de l'ouverture de votre client email. Veuillez essayer à nouveau ou copier l'adresse: " + ownerEmail);
       }
     } else {
       // Message d'alerte si pas d'email disponible
@@ -231,7 +250,7 @@ const AnimalDetail = () => {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Chargement des détails de l'animal...</div>;
+    return <div className={styles.loading}>Loading the animal detail...</div>;
   }
 
   if (error) {
@@ -239,7 +258,7 @@ const AnimalDetail = () => {
   }
 
   if (!animal) {
-    return <div className={styles.notFound}>Animal non trouvé</div>;
+    return <div className={styles.notFound}>No animal found</div>;
   }
   
   return (
@@ -324,7 +343,7 @@ const AnimalDetail = () => {
             
             {animal.race && (
               <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Race:</span>
+                <span className={styles.detailLabel}>Breed:</span>
                 <span className={styles.detailValue}>{animal.race}</span>
               </div>
             )}
@@ -333,7 +352,7 @@ const AnimalDetail = () => {
               <span className={styles.detailLabel}>Gender:</span>
               <span className={styles.detailValue}>
                 <span className={styles.genderIcon}>
-                  {(animal.gender === 'male' || animal.gender === 'Male') ? (
+                  {(animal.gender?.toLowerCase() === 'male') ? (
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="blue" strokeWidth="2">
                       <circle cx="10.5" cy="10.5" r="7.5" />
                       <line x1="18" y1="18" x2="22" y2="22" />
@@ -354,7 +373,7 @@ const AnimalDetail = () => {
             
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Age:</span>
-              <span className={styles.detailValue}>{animal.age} ans</span>
+              <span className={styles.detailValue}>{animal.age} years</span>
             </div>
             
             {animal.size && (
@@ -383,12 +402,12 @@ const AnimalDetail = () => {
             
             <div className={styles.contactButtons}>
               <button className={styles.contactButton} onClick={handleContactOwner}>
-                Demande d'adoption
+                Adoption request
               </button>
               
               {animal.ownerEmail && (
                 <button className={styles.emailButton} onClick={handleEmailContact}>
-                  Contact par email
+                  Contact by email
                 </button>
               )}
             </div>
@@ -403,7 +422,7 @@ const AnimalDetail = () => {
           
           <form onSubmit={handleAdoptionRequest}>
             <div className={styles.formGroup}>
-              <label htmlFor="adoptionMessage">Message pour le propriétaire:</label>
+              <label htmlFor="adoptionMessage">Message to Owner:</label>
               <textarea 
                 id="adoptionMessage"
                 className={styles.adoptionMessage}
@@ -421,14 +440,14 @@ const AnimalDetail = () => {
                 className={styles.cancelButton}
                 onClick={() => document.getElementById('adoptionModal').close()}
               >
-                Annuler
+                Cancel
               </button>
               <button 
                 type="submit" 
                 className={styles.submitButton}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
+                {isSubmitting ? 'Sending in progress...' : 'Send request'}
               </button>
             </div>
           </form>

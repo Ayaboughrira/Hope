@@ -5,6 +5,39 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import styles from '../styles/annonceanimal.module.css';
 
+// Données prédéfinies pour les espèces et races
+const predefinedSpecies = [
+  { _id: 'dog', name: 'Dogs' },
+  { _id: 'cat', name: 'Cats' },
+  { _id: 'bird', name: 'Birds' }
+];
+
+const predefinedRaces = [
+  // Races de chiens
+  { _id: 'dog_labrador', name: 'Labrador Retriever', speciesId: 'dog' },
+  { _id: 'dog_germanshepherd', name: 'Berger Allemand', speciesId: 'dog' },
+  { _id: 'dog_goldenretriever', name: 'Golden Retriever', speciesId: 'dog' },
+  { _id: 'dog_bulldog', name: 'Bulldog', speciesId: 'dog' },
+  { _id: 'dog_beagle', name: 'Beagle', speciesId: 'dog' },
+  { _id: 'dog_poodle', name: 'Caniche', speciesId: 'dog' },
+  
+  // Races de chats
+  { _id: 'cat_persian', name: 'Persan', speciesId: 'cat' },
+  { _id: 'cat_siamese', name: 'Siamois', speciesId: 'cat' },
+  { _id: 'cat_mainecoon', name: 'Maine Coon', speciesId: 'cat' },
+  { _id: 'cat_ragdoll', name: 'Ragdoll', speciesId: 'cat' },
+  { _id: 'cat_bengal', name: 'Bengal', speciesId: 'cat' },
+  { _id: 'cat_sphynx', name: 'Sphynx', speciesId: 'cat' },
+  
+  // Races d'oiseaux
+  { _id: 'bird_canary', name: 'Canari', speciesId: 'bird' },
+  { _id: 'bird_parakeet', name: 'Perruche', speciesId: 'bird' },
+  { _id: 'bird_cockatiel', name: 'Cockatiel', speciesId: 'bird' },
+  { _id: 'bird_lovebird', name: 'Inséparable', speciesId: 'bird' },
+  { _id: 'bird_finch', name: 'Pinson', speciesId: 'bird' },
+  { _id: 'bird_parrot', name: 'Perroquet', speciesId: 'bird' }
+];
+
 const AnimalForm = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -12,13 +45,11 @@ const AnimalForm = () => {
   const [formData, setFormData] = useState({
     // Info sur l'animal
     animalName: '',
-    animalType: '',
-    race: '',
+    speciesId: '', // Remplacé animalType par speciesId
+    raceId: '',    // Remplacé race par raceId
     age: '',
     gender: '',
     description: '',
-    publishType: '',
-    publishId:'',
     
     // Info sur le propriétaire - seront pré-remplies si l'utilisateur est connecté
     ownerName: '',
@@ -27,10 +58,16 @@ const AnimalForm = () => {
     ownerAddress: '',
   });
   
+  // États pour les listes déroulantes
+  const [species, setSpecies] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [filteredRaces, setFilteredRaces] = useState([]);
+  
   const [photos, setPhotos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   // État pour la gestion des étapes
   const [currentStep, setCurrentStep] = useState(1);
@@ -56,7 +93,23 @@ const AnimalForm = () => {
         ownerEmail: session.user.email || '',
       }));
     }
+    
+    // Charger les espèces et les races depuis les données prédéfinies
+    setSpecies(predefinedSpecies);
+    setRaces(predefinedRaces);
+    setIsLoading(false);
+    
   }, [session, status, router]);
+  
+  // Filtrer les races en fonction de l'espèce sélectionnée
+  useEffect(() => {
+    if (formData.speciesId) {
+      const filtered = races.filter(race => race.speciesId === formData.speciesId);
+      setFilteredRaces(filtered);
+    } else {
+      setFilteredRaces([]);
+    }
+  }, [formData.speciesId, races]);
   
   // Mise à jour des classes des sections lors du changement d'étape
   useEffect(() => {
@@ -88,6 +141,14 @@ const AnimalForm = () => {
       ...formData,
       [name]: value
     });
+    
+    // Réinitialiser raceId si l'espèce change
+    if (name === 'speciesId') {
+      setFormData(prev => ({
+        ...prev,
+        raceId: ''
+      }));
+    }
   };
   
   const handlePhotoUpload = (e) => {
@@ -140,7 +201,7 @@ const AnimalForm = () => {
     
     try {
       // Validations
-      if (!formData.animalName || !formData.animalType || !formData.ownerName || !formData.ownerEmail || !formData.ownerPhone) {
+      if (!formData.animalName || !formData.speciesId || !formData.ownerName || !formData.ownerEmail || !formData.ownerPhone) {
         throw new Error('Veuillez remplir tous les champs obligatoires.');
       }
       
@@ -154,6 +215,12 @@ const AnimalForm = () => {
       // Ajouter les données textuelles
       for (const [key, value] of Object.entries(formData)) {
         formDataToSubmit.append(key, value);
+      }
+      
+      // Ajouter les informations sur le publicateur depuis la session
+      if (session && session.user) {
+        formDataToSubmit.append('publishType', session.user.userType || 'individual');
+        formDataToSubmit.append('publishId', session.user.id);
       }
       
       // Ajouter les photos
@@ -185,8 +252,8 @@ const AnimalForm = () => {
       setTimeout(() => {
         setFormData({
           animalName: '',
-          animalType: '',
-          race: '',
+          speciesId: '',
+          raceId: '',
           age: '',
           gender: '',
           description: '',
@@ -215,15 +282,15 @@ const AnimalForm = () => {
     }
   };
   
-  // Afficher un message de chargement pendant la vérification de session
-  if (status === 'loading') {
-    return <div className={styles['loading']}>Chargement...</div>;
+  // Afficher un message de chargement pendant la vérification de session ou le chargement des données
+  if (status === 'loading' || isLoading) {
+    return <div className={styles['loading']}>Loading...</div>;
   }
   
   // Le composant principal ne sera rendu que si l'utilisateur est connecté
   return (
     <div className={styles['animal-form-container']}>
-      <h1 className={styles.heading}>Publier une annonce pour votre animal</h1>
+      <h1 className={styles.heading}>Post your pet for adoption</h1>
       
       {error && (
         <div className={styles['error-message']}>
@@ -253,7 +320,7 @@ const AnimalForm = () => {
         <div className={styles['success-modal']}>
           <div className={styles['modal-content']}>
             <div className={styles['success-icon']}>✓</div>
-            <p>Votre annonce a été publiée avec succès !</p>
+            <p>Your annonce was successfully published !</p>
           </div>
         </div>
       )}
@@ -261,14 +328,14 @@ const AnimalForm = () => {
       <form onSubmit={handleSubmit}>
         {/* Section Informations sur l'animal */}
         <div className={`${styles['form-section']} ${currentStep === 1 ? styles.active : ''}`}>
-          <h3 className={styles['section-title']}>Informations sur l'animal :</h3>
+          <h3 className={styles['section-title']}>Animal informations :</h3>
           
           <div className={styles['form-group']}>
             <input
               type="text"
               id="animalName"
               name="animalName"
-              placeholder='Nom de animal'
+              placeholder='Animal name'
               value={formData.animalName}
               onChange={handleChange}
               required
@@ -278,29 +345,38 @@ const AnimalForm = () => {
           
           <div className={styles['form-group']}>
             <select
-              id="animalType"
-              name="animalType"
-              value={formData.animalType}
+              id="speciesId"
+              name="speciesId"
+              value={formData.speciesId}
               onChange={handleChange}
               required
               className={styles['select-field']}
             >
-              <option value="">Type d'animal</option>
-              <option value="cat">Chat</option>
-              <option value="dog">Chien</option>
+              <option value="">Select a species</option>
+              {species.map(specie => (
+                <option key={specie._id} value={specie._id}>
+                  {specie.name}
+                </option>
+              ))}
             </select>
           </div>
           
           <div className={styles['form-group']}>
-            <input
-              type="text" 
-              id="race"
-              name="race"
-              placeholder='Race'
-              value={formData.race}
+            <select
+              id="raceId"
+              name="raceId"
+              value={formData.raceId}
               onChange={handleChange}
-              className={styles['input-field']}
-            />
+              className={styles['select-field']}
+              disabled={!formData.speciesId || filteredRaces.length === 0}
+            >
+              <option value="">Select a breed </option>
+              {filteredRaces.map(race => (
+                <option key={race._id} value={race._id}>
+                  {race.name}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div className={styles['form-row']}>
@@ -309,7 +385,7 @@ const AnimalForm = () => {
                 type="text"
                 id="age"
                 name="age"
-                placeholder='Âge'
+                placeholder='Age'
                 value={formData.age}
                 onChange={handleChange}
                 className={styles['input-field']}
@@ -324,9 +400,9 @@ const AnimalForm = () => {
                 onChange={handleChange}
                 className={styles['select-field']}
               >
-                <option value="">Genre</option>
-                <option value="male">Mâle</option>
-                <option value="female">Femelle</option>
+                <option value="">Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
               </select>
             </div>
           </div>
@@ -344,7 +420,7 @@ const AnimalForm = () => {
           </div>
           
           <div className={styles['form-navigation']}>
-            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Suivant</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Next</button>
           </div>
         </div>
         
@@ -361,7 +437,7 @@ const AnimalForm = () => {
                 onClick={() => fileInputRef.current.click()}
                 disabled={photos.length >= 5}
               >
-                Ajouter des photos ({5 - photos.length} restantes)
+               Upload photos ({5 - photos.length} remaining)
               </button>
               <input
                 type="file"
@@ -392,21 +468,21 @@ const AnimalForm = () => {
           </div>
           
           <div className={styles['form-navigation']}>
-            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Précédent</button>
-            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Suivant</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Back</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.next}`} onClick={nextStep}>Next</button>
           </div>
         </div>
         
         {/* Section Informations du propriétaire */}
         <div className={`${styles['form-section']} ${currentStep === 3 ? styles.active : ''} ${currentStep === 3 ? styles['last-step'] : ''}`}>
-          <h3 className={styles['section-title']}>Informations de contact :</h3>
+          <h3 className={styles['section-title']}> Contact informations :</h3>
           
           <div className={styles['form-group']}>
             <input
               type="text"
               id="ownerName"
               name="ownerName"
-              placeholder='Nom complet'
+              placeholder='Owner name'
               value={formData.ownerName}
               onChange={handleChange}
               required
@@ -433,7 +509,7 @@ const AnimalForm = () => {
                 type="tel"
                 id="ownerPhone"
                 name="ownerPhone"
-                placeholder='Téléphone'
+                placeholder='Phone number'
                 value={formData.ownerPhone}
                 onChange={handleChange}
                 required
@@ -447,7 +523,7 @@ const AnimalForm = () => {
               type="text"
               id="ownerAddress"
               name="ownerAddress"
-              placeholder='Adresse'
+              placeholder='Address'
               value={formData.ownerAddress}
               onChange={handleChange}
               className={styles['input-field']}
@@ -455,7 +531,7 @@ const AnimalForm = () => {
           </div>
           
           <div className={styles['form-navigation']}>
-            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Précédent</button>
+            <button type="button" className={`${styles['nav-btn']} ${styles.prev}`} onClick={prevStep}>Back</button>
           </div>
           
           <div className={styles['form-actions']}>
@@ -464,7 +540,7 @@ const AnimalForm = () => {
               className={styles['submit-btn']}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Publication en cours...' : 'Publier l\'annonce'}
+              {isSubmitting ? 'Publication in progress...' : 'Publish '}
             </button>
           </div>
         </div>

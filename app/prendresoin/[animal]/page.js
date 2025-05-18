@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect , use } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { notFound } from 'next/navigation';
 import styles from '../../styles/prendresoin.module.css';
 
@@ -14,10 +14,9 @@ export default function AnimalArticles({ params }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [animalType, setAnimalType] = useState(null);
 
-
   // Initialiser animalType à partir des params
   useEffect(() => {
-    if (resolvedParams &&resolvedParams.animal) {
+    if (resolvedParams && resolvedParams.animal) {
       setAnimalType(resolvedParams.animal);
     }
   }, [resolvedParams]);
@@ -29,7 +28,7 @@ export default function AnimalArticles({ params }) {
     try {
       setLoading(true);
       
-      console.log("Chargement des articles pour:", animal, "type:", type);
+      console.log("Load articles for:", animal, "type:", type);
       
       // Construction de l'URL API avec les paramètres
       const apiUrl = `/api/article/${animal}${type !== 'all' ? `?type=${type}` : ''}`;
@@ -58,7 +57,7 @@ export default function AnimalArticles({ params }) {
         }
       }
     } catch (error) {
-      console.error("Erreur lors de la récupération des articles:", error);
+      console.error("Error while retrieving articles:", error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +74,7 @@ export default function AnimalArticles({ params }) {
         'dogs': 'Dogs',
         'birds': 'Birds'
       };
-      document.title = `Articles sur les ${animalNames[animalType] || animalType} | PetCare`; // hna le titre de la page  ???????
+      document.title = `Articles for  ${animalNames[animalType] || animalType} | PetCare`;
     }
   }, [animalType, filterType]);
   
@@ -109,7 +108,7 @@ export default function AnimalArticles({ params }) {
 
   // Formater le contenu de l'article avec des sauts de paragraphe
   const formatContent = (contenu) => {
-    if (!contenu) return <p>Contenu non disponible</p>;
+    if (!contenu) return <p>Not available content </p>;
     
     // Si le contenu est une chaîne, le diviser en paragraphes
     if (typeof contenu === 'string') {
@@ -121,13 +120,29 @@ export default function AnimalArticles({ params }) {
     return <p>{contenu}</p>;
   };
 
+  // Fonction pour afficher le nom de l'auteur selon son type
+  const displayAuthorInfo = (article) => {
+    if (!article.auteurId || !article.auteurType) {
+      return "Auteur inconnu";
+    }
+    
+    switch (article.auteurType) {
+      case 'vet':
+        return `Veterinairian   ${article.clinicName || ''}`;
+      case 'association':
+        return `Association  ${article.nomAssociation || ''}`;
+      default:
+        return "Auteur";
+    }
+  };
+
   if (loading) {
-    return <div className={styles.loadingContainer}>Load Articles...</div>;
+    return <div className={styles.loadingContainer}>Load articles...</div>;
   }
 
   return (
     <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>Articles for the {animalNames[animal]}</h1>
+      <h1 className={styles.pageTitle}>Articles for {animalNames[animal]}</h1>
       
       <div className={styles.filterContainer}>
         <button 
@@ -152,7 +167,7 @@ export default function AnimalArticles({ params }) {
           className={`${styles.filterButton} ${filterType === 'health' ? styles.active : ''}`}
           onClick={() => handleFilterChange('health')}
         >
-         Health 
+          Health
         </button>
       </div>
       
@@ -169,7 +184,7 @@ export default function AnimalArticles({ params }) {
                 <p className={styles.articleExcerpt}>{article.excerpt}</p>
                 <div className={styles.articleMeta}>
                   <span className={styles.articleType}>{article.typeArticle}</span>
-                  <span className={styles.articleAuthor}>Author: Dr. {article.author}</span>
+                  <span className={styles.articleAuthor}>Author: {displayAuthorInfo(article)}</span>
                 </div>
               </div>
             </div>
@@ -189,7 +204,14 @@ export default function AnimalArticles({ params }) {
             <h2 className={styles.modalTitle}>{selectedArticle.titre}</h2>
             <div className={styles.modalMeta}>
               <span className={styles.modalType}>{selectedArticle.typeArticle}</span>
-
+              <span className={styles.modalAuthor}>  By: {displayAuthorInfo(selectedArticle)}</span>
+              <span className={styles.modalDate}>
+                {new Date(selectedArticle.dateCreation).toLocaleDateString('en-US', { 
+                  day: 'numeric', 
+                  month: 'long', 
+                  year: 'numeric' 
+                })}
+              </span>
             </div>
             <div className={styles.modalBody}>
               {formatContent(selectedArticle.contenu || selectedArticle.excerpt)}

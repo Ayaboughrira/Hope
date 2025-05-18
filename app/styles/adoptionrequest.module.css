@@ -1,0 +1,313 @@
+/* styles/adoptionrequests.module.css */
+.adoptionRequestsContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.tabsContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabButton {
+  padding: 0.75rem 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #666;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tabButton:hover {
+  color: #333;
+}
+
+.activeTab {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #ff6b6b;
+}
+
+.loading, .error, .emptyState {
+  text-align: center;
+  padding: 3rem 0;
+  color: #666;
+}
+
+.error {
+  color: #e53935;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.requestCard {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.requestCard:hover {
+  transform: translateY(-5px);
+}
+
+.requestHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.animalInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.animalThumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.animalInfo h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.animalSpecies {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.requestStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.statusBadge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pending {
+  background-color: #fff8e1;
+  color: #ffa000;
+}
+
+.accepted {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.rejected {
+  background-color: #fbe9e7;
+  color: #d32f2f;
+}
+
+.requestDate {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.requestBody {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.requesterInfo, .requestMessage, .responseMessage {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.requesterInfo h4, .requestMessage h4, .responseMessage h4 {
+  margin: 0 0 0.5rem 0;
+  color: #555;
+  font-size: 1rem;
+}
+
+.requestActions {
+  padding: 0 1rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.respondButton {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.respondButton:hover {
+  background-color: #ff5252;
+}
+
+.viewAnimalLink {
+  display: block;
+  text-align: center;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.viewAnimalLink:hover {
+  color: #ff6b6b;
+}
+
+/* Modal styles */
+.responseModal {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  padding: 0;
+  width: 500px;
+  max-width: 90%;
+}
+
+.responseModal::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalContent {
+  padding: 2rem;
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  color: #333;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.responseMessageInput {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.acceptButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.acceptButton:hover {
+  background-color: #43a047;
+}
+
+.rejectButton {
+  background-color: #f44336;
+  color: white;
+}
+
+.rejectButton:hover {
+  background-color: #e53935;
+}
+
+.cancelButton {
+  flex: 1;
+  padding: 0.8rem;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+  transition: background-color 0.3s ease;
+}
+
+.cancelButton:hover {
+  background-color: #d5d5d5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .requestHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .requestStatus {
+    align-items: flex-start;
+    margin-top: 0.5rem;
+  }
+  
+  .modalButtons {
+    flex-direction: column;
+  }
+}

@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { FaUser, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaTools, FaBars, FaHeart, FaCalendarAlt, FaPaw, FaShoppingCart, FaStore, FaHandHoldingHeart } from 'react-icons/fa';
+import { FaUser, FaTimes, FaHome, FaInfoCircle , FaEnvelope, FaTools, FaBars, FaHeart, FaCalendarAlt, FaPaw, FaShoppingCart, FaStore, FaHandHoldingHeart } from 'react-icons/fa';
 import styles from '../styles/navbar.module.css';
 
 const Navbar = () => {
@@ -83,7 +84,7 @@ const Navbar = () => {
     if (!session?.user) return [];
     
     const commonLinks = [
-      { label: 'My favorites', href: '/favorites', icon: <FaHeart /> },
+      { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
       { label: 'Edit my profil', href: `/profile/${session.user.userType}/${session.user.id}`, icon: <FaUser /> },
     ];
     
@@ -98,14 +99,14 @@ const Navbar = () => {
         return [
           ...commonLinks,
           { label: 'Mes patients', href: '/my-patients', icon: <FaPaw /> },
-          { label: 'Calendrier', href: '/calendar', icon: <FaCalendarAlt /> },
+          { label: 'Publish Articles', href: '/articleform', icon: <FaCalendarAlt /> },
         ];
       case 'association':
         return [
           ...commonLinks,
-          { label: 'Gérer les animaux', href: '/manage-animals', icon: <FaPaw /> },
-          { label: 'Demandes d\'adoption', href: '/adoption-requests', icon: <FaHandHoldingHeart /> },
-          { label: 'Événements', href: '/events', icon: <FaCalendarAlt /> }
+          { label: 'Annonce a compaign', href: '/compagneform', icon: <FaPaw /> },
+          { label: 'Publish Articles', href: '/articleform', icon: <FaHandHoldingHeart /> },
+          { label: 'Abuse Reports', href: '/', icon: <FaCalendarAlt /> }
         ];
       case 'store':
         return [
@@ -140,8 +141,15 @@ const Navbar = () => {
         <div className={styles.logoSection}>
           <Link href="/" className={styles.logoWrapper}>
             <div className={styles.logo}>
-              {/* Emplacement pour votre logo */}
-              <div className={styles.logoPlaceholder}>LOGO</div>
+              
+              <Image
+                src="/images/" 
+                alt="Pet Adoption Logo"
+                width={150}  // Ajustez selon la taille de votre logo
+                height={50}  // Ajustez selon la taille de votre logo
+                className={styles.logoImage}
+                priority
+              />
             </div>
           </Link>
           <div className={styles.links}>
@@ -149,7 +157,7 @@ const Navbar = () => {
               <FaHome className={styles.linkIcon} />
               <span>Home</span>
             </Link>
-            <Link href="/Report" className={styles.link}>
+            <Link href="/" className={styles.link}>
               <FaTools className={styles.linkIcon} />
               <span>Report</span>
             </Link>
@@ -242,6 +250,12 @@ const Navbar = () => {
                     <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
                       <FaEnvelope className={styles.sidebarLinkIcon} />
                       <span>Advertise Animal for Adoption</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/annonceanimal" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                      <FaEnvelope className={styles.sidebarLinkIcon} />
+                      <span>Post your Pet </span>
                     </Link>
                   </li>
                   

@@ -1,4 +1,5 @@
 // models/animals.js
+import { ObjectId } from 'mongodb';
 
 /**
  * Crée un objet animal validé à partir des données brutes
@@ -9,8 +10,10 @@ export function createAnimalObject(data) {
   return {
     // Informations de base sur l'animal
     animalName: data.animalName,
-    animalType: data.animalType,
-    race: data.race || '',
+    speciesId: data.speciesId,  // ObjectId de l'espèce
+    speciesCode: data.speciesCode || null, // Code de l'espèce (dog, cat, etc.)
+    raceId: data.raceId,        // ObjectId de la race (peut être null)
+    raceCode: data.raceCode || null, // Code de la race (dog_labrador, etc.)
     age: data.age || '',
     gender: data.gender || '',
     description: data.description || '',
@@ -47,9 +50,11 @@ export function validateAnimal(animal) {
     throw new Error('Le nom de l\'animal est obligatoire');
   }
   
-  if (!animal.animalType) {
-    throw new Error('Le type d\'animal est obligatoire');
+  if (!animal.speciesId) {
+    throw new Error('L\'espèce de l\'animal est obligatoire');
   }
+  
+  // La race peut être optionnelle selon vos besoins
   
   if (!animal.ownerName) {
     throw new Error('Le nom du propriétaire est obligatoire');
@@ -74,11 +79,6 @@ export function validateAnimal(animal) {
   
   if (!animal.publishId) {
     throw new Error('L\'ID du publicateur est obligatoire');
-  }
-  
-  // Autres validations potentielles
-  if (animal.animalType !== 'cat' && animal.animalType !== 'dog') {
-    throw new Error('Le type d\'animal doit être chat ou chien');
   }
   
   return true;

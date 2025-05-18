@@ -51,21 +51,28 @@ export async function signup(userType, userData) {
  */
 export async function login(email, password) {
   try {
+    // Utiliser directement NextAuth signIn pour la gestion de la session
     const result = await signIn('credentials', {
       email,
       password,
       redirect: false
     });
-
+    
+    if (result.error) {
+      return {
+        success: false,
+        error: 'Email ou mot de passe incorrect'
+      };
+    }
+    
     return {
-      success: !result.error,
-      error: result.error
+      success: true
     };
   } catch (error) {
-    console.error('Erreur lors de la connexion:', error);
+    console.error('Erreur de connexion:', error);
     return {
       success: false,
-      error: 'Une erreur est survenue lors de la connexion'
+      error: 'Une erreur inattendue s\'est produite'
     };
   }
 }

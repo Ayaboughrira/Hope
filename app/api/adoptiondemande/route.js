@@ -1,124 +1,123 @@
-// app/api/adoption-requests/route.js
+// app/api/adoptiondemande/route.js
 import { NextResponse } from 'next/server';
 import { connectDB } from '../../config/mongodb';
 import { ObjectId } from 'mongodb';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 
-// Créer une nouvelle demande d'adoption
 export async function POST(request) {
   try {
-    // Vérifier l'authentification de l'utilisateur
+    // Vérifier l'authentification
     const session = await getServerSession(authOptions);
+    
     if (!session) {
       return NextResponse.json({
         success: false,
-        message: 'Non autorisé. Veuillez vous connecter pour effectuer cette action.'
+        message: 'Non authentifié'
       }, { status: 401 });
     }
-
+    
     // Récupérer les données de la demande
-    const requestData = await request.json();
+    const data = await request.json();
     
-    // Valider les données requises
-    if (!requestData.animalId || !requestData.ownerId || !requestData.requesterId) {
-      return NextResponse.json({
-        success: false,
-        message: 'Données incomplètes pour la demande d\'adoption'
-      }, { status: 400 });
+    // Vérifier les données requises
+    const requiredFields = ['animalId', 'ownerId', 'message', 'animalName'];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return NextResponse.json({
+          success: false,
+          message: `Le champ '${field}' est requis`
+        }, { status: 400 });
+      }
     }
-
-    // Vérifier que l'utilisateur n'est pas le propriétaire de l'animal
-    if (requestData.ownerId === session.user.id) {
-      return NextResponse.json({
-        success: false,
-        message: 'Vous ne pouvez pas faire une demande d\'adoption pour votre propre animal'
-      }, { status: 400 });
-    }
-
-    // Se connecter à la base de données
+    
+    // Se connecter à MongoDB
     const db = await connectDB();
+    const requestsCollection = db.collection('adoptionRequests');
     
-    // Structure de la demande d'adoption
+    // Créer l'objet de demande
     const adoptionRequest = {
-      animalId: requestData.animalId,
-      ownerId: requestData.ownerId,
-      requesterId: requestData.requesterId,
-      requesterEmail: requestData.requesterEmail,
-      requesterName: requestData.requesterName,
-      message: requestData.message,
-      animalName: requestData.animalName,
-      animalSpecies: requestData.animalSpecies,
-      animalImage: requestData.animalImage,
-      status: 'pending', // 'pending', 'approved', 'rejected'
+      animalId: data.animalId,
+      ownerId: data.ownerId,
+      ownerType: data.ownerType, // Type du propriétaire (owner, vet, association, store)
+      requesterId: session.user.id,
+      requesterEmail: session.user.email,
+      requesterName: session.user.name,
+      message: data.message,
+      animalName: data.animalName,
+      animalSpecies: data.animalSpecies,
+      animalImage: data.animalImage,
+      status: 'pending', // pending, accepted, rejected
       createdAt: new Date(),
       updatedAt: new Date()
     };
-
-    // Insérer la demande d'adoption dans la base de données
-    const result = await db.collection('adoptionRequests').insertOne(adoptionRequest);
-
+    
+    // Insérer la demande
+    const result = await requestsCollection.insertOne(adoptionRequest);
+    
     if (!result.insertedId) {
-      throw new Error('Échec de l\'enregistrement de la demande d\'adoption');
+      throw new Error('Échec de l\'insertion de la demande');
     }
-
+    
     return NextResponse.json({
       success: true,
       message: 'Demande d\'adoption envoyée avec succès',
       requestId: result.insertedId
-    }, { status: 201 });
+    });
+    
   } catch (error) {
-    console.error('Erreur lors de la création de la demande d\'adoption:', error);
+    console.error('Erreur lors de l\'envoi de la demande d\'adoption:', error);
     return NextResponse.json({
       success: false,
-      message: `Une erreur est survenue: ${error.message}`
+      message: `Erreur: ${error.message}`
     }, { status: 500 });
   }
 }
 
-// Récupérer les demandes d'adoption pour un utilisateur (propriétaire de l'animal)
+// Route pour récupérer les demandes d'adoption pour un propriétaire
 export async function GET(request) {
   try {
-    // Vérifier l'authentification de l'utilisateur
+    // Vérifier l'authentification
     const session = await getServerSession(authOptions);
+    
     if (!session) {
       return NextResponse.json({
         success: false,
-        message: 'Non autorisé. Veuillez vous connecter pour effectuer cette action.'
+        message: 'Non authentifié'
       }, { status: 401 });
     }
-
-    // Récupérer l'ID utilisateur de la session
-    const userId = session.user.id;
     
-    // Récupérer les paramètres de l'URL
+    // Récupérer les paramètres de recherche
     const { searchParams } = new URL(request.url);
-    const filter = searchParams.get('filter') || 'all'; // 'all', 'pending', 'approved', 'rejected'
+    const status = searchParams.get('status');
     
-    // Se connecter à la base de données
-    const db = await connectDB();
+    // Créer le filtre de base (toujours filtrer par propriétaire connecté)
+    const filter = { ownerId: session.user.id };
     
-    // Préparer le filtre pour la requête MongoDB
-    const query = { ownerId: userId };
-    if (filter !== 'all') {
-      query.status = filter;
+    // Ajouter le filtre de statut si fourni
+    if (status && ['pending', 'accepted', 'rejected'].includes(status)) {
+      filter.status = status;
     }
     
-    // Récupérer les demandes d'adoption pour cet utilisateur
-    const requests = await db.collection('adoptionRequests')
-      .find(query)
-      .sort({ createdAt: -1 })
+    // Se connecter à MongoDB
+    const db = await connectDB();
+    const requestsCollection = db.collection('adoptionRequests');
+    
+    // Récupérer les demandes
+    const requests = await requestsCollection.find(filter)
+      .sort({ createdAt: -1 }) // Du plus récent au plus ancien
       .toArray();
     
     return NextResponse.json({
       success: true,
       data: requests
     });
+    
   } catch (error) {
     console.error('Erreur lors de la récupération des demandes d\'adoption:', error);
     return NextResponse.json({
       success: false,
-      message: `Une erreur est survenue: ${error.message}`
+      message: `Erreur: ${error.message}`
     }, { status: 500 });
   }
 }
