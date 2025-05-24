@@ -18,13 +18,14 @@ const AnimalDetail = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [adoptionMessage, setAdoptionMessage] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Fonction pour obtenir le nom d'affichage d'une espèce
   const getSpeciesDisplayName = (code) => {
     const speciesMap = {
-      'dog': 'Chien',
-      'cat': 'Chat',
-      'bird': 'Oiseau'
+      'dog': 'Dog',
+      'cat': 'Cat',
+      'bird': ''
     };
     return speciesMap[code] || code;
   };
@@ -154,6 +155,10 @@ const AnimalDetail = () => {
     document.getElementById('adoptionModal').showModal();
   };
 
+  const closeConfirmationModal = () => {
+    setShowConfirmation(false);
+  };
+
   const handleAdoptionRequest = async (e) => {
     e.preventDefault();
     
@@ -181,9 +186,10 @@ const AnimalDetail = () => {
       const data = await response.json();
       
       if (response.ok) {
-        alert('Votre demande d\'adoption a été envoyée avec succès!');
         document.getElementById('adoptionModal').close();
         setAdoptionMessage('');
+        // Afficher le modal de confirmation au lieu de l'alerte
+        setShowConfirmation(true);
       } else {
         throw new Error(data.message || 'Une erreur est survenue lors de l\'envoi de la demande');
       }
@@ -418,7 +424,7 @@ const AnimalDetail = () => {
       {/* Modal de demande d'adoption */}
       <dialog id="adoptionModal" className={styles.adoptionModal}>
         <div className={styles.modalContent}>
-          <h2>Demande d'adoption pour {animal.name}</h2>
+          <h2>Adoption request for {animal.name}</h2>
           
           <form onSubmit={handleAdoptionRequest}>
             <div className={styles.formGroup}>
@@ -428,7 +434,7 @@ const AnimalDetail = () => {
                 className={styles.adoptionMessage}
                 value={adoptionMessage}
                 onChange={(e) => setAdoptionMessage(e.target.value)}
-                placeholder={`Bonjour, je suis intéressé(e) par l'adoption de ${animal.name}...`}
+                placeholder={`Hello, I am interested in the adoption of ${animal.name}...`}
                 rows={6}
                 required
               />
@@ -453,6 +459,31 @@ const AnimalDetail = () => {
           </form>
         </div>
       </dialog>
+
+      {/* Modal de confirmation */}
+      {showConfirmation && (
+        <div className={styles.confirmationOverlay}>
+          <div className={styles.confirmationModal}>
+            <div className={styles.confirmationIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <h2 className={styles.confirmationTitle}>Request Sent Successfully!</h2>
+            <p className={styles.confirmationMessage}>
+              Your adoption request for {animal.name} has been sent to the owner. 
+              They will contact you soon to discuss the next steps.
+            </p>
+            <button 
+              className={styles.confirmationButton}
+              onClick={closeConfirmationModal}
+            >
+             Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

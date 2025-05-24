@@ -345,3 +345,193 @@
   border-radius: 12px;
   font-size: 0.85rem;
 }
+
+
+
+/* Modal styling */ 
+
+.adoptionModal { width: 100%; max-width: 550px; padding: 0; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); background-color: #fff; overflow: hidden; }
+
+.adoptionModal::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
+
+.modalContent { padding: 2rem; }
+
+.modalContent h2 { margin-top: 0; color: 
+#3a3a3a; font-size: 1.6rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center; position: relative; }
+
+.modalContent h2::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background-color: 
+#ff7a00; border-radius: 2px; }
+
+.formGroup { margin-bottom: 1.5rem; }
+
+.formGroup label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: 
+#4a5568; }
+
+.adoptionMessage { width: 100%; padding: 12px 16px; border: 1px solid 
+#e2e8f0; border-radius: 8px; background-color: 
+#f8fafc; font-size: 1rem; line-height: 1.5; transition: all 0.2s ease-in-out; resize: vertical; min-height: 120px; }
+
+.adoptionMessage:focus { outline: none; border-color: 
+#ff7a00; box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.2); background-color: #fff; }
+
+.adoptionMessage::placeholder { color: 
+#a0aec0; }
+
+.modalButtons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 1.5rem; }
+
+.cancelButton, .submitButton { padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease; }
+
+.cancelButton { background-color: transparent; border: 1px solid 
+#e2e8f0; color: 
+#4a5568; }
+
+.cancelButton:hover { background-color: 
+#f7fafc; border-color: 
+#cbd5e0; }
+
+.submitButton { background-color: 
+#ff7a00; border: none; color: white; box-shadow: 0 2px 4px rgba(255, 122, 0, 0.2); }
+
+.submitButton:hover { background-color: 
+#e86e00; transform: translateY(-1px); }
+
+.submitButton:disabled { background-color: 
+#a0aec0; cursor: not-allowed; transform: none; opacity: 0.7; }
+
+/* Animation */ @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.adoptionModal[open] { animation: fadeIn 0.3s ease forwards; }
+
+/* Ajustements pour le responsive */ @media (max-width: 640px) { .adoptionModal { width: 90%; max-width: none; }
+
+.modalContent { padding: 1.5rem; }
+
+.modalButtons { flex-direction: column; }
+
+.cancelButton, .submitButton { width: 100%; } }
+
+
+
+/* confirmationModal.module.css */
+
+.confirmationOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.confirmationModal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: scaleIn 0.3s ease-out;
+}
+
+.confirmationIcon {
+  width: 80px;
+  height: 80px;
+  background-color: #f0fff4;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.confirmationIcon svg {
+  width: 50px;
+  height: 50px;
+  stroke: #38a169;
+}
+
+.confirmationTitle {
+  color: #2d3748;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.confirmationMessage {
+  color: #4a5568;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.confirmationButton {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.confirmationButton:hover {
+  background-color: #3182ce;
+}
+
+.confirmationButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .confirmationModal {
+    padding: 1.5rem;
+  }
+  
+  .confirmationIcon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .confirmationIcon svg {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .confirmationTitle {
+    font-size: 1.5rem;
+  }
+}

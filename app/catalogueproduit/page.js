@@ -2,19 +2,24 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Search, Filter, ChevronDown, Tag, DollarSign, MapPin, X, Store } from 'lucide-react';
+import { Search, Filter, ChevronDown, Tag, DollarSign, MapPin, X, Store, Plus, User } from 'lucide-react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import styles from '../styles/catalogueproduit.module.css';
 
 export default function ProductCatalog() {
+  const { data: session, status } = useSession();
+  
   // State pour les produits et les filtres
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 200 });
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTypeId, setSelectedTypeId] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [animaleries, setAnimaleries] = useState({});
+  const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
@@ -41,6 +46,34 @@ export default function ProductCatalog() {
     };
   };
 
+  // Chargement des types depuis l'API
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        console.log('Récupération des types...');
+        const response = await fetch('/api/type');
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Réponse API types:', data);
+        
+        if (data.success) {
+          setTypes(data.data || []);
+          console.log('Types chargés:', data.data);
+        } else {
+          console.error('Erreur lors du chargement des types:', data.message);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des types:', error);
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
   // Chargement des produits depuis l'API MongoDB
   useEffect(() => {
     const fetchData = async () => {
@@ -49,8 +82,24 @@ export default function ProductCatalog() {
         
         console.log('Récupération des produits...');
         
-        // Récupération des produits depuis notre API - Utilisation des filtres get si nécessaire
-        const productResponse = await fetch(`/api/produits?page=1&limit=20&minPrice=${priceRange.min}&maxPrice=${priceRange.max}${searchTerm ? `&search=${searchTerm}` : ''}`);
+        // Construction des paramètres de requête
+        const params = new URLSearchParams({
+          page: 1,
+          limit: 20,
+          minPrice: priceRange.min,
+          maxPrice: priceRange.max
+        });
+        
+        if (searchTerm) {
+          params.append('search', searchTerm);
+        }
+        
+        if (selectedTypeId) {
+          params.append('typeId', selectedTypeId);
+        }
+        
+        // Récupération des produits depuis notre API
+        const productResponse = await fetch(`/api/produits?${params.toString()}`);
         
         if (!productResponse.ok) {
           throw new Error(`Erreur lors de la récupération des produits: ${productResponse.status}`);
@@ -108,61 +157,20 @@ export default function ProductCatalog() {
           price: parseFloat(product.price || product.prix || 0),
           description: product.description || product.descriptionProduit || '',
           image: product.photosProduit || product.image || '',
-          promotion: parseFloat(product.promotion || 0)
+          promotion: parseFloat(product.promotion || 0),
+          // Informations sur le type
+          typeName: product.typeName || 'Non spécifié',
+          typeDescription: product.typeDescription || '',
+          // Informations sur l'animalerie
+          animalrieName: product.animalrieName || 'Non spécifié',
+          animalrieEmail: product.animalrieEmail || '',
+          animalrieAdresse: product.animalrieAdresse || ''
         }));
         
         console.log('Produits normalisés:', normalizedProducts.length);
         
-        try {
-          // Récupération des animaleries depuis notre API
-          const animalerieResponse = await fetch('/api/animaleries');
-          if (!animalerieResponse.ok) {
-            console.warn('Erreur lors de la récupération des animaleries:', animalerieResponse.status);
-            // Continuer sans les animaleries
-            setProducts(normalizedProducts);
-            setFilteredProducts(normalizedProducts);
-            setLoading(false);
-            return;
-          }
-          
-          const animalerieResponseData = await animalerieResponse.json();
-          
-          // Extraire les données d'animaleries selon le format de réponse standardisé
-          const animalerieData = animalerieResponseData.data || animalerieResponseData || [];
-          
-          // Création d'une map des animaleries par ID pour une recherche plus facile
-          const animalerieMap = {};
-          animalerieData.forEach(animalerie => {
-            animalerieMap[animalerie._id] = animalerie;
-          });
-          
-          setAnimaleries(animalerieMap);
-          
-          // Association des produits avec les animaleries
-          const productsWithAnimaleries = normalizedProducts.map(product => {
-            // Vérifier si le produit a déjà une animalerie associée
-            if (product.animalerie) {
-              return product;
-            }
-            
-            // Si le produit a un animalerieId, trouver l'animalerie correspondante
-            if (product.animalerieId && animalerieMap[product.animalerieId]) {
-              return {
-                ...product,
-                animalerie: animalerieMap[product.animalerieId]
-              };
-            }
-            return product;
-          });
-          
-          setProducts(productsWithAnimaleries);
-          setFilteredProducts(productsWithAnimaleries);
-        } catch (animalerieError) {
-          console.warn('Erreur animaleries:', animalerieError);
-          // Continuer avec seulement les produits normalisés
-          setProducts(normalizedProducts);
-          setFilteredProducts(normalizedProducts);
-        }
+        setProducts(normalizedProducts);
+        setFilteredProducts(normalizedProducts);
         
         // Définition de la fourchette de prix initiale en fonction des produits
         if (normalizedProducts.length > 0) {
@@ -199,6 +207,10 @@ export default function ProductCatalog() {
         params.append('search', searchTerm);
       }
       
+      if (selectedTypeId) {
+        params.append('typeId', selectedTypeId);
+      }
+      
       // Appel API avec filtres
       const response = await fetch(`/api/produits?${params.toString()}`);
       if (!response.ok) {
@@ -226,7 +238,14 @@ export default function ProductCatalog() {
         price: parseFloat(product.price || product.prix || 0),
         description: product.description || product.descriptionProduit || '',
         image: product.photosProduit || product.image || '',
-        promotion: parseFloat(product.promotion || 0)
+        promotion: parseFloat(product.promotion || 0),
+        // Informations sur le type
+        typeName: product.typeName || 'Non spécifié',
+        typeDescription: product.typeDescription || '',
+        // Informations sur l'animalerie
+        animalrieName: product.animalrieName || 'Non spécifié',
+        animalrieEmail: product.animalrieEmail || '',
+        animalrieAdresse: product.animalrieAdresse || ''
       }));
       
       // Mise à jour de la pagination
@@ -250,6 +269,11 @@ export default function ProductCatalog() {
   const handlePriceChange = (e) => {
     const { name, value } = e.target;
     setPriceRange(prev => ({ ...prev, [name]: Number(value) }));
+  };
+
+  // Gestion du changement de type
+  const handleTypeChange = (e) => {
+    setSelectedTypeId(e.target.value);
   };
 
   // Calcul du prix final avec réduction
@@ -280,8 +304,33 @@ export default function ProductCatalog() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Catalogue de Produits Animalerie</h1>
-        <p className={styles.subtitle}>Trouvez les produits parfaits pour vos animaux de compagnie</p>
+        <div className={styles.headerContent}>
+          <div className={styles.titleSection}>
+            <h1 className={styles.title}>Catalogue de Produits Animalerie</h1>
+            <p className={styles.subtitle}>Trouvez les produits parfaits pour vos animaux de compagnie</p>
+          </div>
+          
+          <div className={styles.userSection}>
+            {status === 'loading' ? (
+              <div className={styles.userLoading}>Chargement...</div>
+            ) : session ? (
+              <div className={styles.userInfo}>
+                <User className={styles.userIcon} />
+                <span className={styles.userName}>
+                  {session.user?.name || session.user?.email}
+                </span>
+                <Link href="/announcer-produit" className={styles.addProductBtn}>
+                  <Plus className={styles.plusIcon} />
+                  Ajouter un produit
+                </Link>
+              </div>
+            ) : (
+              <Link href="/signuplogin" className={styles.loginBtn}>
+                Se connecter
+              </Link>
+            )}
+          </div>
+        </div>
       </header>
 
       <div className={styles.searchAndFilter}>
@@ -309,32 +358,52 @@ export default function ProductCatalog() {
 
       {showFilters && (
         <div className={styles.filterPanel}>
-          <h3 className={styles.filterTitle}>Fourchette de Prix</h3>
-          <div className={styles.priceInputs}>
-            <div className={styles.priceField}>
-              <label htmlFor="min">Min (€):</label>
-              <input
-                type="number"
-                id="min"
-                name="min"
-                min="0"
-                max={priceRange.max}
-                value={priceRange.min}
-                onChange={handlePriceChange}
-                className={styles.priceInput}
-              />
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <h3 className={styles.filterTitle}>Type de produit</h3>
+              <select
+                value={selectedTypeId}
+                onChange={handleTypeChange}
+                className={styles.typeSelect}
+              >
+                <option value="">Tous les types</option>
+                {types.map(type => (
+                  <option key={type._id} value={type._id}>
+                    {type.nomType}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className={styles.priceField}>
-              <label htmlFor="max">Max (€):</label>
-              <input
-                type="number"
-                id="max"
-                name="max"
-                min={priceRange.min}
-                value={priceRange.max}
-                onChange={handlePriceChange}
-                className={styles.priceInput}
-              />
+            
+            <div className={styles.filterGroup}>
+              <h3 className={styles.filterTitle}>Fourchette de Prix</h3>
+              <div className={styles.priceInputs}>
+                <div className={styles.priceField}>
+                  <label htmlFor="min">Min (€):</label>
+                  <input
+                    type="number"
+                    id="min"
+                    name="min"
+                    min="0"
+                    max={priceRange.max}
+                    value={priceRange.min}
+                    onChange={handlePriceChange}
+                    className={styles.priceInput}
+                  />
+                </div>
+                <div className={styles.priceField}>
+                  <label htmlFor="max">Max (€):</label>
+                  <input
+                    type="number"
+                    id="max"
+                    name="max"
+                    min={priceRange.min}
+                    value={priceRange.max}
+                    onChange={handlePriceChange}
+                    className={styles.priceInput}
+                  />
+                </div>
+              </div>
             </div>
           </div>
           
@@ -377,7 +446,7 @@ export default function ProductCatalog() {
               <p>Aucun produit trouvé correspondant à vos critères.</p>
               <button 
                 className={styles.debugButton}
-                onClick={() => console.log('État actuel:', { products, filteredProducts, priceRange, searchTerm, debugInfo })}
+                onClick={() => console.log('État actuel:', { products, filteredProducts, priceRange, searchTerm, selectedTypeId, debugInfo })}
               >
                 Afficher les détails de débogage (console)
               </button>
@@ -421,14 +490,20 @@ export default function ProductCatalog() {
                 
                 <div className={styles.productInfo}>
                   <h2 className={styles.productName}>{product.label}</h2>
-                  {/*
-                  {product.animalerie && (
-                    <div className={styles.animalerieTag}>
-                      <Store className={styles.storeIcon} />
-                      <span>{product.animalerie.nom}</span>
+                  
+                  {product.typeName && product.typeName !== 'Non spécifié' && (
+                    <div className={styles.typeTag}>
+                      <span className={styles.typeLabel}>{product.typeName}</span>
                     </div>
                   )}
-                  */}
+                  
+                  {product.animalrieName && product.animalrieName !== 'Non spécifié' && (
+                    <div className={styles.animalerieTag}>
+                      <Store className={styles.storeIcon} />
+                      <span>{product.animalrieName}</span>
+                    </div>
+                  )}
+                  
                   <div className={styles.priceContainer}>
                     {product.promotion > 0 ? (
                       <>
@@ -495,28 +570,35 @@ export default function ProductCatalog() {
               
               <div className={styles.modalProductInfo}>
                 <h2 className={styles.modalProductName}>{selectedProduct.label}</h2>
-                {/*
-                {selectedProduct.animalerie && (
-                  <Link 
-                    href={`/animalerie/${selectedProduct.animalerieId}`}
-                    className={styles.modalAnimalerieLink}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className={styles.modalAnimalerieInfo}>
-                      <Store className={styles.modalStoreIcon} />
-                      <div className={styles.modalAnimalerieDetails}>
-                        <span className={styles.modalAnimalerieName}>{selectedProduct.animalerie.nom}</span>
-                        {selectedProduct.animalerie.adresse && (
-                          <span className={styles.modalAnimalerieAddress}>
-                            <MapPin className={styles.pinIcon} />
-                            {selectedProduct.animalerie.adresse}
-                          </span>
-                        )}
-                        <span className={styles.viewProfileLink}>Voir le profil de l'animalerie</span>
-                      </div>
+                
+                {selectedProduct.typeName && selectedProduct.typeName !== 'Non spécifié' && (
+                  <div className={styles.modalTypeInfo}>
+                    <span className={styles.modalTypeLabel}>Type: {selectedProduct.typeName}</span>
+                    {selectedProduct.typeDescription && (
+                      <p className={styles.modalTypeDescription}>{selectedProduct.typeDescription}</p>
+                    )}
+                  </div>
+                )}
+                
+                {selectedProduct.animalrieName && selectedProduct.animalrieName !== 'Non spécifié' && (
+                  <div className={styles.modalAnimalerieInfo}>
+                    <Store className={styles.modalStoreIcon} />
+                    <div className={styles.modalAnimalerieDetails}>
+                      <span className={styles.modalAnimalerieName}>{selectedProduct.animalrieName}</span>
+                      {selectedProduct.animalrieAdresse && (
+                        <span className={styles.modalAnimalerieAddress}>
+                          <MapPin className={styles.pinIcon} />
+                          {selectedProduct.animalrieAdresse}
+                        </span>
+                      )}
+                      {selectedProduct.animalrieEmail && (
+                        <span className={styles.modalAnimalerieEmail}>
+                          Email: {selectedProduct.animalrieEmail}
+                        </span>
+                      )}
                     </div>
-                  </Link>
-                )}*/}
+                  </div>
+                )}
                 
                 <div className={styles.modalPriceContainer}>
                   {selectedProduct.promotion > 0 ? (
@@ -583,7 +665,7 @@ export default function ProductCatalog() {
       <div className={styles.debugSection}>
         <button 
           className={styles.debugButton}
-          onClick={() => console.log('État actuel:', { products, filteredProducts, debugInfo })}
+          onClick={() => console.log('État actuel:', { products, filteredProducts, types, debugInfo, session })}
         >
           Debug
         </button>

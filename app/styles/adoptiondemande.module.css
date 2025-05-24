@@ -1,358 +1,536 @@
-/* styles/adoptionrequests.module.css */
+/* adoptiondemande.module.css */
 .adoptionRequestsContainer {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
+  max-width: 1400px;
+  margin: 80px auto 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #faf9f6 0%, #f5f3f0 100%);
+  min-height: 100vh;
 }
 
 .pageTitle {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 24px;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 12px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
 }
 
-.filtersContainer {
+.pageTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b35, #ff8c42);
+  border-radius: 2px;
+}
+
+.tabsContainer {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+  background: white;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 8px 32px rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.1);
 }
 
-.filterButton {
-  padding: 8px 16px;
-  border-radius: 30px;
-  border: 1px solid #ddd;
-  background-color: #fff;
+.tabButton {
+  padding: 16px 32px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.filterButton:hover {
-  background-color: #f7f7f7;
+.tabButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+  transition: left 0.5s;
 }
 
-.filterButton.active {
-  background-color: #4a90e2;
-  color: white;
-  border-color: #4a90e2;
+.tabButton:hover::before {
+  left: 100%;
+}
+
+.tabButton:hover {
+  color: #ff6b35;
+  transform: translateY(-2px);
+}
+
+.activeTab {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42) !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 1.25rem;
+  border-radius: 16px;
+  margin: 2rem 0;
+}
+
+.loading {
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  color: #ff6b35;
+  border: 2px dashed rgba(255, 107, 53, 0.3);
+}
+
+.error {
+  background: linear-gradient(135deg, #ffebee, #fce4ec);
+  color: #d32f2f;
+  border: 2px solid rgba(211, 47, 47, 0.2);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.1);
+}
+
+.emptyState p {
+  font-size: 1.25rem;
+  color: #666;
+  margin: 0;
 }
 
 .requestsList {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  gap: 1.25rem;
 }
 
 .requestCard {
-  background-color: #fff;
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.15);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.requestCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35, #ff8c42);
+}
+
+.requestCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.12);
 }
 
 .requestHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  background-color: #f7f7f7;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+  border-bottom: 1px solid rgba(255, 107, 53, 0.08);
 }
 
 .animalInfo {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
-.animalImage {
-  width: 70px;
-  height: 70px;
-  border-radius: 8px;
+.animalThumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
   object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.animalName {
+.animalInfo h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  margin: 0;
+  color: #2c2c2c;
+  margin: 0 0 0.25rem 0;
 }
 
 .animalSpecies {
-  margin: 4px 0 0;
   color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.requestStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
 }
 
 .statusBadge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-weight: 600;
   font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.statusPending {
-  background-color: #fff8e1;
-  color: #f57c00;
-  border: 1px solid #ffcc80;
+.pending {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  color: #ef6c00;
+  border: 2px solid #ffb74d;
 }
 
-.statusApproved {
-  background-color: #e8f5e9;
+.accepted {
+  background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
   color: #2e7d32;
-  border: 1px solid #a5d6a7;
+  border: 2px solid #66bb6a;
 }
 
-.statusRejected {
-  background-color: #ffebee;
+.rejected {
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
   color: #c62828;
-  border: 1px solid #ef9a9a;
-}
-
-.requestInfo {
-  padding: 16px;
-}
-
-.requesterInfo {
-  margin: 0 0 8px;
-  font-size: 1rem;
+  border: 2px solid #ef5350;
 }
 
 .requestDate {
-  margin: 0 0 16px;
   font-size: 0.875rem;
-  color: #666;
-}
-
-.messageContainer, .responseContainer {
-  background-color: #f9f9f9;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.messageContainer h3, .responseContainer h3 {
-  margin-top: 0;
-  font-size: 1rem;
-  margin-bottom: 8px;
-  color: #444;
-}
-
-.requestMessage, .responseMessage {
-  margin: 0;
-  white-space: pre-line;
-}
-
-.actionButtons {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
-
-.approveButton, .rejectButton {
-  padding: 10px 20px;
-  border-radius: 8px;
+  color: #999;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+}
+
+.requestBody {
+  padding: 1.25rem;
+}
+
+.requesterInfo, .requestMessage, .responseMessage {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  border-left: 3px solid #ff6b35;
+}
+
+.requesterInfo h4, .requestMessage h4, .responseMessage h4 {
+  color: #ff6b35;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.requesterInfo p, .requestMessage p, .responseMessage p {
+  color: #444;
+  line-height: 1.5;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.requestActions {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.respondButton {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: white;
   border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
 
-.approveButton {
-  background-color: #4caf50;
-  color: white;
-}
-
-.approveButton:hover {
-  background-color: #388e3c;
-}
-
-.rejectButton {
-  background-color: #f44336;
-  color: white;
-}
-
-.rejectButton:hover {
-  background-color: #d32f2f;
+.respondButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
 }
 
 .viewAnimalLink {
   display: inline-block;
-  margin-top: 12px;
-  color: #4a90e2;
+  margin: 0 1.25rem 1.25rem;
+  color: #ff6b35;
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border: 1px solid #ff6b35;
+  border-radius: 20px;
+  transition: all 0.3s ease;
 }
 
 .viewAnimalLink:hover {
-  text-decoration: underline;
+  background: #ff6b35;
+  color: white;
+  transform: translateY(-1px);
 }
 
-.responseModal {
+/* Modal Styles */
+.responseModal, .confirmationModal {
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
   width: 90%;
   max-width: 600px;
   padding: 0;
+  overflow: hidden;
 }
 
-.responseModal::backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
+.responseModal::backdrop, .confirmationModal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
 }
 
 .modalContent {
-  padding: 24px;
+  padding: 3rem;
+  background: linear-gradient(135deg, #fff, #fafafa);
 }
 
 .modalContent h2 {
-  margin-top: 0;
-  font-size: 1.5rem;
-  margin-bottom: 16px;
+  color: #2c2c2c;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 2rem 0;
+  text-align: center;
 }
 
 .formGroup {
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
 }
 
 .formGroup label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #444;
+  font-size: 1.1rem;
 }
 
 .responseMessageInput {
   width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
   font-family: inherit;
   font-size: 1rem;
   resize: vertical;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.responseMessageInput:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
 }
 
 .modalButtons {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.cancelButton, .submitButton {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 500;
+.actionButton, .cancelButton {
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.acceptButton {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+}
+
+.acceptButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4);
+}
+
+.rejectButton {
+  background: linear-gradient(135deg, #f44336, #ef5350);
+  color: white;
+  box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
+}
+
+.rejectButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(244, 67, 54, 0.4);
 }
 
 .cancelButton {
-  background-color: #f0f0f0;
-  color: #333;
+  background: #f5f5f5;
+  color: #666;
+  border: 2px solid #e0e0e0;
 }
 
 .cancelButton:hover {
-  background-color: #e0e0e0;
+  background: #e0e0e0;
+  transform: translateY(-2px);
 }
 
-.noRequests {
+/* Confirmation Modal Specific Styles */
+.confirmationContent {
   text-align: center;
-  padding: 40px 0;
-  background-color: #f9f9f9;
+  padding: 3rem;
+}
+
+.confirmationIcon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 2rem;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+}
+
+.confirmationTitle {
+  color: #2c2c2c;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.confirmationMessage {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.confirmationButton {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: white;
+  border: none;
+  padding: 16px 32px;
   border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
 }
 
-.loading, .error {
-  text-align: center;
-  padding: 40px 0;
-  font-size: 1.125rem;
+.confirmationButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
 }
 
-.error {
-  color: #d32f2f;
-}
-
-/* Styles pour les écrans plus petits */
+/* Responsive Design */
 @media (max-width: 768px) {
+  .adoptionRequestsContainer {
+    padding: 1rem;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .tabsContainer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .tabButton {
+    padding: 12px 24px;
+  }
+  
   .requestHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 1.5rem;
   }
   
-  .statusBadge {
-    align-self: flex-start;
+  .requestStatus {
+    align-items: flex-start;
   }
   
-  .actionButtons {
+  .animalInfo {
     flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
   
-  .approveButton, .rejectButton, .submitButton, .cancelButton {
-    width: 100%;
+  .modalContent {
+    padding: 2rem;
   }
   
   .modalButtons {
     flex-direction: column;
   }
+  
+  .actionButton, .cancelButton {
+    width: 100%;
+  }
 }
 
-/* styles/useradoptionrequests.module.css - Similaire mais avec quelques différences */
-.userRequestsContainer {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
-}
-
-.pageTitle {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 24px;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 12px;
-}
-
-.requestsList {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Les autres styles sont identiques à adoptionrequests.module.css */
-/* Ajouter uniquement ces styles spécifiques */
-
-.browseLink {
-  display: inline-block;
-  margin-top: 16px;
-  padding: 10px 20px;
-  background-color: #4a90e2;
-  color: white;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.browseLink:hover {
-  background-color: #3a7bc8;
-}
-
-.nextStepsContainer {
-  background-color: #e8f5e9;
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 16px;
-  border-left: 4px solid #4caf50;
-}
-
-.nextStepsContainer h3 {
-  margin-top: 0;
-  color: #2e7d32;
-}
-
-.noResponseMessage {
-  font-style: italic;
-  color: #666;
+@media (max-width: 480px) {
+  .requestCard {
+    border-radius: 16px;
+  }
+  
+  .requestHeader, .requestBody {
+    padding: 1rem;
+  }
+  
+  .animalThumbnail {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .modalContent {
+    padding: 1.5rem;
+  }
+  
+  .confirmationContent {
+    padding: 2rem;
+  }
+  
+  .confirmationIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
 }

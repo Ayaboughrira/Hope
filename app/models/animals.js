@@ -10,10 +10,10 @@ export function createAnimalObject(data) {
   return {
     // Informations de base sur l'animal
     animalName: data.animalName,
-    speciesId: data.speciesId,  // ObjectId de l'espèce
-    speciesCode: data.speciesCode || null, // Code de l'espèce (dog, cat, etc.)
-    raceId: data.raceId,        // ObjectId de la race (peut être null)
-    raceCode: data.raceCode || null, // Code de la race (dog_labrador, etc.)
+    speciesId: data.speciesId instanceof ObjectId ? data.speciesId : new ObjectId(data.speciesId),
+    speciesCode: data.speciesCode || null,
+    raceId: data.raceId ? (data.raceId instanceof ObjectId ? data.raceId : new ObjectId(data.raceId)) : null,
+    raceCode: data.raceCode || null,
     age: data.age || '',
     gender: data.gender || '',
     description: data.description || '',
@@ -27,13 +27,13 @@ export function createAnimalObject(data) {
     // Média
     photos: data.photos || [],
     
-    // Informations sur le publicateur (qui l'a mis en ligne)
+    // Informations sur le publicateur
     publishType: data.publishType,
     publishId: data.publishId,
     publishDate: data.publishDate || new Date(),
     
     // État de l'annonce
-    status: 'active', // active, adopted, deleted
+    status: 'active',
     createdAt: new Date(),
     updatedAt: new Date()
   };

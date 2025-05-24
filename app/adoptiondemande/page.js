@@ -15,11 +15,13 @@ const AdoptionRequests = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [responseMessage, setResponseMessage] = useState('');
   const [activeRequestId, setActiveRequestId] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmationData, setConfirmationData] = useState(null);
   
   useEffect(() => {
     // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
     if (status === 'unauthenticated') {
-      router.push('/auth/signun?callbackUrl=/adoptiondemande');
+      router.push('/signuplogin?callbackUrl=/adoptiondemande');
       return;
     }
     
@@ -64,6 +66,24 @@ const AdoptionRequests = () => {
     document.getElementById('responseModal').showModal();
   };
   
+  const closeResponseModal = () => {
+    document.getElementById('responseModal').close();
+    setActiveRequestId(null);
+    setResponseMessage('');
+  };
+  
+  const showConfirmationModal = (data) => {
+    setConfirmationData(data);
+    setShowConfirmation(true);
+    document.getElementById('confirmationModal').showModal();
+  };
+  
+  const closeConfirmationModal = () => {
+    document.getElementById('confirmationModal').close();
+    setShowConfirmation(false);
+    setConfirmationData(null);
+  };
+  
   const handleRequestResponse = async (status) => {
     if (!activeRequestId) return;
     
@@ -82,9 +102,22 @@ const AdoptionRequests = () => {
       const data = await response.json();
       
       if (response.ok) {
-        alert(data.message);
-        document.getElementById('responseModal').close();
-        fetchRequests(activeTab); // Rafraîchir la liste
+        // Fermer la modal de réponse
+        closeResponseModal();
+        
+        // Trouver les informations de la demande pour la confirmation
+        const request = requests.find(req => req._id === activeRequestId);
+        
+        // Afficher la modal de confirmation
+        showConfirmationModal({
+          status: status,
+          animalName: request?.animalName || 'l\'animal',
+          requesterName: request?.requesterName || 'le demandeur',
+          message: data.message
+        });
+        
+        // Rafraîchir la liste
+        fetchRequests(activeTab);
       } else {
         throw new Error(data.message || 'Une erreur est survenue');
       }
@@ -108,7 +141,7 @@ const AdoptionRequests = () => {
   
   // Si la session est en cours de chargement
   if (status === 'loading') {
-    return <div className={styles.loading}>Chargement...</div>;
+    return <div className={styles.loading}>Loading...</div>;
   }
   
   // Si l'utilisateur n'est pas connecté, ne rien afficher (la redirection sera gérée par useEffect)
@@ -118,38 +151,38 @@ const AdoptionRequests = () => {
   
   return (
     <div className={styles.adoptionRequestsContainer}>
-      <h1 className={styles.pageTitle}>Demandes d'adoption reçues</h1>
+      <h1 className={styles.pageTitle}>Requests for adoption received</h1>
       
       <div className={styles.tabsContainer}>
         <button 
           className={`${styles.tabButton} ${activeTab === 'pending' ? styles.activeTab : ''}`}
           onClick={() => handleTabChange('pending')}
         >
-          En attente
+          Pending
         </button>
         <button 
           className={`${styles.tabButton} ${activeTab === 'accepted' ? styles.activeTab : ''}`}
           onClick={() => handleTabChange('accepted')}
         >
-          Acceptées
+          Accepted
         </button>
         <button 
           className={`${styles.tabButton} ${activeTab === 'rejected' ? styles.activeTab : ''}`}
           onClick={() => handleTabChange('rejected')}
         >
-          Rejetées
+          Rejected
         </button>
       </div>
       
       {loading ? (
-        <div className={styles.loading}>Chargement des demandes...</div>
+        <div className={styles.loading}>Loading requests...</div>
       ) : error ? (
         <div className={styles.error}>{error}</div>
       ) : requests.length === 0 ? (
         <div className={styles.emptyState}>
-          <p>Aucune demande {
-            activeTab === 'pending' ? 'en attente' :
-            activeTab === 'accepted' ? 'acceptée' : 'rejetée'
+          <p>No request {
+            activeTab === 'pending' ? 'Pending' :
+            activeTab === 'accepted' ? 'Accepted' : 'Rejected'
           }</p>
         </div>
       ) : (
@@ -173,8 +206,8 @@ const AdoptionRequests = () => {
                 
                 <div className={styles.requestStatus}>
                   <span className={`${styles.statusBadge} ${styles[request.status]}`}>
-                    {request.status === 'pending' ? 'En attente' :
-                     request.status === 'accepted' ? 'Acceptée' : 'Rejetée'}
+                    {request.status === 'pending' ? 'Pending' :
+                     request.status === 'accepted' ? 'Accepted' : 'Rejected'}
                   </span>
                   <span className={styles.requestDate}>
                     {formatDate(request.createdAt)}
@@ -184,7 +217,7 @@ const AdoptionRequests = () => {
               
               <div className={styles.requestBody}>
                 <div className={styles.requesterInfo}>
-                  <h4>Demandeur:</h4>
+                  <h4>Requester:</h4>
                   <p>{request.requesterName}</p>
                   <p>{request.requesterEmail}</p>
                 </div>
@@ -196,7 +229,7 @@ const AdoptionRequests = () => {
                 
                 {request.responseMessage && (
                   <div className={styles.responseMessage}>
-                    <h4>Votre réponse:</h4>
+                    <h4>Your response:</h4>
                     <p>{request.responseMessage}</p>
                   </div>
                 )}
@@ -208,13 +241,13 @@ const AdoptionRequests = () => {
                     className={styles.respondButton}
                     onClick={() => openResponseModal(request._id)}
                   >
-                    Répondre à cette demande
+                    Reply to this request
                   </button>
                 </div>
               )}
               
               <Link href={`/catalogueanimal/${request.animalId}`} className={styles.viewAnimalLink}>
-                Voir l'annonce de l'animal
+               View the animal's ad
               </Link>
             </div>
           ))}
@@ -224,10 +257,10 @@ const AdoptionRequests = () => {
       {/* Modal pour répondre à une demande */}
       <dialog id="responseModal" className={styles.responseModal}>
         <div className={styles.modalContent}>
-          <h2>Répondre à la demande d'adoption</h2>
+          <h2> Reply to adoption request </h2>
           
           <div className={styles.formGroup}>
-            <label htmlFor="responseMessage">Message au demandeur (optionnel):</label>
+            <label htmlFor="responseMessage">Message to the requester (optionnel):</label>
             <textarea 
               id="responseMessage"
               className={styles.responseMessageInput}
@@ -244,23 +277,50 @@ const AdoptionRequests = () => {
               className={`${styles.actionButton} ${styles.rejectButton}`}
               onClick={() => handleRequestResponse('rejected')}
             >
-              Rejeter la demande
+              Reject the request 
             </button>
             <button 
               type="button" 
               className={`${styles.actionButton} ${styles.acceptButton}`}
               onClick={() => handleRequestResponse('accepted')}
             >
-              Accepter la demande
+              Accept the request  
             </button>
             <button 
               type="button" 
               className={styles.cancelButton}
-              onClick={() => document.getElementById('responseModal').close()}
+              onClick={closeResponseModal}
             >
-              Annuler
+              Cancel
             </button>
           </div>
+        </div>
+      </dialog>
+
+      {/* Modal de confirmation */}
+      <dialog id="confirmationModal" className={styles.confirmationModal}>
+        <div className={styles.confirmationContent}>
+          <div className={styles.confirmationIcon}>
+            {confirmationData?.status === 'accepted' ? '✓' : '✕'}
+          </div>
+          <h2 className={styles.confirmationTitle}>
+            {confirmationData?.status === 'accepted' ? 
+              'Request accepted successfuly!' : 
+              'Request rejected'
+            }
+          </h2>
+          <p className={styles.confirmationMessage}>
+            {confirmationData?.status === 'accepted' ? 
+              ` You are accepted the adoption request of ${confirmationData?.animalName} by ${confirmationData?.requesterName}.` :
+              `You are  rejected the adoption request of ${confirmationData?.animalName} by ${confirmationData?.requesterName}.`
+            }
+          </p>
+          <button 
+            className={styles.confirmationButton}
+            onClick={closeConfirmationModal}
+          >
+           Close 
+          </button>
         </div>
       </dialog>
     </div>

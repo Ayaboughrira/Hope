@@ -2,24 +2,69 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styles from '../styles/annoncerproduit.module.css';
-
 
 export default function ProductForm() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  
   const [formData, setFormData] = useState({
     label: '',
     price: '',
     promotion: '',
     description: '',
-    category: 'dog',
+    typeId: '', // ID du type de produit sélectionné
     image: null
   });
   
+  const [types, setTypes] = useState([]); // Pour stocker les types depuis la BDD
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Charger les types depuis la base de données
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        console.log('Récupération des types...');
+        const response = await fetch('/api/type');
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Réponse API types:', data);
+        
+        if (data.success) {
+          setTypes(data.data || []);
+          console.log('Types chargés:', data.data);
+        } else {
+          setError('Erreur lors du chargement des types: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des types:', error);
+        setError('Erreur lors du chargement des types: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
+  // Vérifier l'authentification
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session) {
+      router.push('/signuplogin');
+      return;
+    }
+  }, [session, status, router]);
 
   // Effet pour empêcher le défilement quand la modale est ouverte
   useEffect(() => {
@@ -74,25 +119,47 @@ export default function ProductForm() {
     setIsSubmitting(true);
     setError(null);
     
+    // Vérifier la session avant la soumission
+    if (!session) {
+      setError('Session expirée. Veuillez vous reconnecter.');
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
-      // 1. Préparer les données du formulaire avec FormData pour l'upload d'image
+      // Debug: afficher les informations de session
+      console.log('Session user:', session.user);
+      console.log('animalrieId:', session.user?.animalrieId);
+      
+      // Préparer les données du formulaire avec FormData pour l'upload d'image
       const formDataToSend = new FormData();
       formDataToSend.append('label', formData.label);
       formDataToSend.append('price', formData.price);
       formDataToSend.append('promotion', formData.promotion || '0');
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('category', formData.category);
+      formDataToSend.append('typeId', formData.typeId);
+      
+      // Corriger le nom de la propriété : animalrieId au lieu de animalerieId
+      if (session.user?.animalrieId) {
+        formDataToSend.append('animalrieId', session.user.animalrieId);
+        console.log('animalrieId ajouté:', session.user.animalrieId);
+      } else {
+        console.log('Aucun animalrieId trouvé dans la session');
+      }
       
       if (formData.image) {
         formDataToSend.append('image', formData.image);
       }
       
-      // 2. Envoyer les données à notre API route qui s'occupera de Cloudinary et MongoDB
+      // Debug: afficher le contenu de FormData
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+      
+      // Envoyer les données à notre API route
       const response = await fetch('/api/produits', {
         method: 'POST',
         body: formDataToSend,
-        // Ne pas définir Content-Type header quand on utilise FormData,
-        // le navigateur le fait automatiquement avec la boundary correcte
       });
       
       if (!response.ok) {
@@ -101,19 +168,19 @@ export default function ProductForm() {
       }
       
       const result = await response.json();
+      console.log('Produit créé:', result);
       
-      // 3. Réinitialiser le formulaire après soumission
+      // Réinitialiser le formulaire après soumission
       setFormData({
         label: '',
         price: '',
         promotion: '',
         description: '',
-        category: 'dog',
+        typeId: '',
         image: null
       });
       setImagePreview(null);
       
-    
       setShowModal(true);
       
     } catch (error) {
@@ -124,15 +191,44 @@ export default function ProductForm() {
     }
   };
 
+  // Afficher un loader pendant le chargement
+  if (status === 'loading' || loading) {
+    return (
+      <div className={styles.formContainer}>
+        <div className={styles.loading}>
+          <p>Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Vérifier l'authentification
+  if (!session) {
+    return (
+      <div className={styles.formContainer}>
+        <div className={styles.errorMessage}>
+          <p>Vous devez être connecté pour accéder à cette page.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.formContainer}>
-      <h1 className={styles.title}>Publish product</h1>
+      <h1 className={styles.title}>Publier un produit</h1>
+      <p className={styles.subtitle}>
+        Utilisateur: {session.user?.name || session.user?.email}
+        {/* Corriger aussi l'affichage de l'animalrie */}
+        {session.user?.animalrieId && (
+          <span> (Animalrie ID: {session.user.animalrieId})</span>
+        )}
+      </p>
       
       {error && <div className={styles.errorMessage}>{error}</div>}
       
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label htmlFor="libelle">Product label :</label>
+          <label htmlFor="label">Libellé du produit :</label>
           <input
             type="text"
             id="label"
@@ -146,7 +242,7 @@ export default function ProductForm() {
         
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label htmlFor="prix">Price : </label>
+            <label htmlFor="price">Prix :</label>
             <input
               type="number"
               id="price"
@@ -189,22 +285,27 @@ export default function ProductForm() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="categorie">Category :</label>
+          <label htmlFor="typeId">Type de produit :</label>
           <select
-            id="category"
-            name="category"
-            value={formData.category}
+            id="typeId"
+            name="typeId"
+            value={formData.typeId}
             onChange={handleChange}
+            required
             className={styles.select}
           >
-            <option value="dog">Dog</option>
-            <option value="cats">Cat</option>
-            <option value="birds">Birds</option>
+            <option value="">Sélectionner un type</option>
+            {types.map(type => (
+              <option key={type._id} value={type._id}>
+                {type.nomType }
+              </option>
+            ))}
           </select>
+          
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="image">product image </label>
+          <label htmlFor="image">Image du produit :</label>
           <input
             type="file"
             id="image"
@@ -225,9 +326,9 @@ export default function ProductForm() {
         <button
           type="submit" 
           className={styles.submitButton}
-          disabled={isSubmitting}
+          disabled={isSubmitting || types.length === 0}
         >
-          {isSubmitting ? 'Published in progress...' : 'Publish product '}
+          {isSubmitting ? 'Publication en cours...' : 'Publier le produit'}
         </button>
       </form>
 
@@ -236,10 +337,10 @@ export default function ProductForm() {
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalSuccessIcon}>✓</div>
-            <h2 className={styles.modalTitle}>success!</h2>
-            <p className={styles.modalMessage}>Successfully Published product!</p>
+            <h2 className={styles.modalTitle}>Succès!</h2>
+            <p className={styles.modalMessage}>Produit publié avec succès!</p>
             <button className={styles.modalButton} onClick={closeModal}>
-             Close
+              Fermer
             </button>
           </div>
         </div>

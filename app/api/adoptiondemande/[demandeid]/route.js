@@ -1,6 +1,6 @@
 // app/api/adoptiondemande/[demandeid]/route.js
 import { NextResponse } from 'next/server';
-import { connectDB } from '../../../../config/mongodb';
+import { connectDB } from '../../../config/mongodb';
 import { ObjectId } from 'mongodb';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
@@ -19,10 +19,11 @@ export async function PATCH(request, { params }) {
     }
     
     // Récupérer l'ID de la demande depuis les paramètres
-    const requestId = params.requestId;
+    // CORRECTION: utiliser demandeid au lieu de requestId
+    const requestId = params.demandeid;
     
     // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(requestId)) {
+    if (!requestId || !ObjectId.isValid(requestId)) {
       return NextResponse.json({
         success: false,
         message: 'ID de demande invalide'
@@ -128,10 +129,11 @@ export async function GET(request, { params }) {
     }
     
     // Récupérer l'ID de la demande depuis les paramètres
-    const requestId = params.requestId;
+    // CORRECTION: utiliser demandeid au lieu de requestId
+    const requestId = params.demandeid;
     
     // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(requestId)) {
+    if (!requestId || !ObjectId.isValid(requestId)) {
       return NextResponse.json({
         success: false,
         message: 'ID de demande invalide'

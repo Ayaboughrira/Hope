@@ -266,7 +266,7 @@ const MesAnimaux = () => {
                     {/* Filtre par espèce */}
                     <div className={styles.filterGroup}>
                       <label htmlFor="species-filter" className={styles.filterLabel}>
-                        Espèce
+                        Species
                       </label>
                       <select
                         id="species-filter"
@@ -395,7 +395,7 @@ const MesAnimaux = () => {
                         <div className={styles.animalDetail}>
                           <span className={styles.detailLabel}>Age:</span>
                           <span className={styles.detailValue}>
-                            {animal.age ? `${animal.age} years ${animal.age > 1 ? 's' : ''}` : "Non spécifié"}
+                            {animal.age ? `${animal.age} years` : "Not specified"}
                           </span>
                         </div>
                         

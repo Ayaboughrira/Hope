@@ -3,7 +3,7 @@ import { connectDB } from '../../config/mongodb';
 import cloudinary from '../../config/cloudinary';
 import { writeFile, mkdir, unlink } from 'fs/promises';
 import path from 'path';
-
+import { ObjectId } from 'mongodb';
 
 // Constants de pagination par défaut
 const DEFAULT_PAGE = 1;
@@ -23,9 +23,10 @@ export async function GET(req) {
     const minPrice = parseFloat(url.searchParams.get('minPrice') || 0);
     const maxPrice = parseFloat(url.searchParams.get('maxPrice') || Number.MAX_SAFE_INTEGER);
     const searchTerm = url.searchParams.get('search') || '';
-    const category = url.searchParams.get('category') || '';
+    const typeId = url.searchParams.get('typeId') || ''; // Filtrer par type
+    const animalrieId = url.searchParams.get('animalrieId') || ''; // Corriger le nom du paramètre
     
-    console.log(`Paramètres de requête: page=${page}, limit=${limit}, minPrice=${minPrice}, maxPrice=${maxPrice}, search=${searchTerm}, category=${category}`);
+    console.log(`Paramètres de requête: page=${page}, limit=${limit}, minPrice=${minPrice}, maxPrice=${maxPrice}, search=${searchTerm}, typeId=${typeId}, animalrieId=${animalrieId}`);
     
     // Valider les paramètres
     if (isNaN(page) || page < 1) {
@@ -43,8 +44,7 @@ export async function GET(req) {
     const db = await connectDB();
     console.log('Connexion à MongoDB réussie');
     
-    // Construire la requête de filtrage avec une approche plus robuste
-    // Gérer à la fois les champs price et prix
+    // Construire la requête de filtrage
     let query = {};
     
     // Ajouter la condition de prix
@@ -53,18 +53,24 @@ export async function GET(req) {
       { prix: { $gte: minPrice, $lte: maxPrice } }
     ];
     
-    // Ajouter le filtre par catégorie si spécifié
-    if (category) {
-      query.category = category;
+    // Ajouter le filtre par type si spécifié
+    if (typeId) {
+      query.typeId = typeId;
+    }
+    
+    // Corriger le nom du champ pour l'animalrie
+    if (animalrieId) {
+      query.animalrieId = animalrieId;
     }
     
     // Ajouter la recherche textuelle si un terme est fourni
     if (searchTerm && searchTerm.trim() !== '') {
-      // Remplacer la condition $or existante par une nouvelle qui combine prix et recherche
       const searchRegex = { $regex: searchTerm, $options: 'i' };
       query = {
         $and: [
           { $or: query.$or }, // Conserver les conditions de prix
+          ...(typeId ? [{ typeId: typeId }] : []), // Conserver le filtre type
+          ...(animalrieId ? [{ animalrieId: animalrieId }] : []), // Corriger le nom du champ
           { $or: [
               { label: searchRegex },
               { libelle: searchRegex },
@@ -74,16 +80,52 @@ export async function GET(req) {
           }
         ]
       };
+    } else if (typeId || animalrieId) {
+      // Si pas de recherche textuelle mais des filtres type/animalrie
+      const conditions = [{ $or: query.$or }];
+      if (typeId) conditions.push({ typeId: typeId });
+      if (animalrieId) conditions.push({ animalrieId: animalrieId }); // Corriger le nom du champ
+      
+      query = { $and: conditions };
     }
     
     console.log('Requête MongoDB:', JSON.stringify(query, null, 2));
     
-    // Exécuter la requête avec pagination
+    // Exécuter la requête avec pagination et jointure avec les types et animalries
     const produits = await db.collection('produits')
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
+      .aggregate([
+        { $match: query },
+        // Jointure avec la collection types
+        {
+          $lookup: {
+            from: 'type',
+            localField: 'typeId',
+            foreignField: '_id',
+            as: 'type'
+          }
+        },
+        // Jointure avec la collection animalrie (corriger le nom)
+        {
+          $lookup: {
+            from: 'animalrie',
+            localField: 'animalrieId', // Corriger le nom du champ local
+            foreignField: '_id',
+            as: 'animalrie'
+          }
+        },
+        // Dérouler les tableaux pour avoir un objet simple
+        {
+          $addFields: {
+            type: { $arrayElemAt: ['$type', 0] },
+            animalrie: { $arrayElemAt: ['$animalrie', 0] } // Corriger le nom
+          }
+        },
+        // Trier par date de création (plus récent d'abord)
+        { $sort: { createdAt: -1 } },
+        // Pagination
+        { $skip: skip },
+        { $limit: limit }
+      ])
       .toArray();
     
     console.log(`Produits trouvés: ${produits.length}`);
@@ -98,36 +140,31 @@ export async function GET(req) {
     
     // Normaliser les produits pour qu'ils soient compatibles avec le frontend
     const normalizedProducts = produits.map(product => {
-      // S'assurer que tous les champs nécessaires sont présents et normalisés
       const normalizedProduct = {
         ...product,
         _id: product._id,
         label: product.label || product.libelle || '',
-        // Normaliser le prix en choisissant d'abord price, puis prix
         price: parseFloat(product.price !== undefined ? product.price : (product.prix || 0)),
-        // Conserver le champ prix si présent pour la rétrocompatibilité
         prix: parseFloat(product.prix !== undefined ? product.prix : (product.price || 0)),
-        // Normaliser la description
         description: product.description || product.descriptionProduit || '',
-        // Conserver descriptionProduit si présent pour la rétrocompatibilité
         descriptionProduit: product.descriptionProduit || product.description || '',
-        // Normaliser l'image
         image: product.image || product.photosProduit || '',
         photosProduit: product.photosProduit || product.image || '',
-        // Autres champs
-        category: product.category || '',
         promotion: parseFloat(product.promotion || 0),
-        animalerieId: product.animalerieId || null
+        typeId: product.typeId || null,
+        animalrieId: product.animalrieId || null, // Corriger le nom
+        // Informations sur le type
+        typeName: product.type?.nom || 'Non spécifié',
+        typeDescription: product.type?.description || '',
+        // Informations sur l'animalrie (corriger le nom)
+        animalrieName: product.animalrie?.nom || product.animalrie?.name || 'Non spécifié',
+        animalrieEmail: product.animalrie?.email || '',
+        animalrieAdresse: product.animalrie?.adresse || ''
       };
-      
-      // Pour le débogage
-      //console.log(`Produit normalisé ${normalizedProduct._id}:`, 
-      //  { price: normalizedProduct.price, desc: normalizedProduct.description?.substring(0, 20) });
       
       return normalizedProduct;
     });
     
-    // Format de réponse compatible avec le frontend
     return NextResponse.json({
       success: true,
       data: normalizedProducts,
@@ -141,7 +178,7 @@ export async function GET(req) {
     
   } catch (error) {
     console.error(`Erreur lors de la récupération des produits: ${error.message}`);
-    console.error(error.stack); // Afficher la stack trace pour un meilleur débogage
+    console.error(error.stack);
     return NextResponse.json(
       { success: false, message: error.message || 'Erreur lors de la récupération des produits' },
       { status: 500 }
@@ -154,6 +191,8 @@ export async function GET(req) {
  */
 export async function POST(req) {
   try {
+    console.log('Début de la création d\'un nouveau produit');
+    
     // Utiliser l'API formData() native
     const formData = await req.formData();
     
@@ -162,13 +201,61 @@ export async function POST(req) {
     const price = formData.get('price');
     const promotion = formData.get('promotion');
     const description = formData.get('description');
-    const category = formData.get('category');
+    const typeId = formData.get('typeId'); // Récupérer typeId
     const imageFile = formData.get('image');
-    const animalerieId = formData.get('animalerieId');
+    const animalrieId = formData.get('animalrieId'); // Corriger le nom du paramètre
+    
+    console.log('Données reçues:', {
+      label,
+      price,
+      promotion,
+      description,
+      typeId,
+      animalrieId, // Affichage avec le nom corrigé
+      hasImage: !!imageFile
+    });
+    
+    // Validation des données requises (SUPPRESSION de la vérification animalrieId obligatoire)
+    if (!label || !price || !description || !typeId) {
+      return NextResponse.json(
+        { success: false, message: 'Tous les champs obligatoires doivent être remplis' },
+        { status: 400 }
+      );
+    }
+    
+    // Connexion à MongoDB
+    const db = await connectDB();
+    console.log('Connexion à MongoDB réussie');
+    
+    // Vérifier que le type existe
+    const typeExists = await db.collection('type').findOne({ _id: new ObjectId(typeId) });
+    if (!typeExists) {
+      return NextResponse.json(
+        { success: false, message: 'Le type de produit spécifié n\'existe pas' },
+        { status: 400 }
+      );
+    }
+    console.log('Type vérifié:', typeExists);
+    
+    // Vérifier que l'animalrie existe SEULEMENT si un ID est fourni
+    if (animalrieId) {
+      const animalrieExists = await db.collection('animalrie').findOne({ _id: new ObjectId(animalrieId) });
+      if (!animalrieExists) {
+        return NextResponse.json(
+          { success: false, message: 'L\'animalrie spécifiée n\'existe pas' },
+          { status: 400 }
+        );
+      }
+      console.log('Animalrie vérifiée:', animalrieExists);
+    } else {
+      console.log('Aucun animalrieId fourni - produit sera créé sans association');
+    }
     
     // Uploader l'image à Cloudinary si présente
     let imageUrl = null;
     if (imageFile && typeof imageFile.arrayBuffer === 'function' && imageFile.size > 0) {
+      console.log('Upload de l\'image en cours...');
+      
       // Créer un dossier temporaire s'il n'existe pas
       const tmpDir = path.join(process.cwd(), 'tmp');
       await mkdir(tmpDir, { recursive: true });
@@ -187,42 +274,71 @@ export async function POST(req) {
       });
       
       imageUrl = result.secure_url;
+      console.log('Image uploadée:', imageUrl);
       
       // Supprimer le fichier temporaire
       await unlink(tempFilePath);
     }
     
-    // Connexion à MongoDB
-    const db = await connectDB();
-    
-    // Préparer les données du produit avec tous les champs nécessaires pour la compatibilité frontend
+    // Préparer les données du produit
     const parsedPrice = parseFloat(price);
     const parsedPromotion = promotion ? parseFloat(promotion) : 0;
     
     const productData = {
-      // Stocker les données sous tous les formats utilisés pour assurer la compatibilité
       label: label,
       price: parsedPrice,
       promotion: parsedPromotion,
       description: description,
-      category: category,
-      photosProduit: imageUrl, 
-      image: imageUrl, // Ajout pour compatibilité
-      animalerieId: animalerieId || null,
-      createdAt: new Date()
+      typeId: new ObjectId(typeId), // Référence vers la collection types
+      animalrieId: animalrieId ? new ObjectId(animalrieId) : null, // Corriger le nom du champ
+      image: imageUrl,
+      photosProduit: imageUrl, // Pour la compatibilité
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
+    
+    console.log('Données du produit à insérer:', productData);
     
     // Insérer le document dans la collection 'produits'
     const result = await db.collection('produits').insertOne(productData);
+    console.log('Produit inséré avec l\'ID:', result.insertedId);
     
-    // Récupérer le produit complet pour le renvoyer
-    const insertedProduct = await db.collection('produits').findOne({ _id: result.insertedId });
+    // Récupérer le produit complet avec les informations du type et de l'animalrie
+    const insertedProduct = await db.collection('produits')
+      .aggregate([
+        { $match: { _id: result.insertedId } },
+        {
+          $lookup: {
+            from: 'type',
+            localField: 'typeId',
+            foreignField: '_id',
+            as: 'type'
+          }
+        },
+        {
+          $lookup: {
+            from: 'animalrie', // Nom de collection correct
+            localField: 'animalrieId', // Nom de champ correct
+            foreignField: '_id',
+            as: 'animalrie'
+          }
+        },
+        {
+          $addFields: {
+            type: { $arrayElemAt: ['$type', 0] },
+            animalrie: { $arrayElemAt: ['$animalrie', 0] } // Nom correct
+          }
+        }
+      ])
+      .toArray();
+    
+    console.log('Produit créé avec succès:', insertedProduct[0]);
     
     return NextResponse.json({ 
       success: true, 
       message: 'Produit créé avec succès', 
       productId: result.insertedId,
-      product: insertedProduct
+      product: insertedProduct[0]
     });
     
   } catch (error) {

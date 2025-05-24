@@ -1,192 +1,152 @@
-// app/api/campaigns/[id]/route.js
+// app/api/compagne/[id]/route.js
 import { NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
 import { connectDB } from '../../../config/mongodb';
-import cloudinary, { deleteCloudinaryFile } from '../../../config/cloudinary';
+import { ObjectId } from 'mongodb';
 
-// Récupérer une campagne spécifique
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
-    
-    // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'ID de campagne invalide' }, { status: 400 });
-    }
-    
-    const db = await connectDB();
-    const campaignsCollection = db.collection('campaigns');
-    
-    // Récupérer la campagne par son ID
-    const campaign = await campaignsCollection.findOne({ _id: new ObjectId(id) });
-    
-    if (!campaign) {
-      return NextResponse.json({ error: 'Campagne non trouvée' }, { status: 404 });
-    }
-    
-    return NextResponse.json({ campaign }, { status: 200 });
-  } catch (error) {
-    console.error('Erreur lors de la récupération de la campagne:', error);
-    return NextResponse.json({ 
-      error: 'Une erreur est survenue lors de la récupération de la campagne',
-      details: error.message
-    }, { status: 500 });
-  }
-}
-
-// Mettre à jour une campagne
-export async function PUT(request, { params }) {
-  try {
-    const { id } = params;
-    
-    // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'ID de campagne invalide' }, { status: 400 });
-    }
-    
-    const formData = await request.formData();
-    
-    // Extraire les données de base à mettre à jour
-    const updateData = {
-      title: formData.get('title'),
-      startDate: formData.get('startDate'),
-      endDate: formData.get('endDate'),
-      startTime: formData.get('startTime'),
-      location: formData.get('location'),
-      description: formData.get('description'),
-      objective: formData.get('objective'),
-      email: formData.get('email'),
-      phone: formData.get('phone') || '',
-      updatedAt: new Date()
-    };
-    
-    // Éliminer les champs vides
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] === null || updateData[key] === undefined) {
-        delete updateData[key];
-      }
-    });
-    
     // Connexion à la base de données
     const db = await connectDB();
-    const campaignsCollection = db.collection('campaigns');
-    
-    // Récupérer la campagne existante
-    const existingCampaign = await campaignsCollection.findOne({ _id: new ObjectId(id) });
-    
-    if (!existingCampaign) {
-      return NextResponse.json({ error: 'Campagne non trouvée' }, { status: 404 });
+    const campaignId = params.id;
+
+    // Vérifier si l'ID est valide
+    if (!ObjectId.isValid(campaignId)) {
+      return NextResponse.json(
+        { error: 'ID de campagne invalide' },
+        { status: 400 }
+      );
     }
-    
-    // Gérer les nouvelles images si présentes
-    const handleImages = formData.get('handleImages');
-    
-    if (handleImages === 'replace') {
-      // Supprimer les anciennes images de Cloudinary
-      if (existingCampaign.imageIds && existingCampaign.imageIds.length > 0) {
-        for (const publicId of existingCampaign.imageIds) {
-          await deleteCloudinaryFile(publicId);
+
+    // Récupérer la campagne spécifique avec les informations complètes de l'association
+    const campaign = await db.collection('campaigns').aggregate([
+      {
+        $match: {
+          _id: new ObjectId(campaignId),
+          status: 'active'
         }
-      }
-      
-      // Ajouter les nouvelles images
-      const imageFiles = formData.getAll('images');
-      const imageUrls = [];
-      const imageIds = [];
-      
-      if (imageFiles && imageFiles.length > 0) {
-        // Limiter à 3 images
-        const filesToUpload = imageFiles.slice(0, 3);
-        
-        for (const file of filesToUpload) {
-          if (file.size > 0) {
-            const arrayBuffer = await file.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            const cloudinaryDataUri = `data:${file.type};base64,${buffer.toString('base64')}`;
-            
-            const uploadResult = await cloudinary.uploader.upload(cloudinaryDataUri, {
-              folder: 'hope-campaigns',
-              resource_type: 'image'
-            });
-            
-            imageUrls.push(uploadResult.secure_url);
-            imageIds.push(uploadResult.public_id);
+      },
+      {
+        $lookup: {
+          from: 'association',
+          localField: 'associationId',
+          foreignField: '_id',
+          as: 'associationInfo'
+        }
+      },
+      {
+        $addFields: {
+          // Données de l'association
+          association: {
+            $arrayElemAt: ['$associationInfo.associationName', 0]
+          },
+          associationEmail: {
+            $arrayElemAt: ['$associationInfo.email', 0]
+          },
+          associationPhone: {
+            $arrayElemAt: ['$associationInfo.phone', 0]
+          },
+          associationAddress: {
+            $arrayElemAt: ['$associationInfo.address', 0]
           }
         }
+      },
+      {
+        $project: {
+          associationInfo: 0 // Exclure les détails complets de l'association
+        }
       }
+    ]).toArray();
+
+    if (campaign.length === 0) {
+      return NextResponse.json(
+        { error: 'Campagne non trouvée' },
+        { status: 404 }
+      );
+    }
+
+    const foundCampaign = campaign[0];
+
+    // Formatter les données pour le frontend
+    const formattedCampaign = {
+      id: foundCampaign._id.toString(),
+      name: foundCampaign.title,
+      association: foundCampaign.association || foundCampaign.associationName,
+      location: foundCampaign.location,
+      startDate: foundCampaign.startDate,
+      endDate: foundCampaign.endDate,
+      startTime: foundCampaign.startTime,
+      description: foundCampaign.description,
+      objective: foundCampaign.objective,
+      image: foundCampaign.images && foundCampaign.images.length > 0 
+        ? foundCampaign.images[0].url 
+        : '/api/placeholder/400/300',
+      images: foundCampaign.images || [],
       
-      updateData.imageUrls = imageUrls;
-      updateData.imageIds = imageIds;
-    }
-    
-    // Mettre à jour la campagne
-    const result = await campaignsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateData }
-    );
-    
-    if (result.matchedCount === 0) {
-      return NextResponse.json({ error: 'Campagne non trouvée' }, { status: 404 });
-    }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Campagne mise à jour avec succès'
-    }, { status: 200 });
-    
+      // Informations de contact - priorité : campagne > association
+      email: foundCampaign.email || foundCampaign.associationEmail,
+      phone: foundCampaign.phone || foundCampaign.associationPhone,
+      address: foundCampaign.address || foundCampaign.associationAddress,
+      
+      // Informations supplémentaires
+      associationId: foundCampaign.associationId?.toString(),
+      createdAt: foundCampaign.createdAt,
+      participantsCount: foundCampaign.participantsIds ? foundCampaign.participantsIds.length : 0
+    };
+
+    return NextResponse.json(formattedCampaign);
+
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de la campagne:', error);
-    return NextResponse.json({ 
-      error: 'Une erreur est survenue lors de la mise à jour de la campagne',
-      details: error.message
-    }, { status: 500 });
+    console.error('Erreur lors de la récupération de la campagne:', error);
+    return NextResponse.json(
+      { error: 'Erreur interne du serveur' },
+      { status: 500 }
+    );
   }
 }
 
-// Supprimer une campagne
-export async function DELETE(request, { params }) {
+// API pour mettre à jour une campagne (pour les associations)
+export async function PUT(request, { params }) {
   try {
-    const { id } = params;
-    
-    // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'ID de campagne invalide' }, { status: 400 });
+    const campaignId = params.id;
+    const updateData = await request.json();
+
+    if (!ObjectId.isValid(campaignId)) {
+      return NextResponse.json(
+        { error: 'ID de campagne invalide' },
+        { status: 400 }
+      );
     }
-    
+
     const db = await connectDB();
-    const campaignsCollection = db.collection('campaigns');
-    
-    // Récupérer la campagne pour avoir les IDs des images
-    const campaign = await campaignsCollection.findOne({ _id: new ObjectId(id) });
-    
-    if (!campaign) {
-      return NextResponse.json({ error: 'Campagne non trouvée' }, { status: 404 });
-    }
-    
-    // Supprimer les images de Cloudinary
-    if (campaign.imageIds && campaign.imageIds.length > 0) {
-      for (const publicId of campaign.imageIds) {
-        await deleteCloudinaryFile(publicId);
+
+    // Mettre à jour la campagne
+    const result = await db.collection('campaigns').updateOne(
+      { _id: new ObjectId(campaignId) },
+      { 
+        $set: {
+          ...updateData,
+          updatedAt: new Date()
+        }
       }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { error: 'Campagne non trouvée' },
+        { status: 404 }
+      );
     }
-    
-    // Supprimer la campagne de la base de données
-    const result = await campaignsCollection.deleteOne({ _id: new ObjectId(id) });
-    
-    if (result.deletedCount === 0) {
-      return NextResponse.json({ error: 'Campagne non trouvée' }, { status: 404 });
-    }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Campagne supprimée avec succès' 
-    }, { status: 200 });
-    
+
+    return NextResponse.json({
+      success: true,
+      message: 'Campagne mise à jour avec succès'
+    });
+
   } catch (error) {
-    console.error('Erreur lors de la suppression de la campagne:', error);
-    return NextResponse.json({ 
-      error: 'Une erreur est survenue lors de la suppression de la campagne',
-      details: error.message
-    }, { status: 500 });
+    console.error('Erreur lors de la mise à jour de la campagne:', error);
+    return NextResponse.json(
+      { error: 'Erreur interne du serveur' },
+      { status: 500 }
+    );
   }
 }

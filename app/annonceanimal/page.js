@@ -5,39 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import styles from '../styles/annonceanimal.module.css';
 
-// Données prédéfinies pour les espèces et races
-const predefinedSpecies = [
-  { _id: 'dog', name: 'Dogs' },
-  { _id: 'cat', name: 'Cats' },
-  { _id: 'bird', name: 'Birds' }
-];
-
-const predefinedRaces = [
-  // Races de chiens
-  { _id: 'dog_labrador', name: 'Labrador Retriever', speciesId: 'dog' },
-  { _id: 'dog_germanshepherd', name: 'Berger Allemand', speciesId: 'dog' },
-  { _id: 'dog_goldenretriever', name: 'Golden Retriever', speciesId: 'dog' },
-  { _id: 'dog_bulldog', name: 'Bulldog', speciesId: 'dog' },
-  { _id: 'dog_beagle', name: 'Beagle', speciesId: 'dog' },
-  { _id: 'dog_poodle', name: 'Caniche', speciesId: 'dog' },
-  
-  // Races de chats
-  { _id: 'cat_persian', name: 'Persan', speciesId: 'cat' },
-  { _id: 'cat_siamese', name: 'Siamois', speciesId: 'cat' },
-  { _id: 'cat_mainecoon', name: 'Maine Coon', speciesId: 'cat' },
-  { _id: 'cat_ragdoll', name: 'Ragdoll', speciesId: 'cat' },
-  { _id: 'cat_bengal', name: 'Bengal', speciesId: 'cat' },
-  { _id: 'cat_sphynx', name: 'Sphynx', speciesId: 'cat' },
-  
-  // Races d'oiseaux
-  { _id: 'bird_canary', name: 'Canari', speciesId: 'bird' },
-  { _id: 'bird_parakeet', name: 'Perruche', speciesId: 'bird' },
-  { _id: 'bird_cockatiel', name: 'Cockatiel', speciesId: 'bird' },
-  { _id: 'bird_lovebird', name: 'Inséparable', speciesId: 'bird' },
-  { _id: 'bird_finch', name: 'Pinson', speciesId: 'bird' },
-  { _id: 'bird_parrot', name: 'Perroquet', speciesId: 'bird' }
-];
-
 const AnimalForm = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -45,8 +12,10 @@ const AnimalForm = () => {
   const [formData, setFormData] = useState({
     // Info sur l'animal
     animalName: '',
-    speciesId: '', // Remplacé animalType par speciesId
-    raceId: '',    // Remplacé race par raceId
+    speciesId: '',
+    speciesCode: '',
+    raceId: '',
+    raceCode: '',
     age: '',
     gender: '',
     description: '',
@@ -61,7 +30,9 @@ const AnimalForm = () => {
   // États pour les listes déroulantes
   const [species, setSpecies] = useState([]);
   const [races, setRaces] = useState([]);
-  const [filteredRaces, setFilteredRaces] = useState([]);
+  const [selectedSpeciesName, setSelectedSpeciesName] = useState(''); // Pour afficher le nom de l'espèce sélectionnée
+  const [selectedRaceName, setSelectedRaceName] = useState(''); // Pour afficher le nom de la race sélectionnée
+  const [racesLoading, setRacesLoading] = useState(false); // Pour indiquer le chargement des races
   
   const [photos, setPhotos] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -75,7 +46,63 @@ const AnimalForm = () => {
   
   const fileInputRef = useRef(null);
   
-  // Vérifier si l'utilisateur est connecté
+  // Charger les espèces depuis l'API
+  const fetchSpecies = async () => {
+    try {
+      const response = await fetch('/api/species');
+      const result = await response.json();
+      
+      if (result.success) {
+        setSpecies(result.data);
+        console.log('Espèces chargées:', result.data);
+      } else {
+        console.error('Erreur lors du chargement des espèces:', result.message);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des espèces:', error);
+    }
+  };
+  
+  // Charger les races pour une espèce spécifique
+  const fetchRacesBySpecies = async (speciesId) => {
+    if (!speciesId) {
+      setRaces([]);
+      return;
+    }
+    
+    try {
+      setRacesLoading(true);
+      const response = await fetch(`/api/races?speciesId=${speciesId}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        // Ajout de logging pour débugger
+        console.log('Races chargées:', result.data);
+        
+        // Vérifier que chaque race a un nom d'affichage
+        const processedRaces = result.data.map(race => {
+          if (!race.name && race.code) {
+            // Si le nom est manquant mais que le code existe, extraire le nom de la race du code
+            const parts = race.code.split('-');
+            race.name = parts.length > 1 ? parts[1] : race.code;
+          }
+          return race;
+        });
+        
+        setRaces(processedRaces);
+      } else {
+        console.error('Erreur lors du chargement des races:', result.message);
+        setRaces([]);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des races:', error);
+      setRaces([]);
+    } finally {
+      setRacesLoading(false);
+    }
+  };
+
+  // Vérifier si l'utilisateur est connecté et charger les données
   useEffect(() => {
     if (status === 'loading') return;
     
@@ -94,22 +121,20 @@ const AnimalForm = () => {
       }));
     }
     
-    // Charger les espèces et les races depuis les données prédéfinies
-    setSpecies(predefinedSpecies);
-    setRaces(predefinedRaces);
+    // Charger les espèces depuis l'API
+    fetchSpecies();
     setIsLoading(false);
     
   }, [session, status, router]);
   
-  // Filtrer les races en fonction de l'espèce sélectionnée
+  // Charger les races lorsqu'une espèce est sélectionnée
   useEffect(() => {
     if (formData.speciesId) {
-      const filtered = races.filter(race => race.speciesId === formData.speciesId);
-      setFilteredRaces(filtered);
+      fetchRacesBySpecies(formData.speciesId);
     } else {
-      setFilteredRaces([]);
+      setRaces([]);
     }
-  }, [formData.speciesId, races]);
+  }, [formData.speciesId]);
   
   // Mise à jour des classes des sections lors du changement d'étape
   useEffect(() => {
@@ -137,17 +162,44 @@ const AnimalForm = () => {
   
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
     
-    // Réinitialiser raceId si l'espèce change
     if (name === 'speciesId') {
-      setFormData(prev => ({
-        ...prev,
-        raceId: ''
-      }));
+      // Trouver l'espèce sélectionnée pour récupérer son code
+      const selectedSpecies = species.find(s => s._id === value);
+      
+      if (selectedSpecies) {
+        // Utiliser le champ 'code' comme nom d'affichage de l'espèce
+        setSelectedSpeciesName(selectedSpecies.code);
+        setFormData({
+          ...formData,
+          speciesId: value,
+          speciesCode: selectedSpecies.code,
+          raceId: '',  // Réinitialiser race quand l'espèce change
+          raceCode: '' // Réinitialiser le code de race
+        });
+        setSelectedRaceName(''); // Réinitialiser le nom de race affiché
+        console.log(`Espèce sélectionnée: ${selectedSpecies.code} (ID: ${selectedSpecies._id})`);
+      }
+    } else if (name === 'raceId') {
+      // Trouver la race sélectionnée pour récupérer son code et son nom
+      const selectedRace = races.find(r => r._id === value);
+      
+      if (selectedRace) {
+        // Utiliser le champ 'name' comme nom d'affichage de la race ou le code si le nom n'existe pas
+        const displayName = selectedRace.name || selectedRace.code || "Race sans nom";
+        setSelectedRaceName(displayName);
+        setFormData({
+          ...formData,
+          raceId: value,
+          raceCode: selectedRace.code
+        });
+        console.log(`Race sélectionnée: ${displayName} (${selectedRace.code})`);
+      }
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
     }
   };
   
@@ -253,7 +305,9 @@ const AnimalForm = () => {
         setFormData({
           animalName: '',
           speciesId: '',
+          speciesCode: '',
           raceId: '',
+          raceCode: '',
           age: '',
           gender: '',
           description: '',
@@ -269,6 +323,8 @@ const AnimalForm = () => {
         setPhotos([]);
         setCurrentStep(1);
         setShowModal(false);
+        setSelectedSpeciesName('');
+        setSelectedRaceName('');
         
         // Rediriger vers la page des annonces
         router.push('/catalogueanimal');
@@ -352,10 +408,12 @@ const AnimalForm = () => {
               required
               className={styles['select-field']}
             >
-              <option value="">Select a species</option>
+              <option value="">
+                {selectedSpeciesName ? selectedSpeciesName : "Select a species"}
+              </option>
               {species.map(specie => (
                 <option key={specie._id} value={specie._id}>
-                  {specie.name}
+                  {specie.code}
                 </option>
               ))}
             </select>
@@ -368,14 +426,20 @@ const AnimalForm = () => {
               value={formData.raceId}
               onChange={handleChange}
               className={styles['select-field']}
-              disabled={!formData.speciesId || filteredRaces.length === 0}
+              disabled={!formData.speciesId || racesLoading}
             >
-              <option value="">Select a breed </option>
-              {filteredRaces.map(race => (
-                <option key={race._id} value={race._id}>
-                  {race.name}
-                </option>
-              ))}
+              <option value="">
+                {racesLoading ? "Loading breeds..." : selectedRaceName ? selectedRaceName : "Select a breed"}
+              </option>
+              {races.length > 0 ? (
+                races.map(race => (
+                  <option key={race._id} value={race._id}>
+                    {race.name || race.code || "Race sans nom"}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No breeds available for this species</option>
+              )}
             </select>
           </div>
           
