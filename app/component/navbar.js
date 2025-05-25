@@ -114,16 +114,18 @@ const Navbar = () => {
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
+          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
         ];
 
       case 'vet':
         return [
           ...commonLinks,
-          { label: 'Mes patients', href: '/my-patients', icon: <FaStethoscope /> },
+          
           { label: 'Publish Articles', href: '/articleform', icon: <FaNewspaper /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> }
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
+          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
         ];
       case 'association':
         return [
@@ -133,7 +135,8 @@ const Navbar = () => {
           { label: 'Abuse Reports', href: '/', icon: <FaShieldAlt /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> }
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
+          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
         ];
       case 'store':
         return [
@@ -141,7 +144,8 @@ const Navbar = () => {
           { label: 'Publish products', href: '/annoncerproduit', icon: <FaStore /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> }
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
+          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
         ];
       default:
         return commonLinks;
@@ -170,7 +174,7 @@ const Navbar = () => {
           <Link href="/" className={styles.logoWrapper}>
             <div className={styles.logo}>
               <Image
-                src="/images/" 
+                src="/images/logo1.png" 
                 alt="Pet Adoption Logo"
                 width={150}
                 height={50}

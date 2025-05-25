@@ -1,12 +1,13 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import styles from '../styles/catalogueanimal.module.css'; 
 import Link from 'next/link';
 
 const AnimalCatalog = () => {
-  // State for storing animal data
+  // State pour stocker les données des animaux
   const [animals, setAnimals] = useState([]);
-  // State for filters
+  // State pour les filtres
   const [filters, setFilters] = useState({
     species: 'all',
     race: 'all',
@@ -14,109 +15,128 @@ const AnimalCatalog = () => {
     gender: 'all',
     searchTerm: ''
   });
-  // Loading state
+  // État de chargement
   const [loading, setLoading] = useState(true);
-  // Favorites state
+  // État des favoris (maintenant géré via API)
   const [favorites, setFavorites] = useState({});
-  // Error state
+  // État d'erreur
   const [error, setError] = useState(null);
-  // Species and races data
+  // Données des espèces et races
   const [speciesData, setSpeciesData] = useState([]);
   const [racesData, setRacesData] = useState([]);
-  // Filtered races based on selected species
+  // Races filtrées basées sur l'espèce sélectionnée
   const [filteredRaces, setFilteredRaces] = useState([]);
-  // Loading states for specific data types
+  // États de chargement pour des types de données spécifiques
   const [loadingSpecies, setLoadingSpecies] = useState(true);
   const [loadingRaces, setLoadingRaces] = useState(true);
   const [loadingAnimals, setLoadingAnimals] = useState(true);
 
-  // Fetch Species data
+  // Session NextAuth
+  const { data: session, status } = useSession();
+
+  // Récupérer les données des espèces
   const fetchSpecies = async () => {
     try {
       setLoadingSpecies(true);
       const response = await fetch('/api/species');
       
       if (!response.ok) {
-        throw new Error(`HTTP Error for species: ${response.status}`);
+        throw new Error(`Erreur HTTP pour les espèces: ${response.status}`);
       }
       
       const result = await response.json();
       
       if (result.success) {
-        console.log('Species loaded:', result.data.length);
+        console.log('Espèces chargées:', result.data.length);
         setSpeciesData(result.data);
       } else {
-        throw new Error('Failed to retrieve species data');
+        throw new Error('Échec de la récupération des données d\'espèces');
       }
     } catch (err) {
-      console.error('Error loading species data:', err);
-      setError('Unable to load species data. Please try again later.');
+      console.error('Erreur lors du chargement des données d\'espèces:', err);
+      setError('Impossible de charger les données d\'espèces. Veuillez réessayer plus tard.');
     } finally {
       setLoadingSpecies(false);
     }
   };
 
-  // Fetch Races data
+  // Récupérer les données des races
   const fetchRaces = async () => {
     try {
       setLoadingRaces(true);
       const response = await fetch('/api/races');
       
       if (!response.ok) {
-        throw new Error(`HTTP Error for races: ${response.status}`);
+        throw new Error(`Erreur HTTP pour les races: ${response.status}`);
       }
       
       const result = await response.json();
       
       if (result.success) {
-        console.log('Races loaded:', result.data.length);
+        console.log('Races chargées:', result.data.length);
         setRacesData(result.data);
       } else {
-        throw new Error('Failed to retrieve races data');
+        throw new Error('Échec de la récupération des données de races');
       }
     } catch (err) {
-      console.error('Error loading races data:', err);
-      setError('Unable to load races data. Please try again later.');
+      console.error('Erreur lors du chargement des données de races:', err);
+      setError('Impossible de charger les données de races. Veuillez réessayer plus tard.');
     } finally {
       setLoadingRaces(false);
     }
   };
 
-  // Fetch Animals data
+  // Récupérer les données des animaux
   const fetchAnimals = async () => {
     try {
       setLoadingAnimals(true);
       const response = await fetch('/api/animals');
       
       if (!response.ok) {
-        throw new Error(`HTTP Error for animals: ${response.status}`);
+        throw new Error(`Erreur HTTP pour les animaux: ${response.status}`);
       }
       
       const result = await response.json();
       
       if (result.success) {
-        console.log('Animals loaded:', result.data.length);
+        console.log('Animaux chargés:', result.data.length);
         setAnimals(result.data);
       } else {
-        throw new Error('Failed to retrieve animals data');
+        throw new Error('Échec de la récupération des données d\'animaux');
       }
     } catch (err) {
-      console.error('Error loading animals data:', err);
-      setError('Unable to load animals data. Please try again later.');
+      console.error('Erreur lors du chargement des données d\'animaux:', err);
+      setError('Impossible de charger les données d\'animaux. Veuillez réessayer plus tard.');
     } finally {
       setLoadingAnimals(false);
     }
   };
 
-  // Load all data on component mount
-  useEffect(() => {
-    // Load favorites from localStorage on startup
-    const savedFavorites = localStorage.getItem('animalFavorites');
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
+  // Récupérer les favoris de l'utilisateur connecté
+  const fetchUserFavorites = async () => {
+    if (status === 'authenticated' && session) {
+      try {
+        const response = await fetch('/api/favorites');
+        if (response.ok) {
+          const { success, data } = await response.json();
+          if (success && data) {
+            // Convertir le tableau d'IDs en objet pour une recherche rapide
+            const favoritesObj = {};
+            data.forEach(id => {
+              favoritesObj[id] = true;
+            });
+            setFavorites(favoritesObj);
+          }
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement des favoris:', err);
+      }
     }
-    
-    // Fetch all data in parallel
+  };
+
+  // Charger toutes les données au montage du composant
+  useEffect(() => {
+    // Récupérer toutes les données en parallèle
     Promise.all([
       fetchSpecies(),
       fetchRaces(),
@@ -124,24 +144,29 @@ const AnimalCatalog = () => {
     ]).then(() => {
       setLoading(false);
     }).catch(err => {
-      console.error('Error fetching data:', err);
-      setError('Failed to load necessary data. Please try again later.');
+      console.error('Erreur lors de la récupération des données:', err);
+      setError('Échec du chargement des données nécessaires. Veuillez réessayer plus tard.');
       setLoading(false);
     });
   }, []);
 
-  // Update filtered races when species selection changes
+  // Charger les favoris quand la session change
+  useEffect(() => {
+    fetchUserFavorites();
+  }, [session, status]);
+
+  // Mettre à jour les races filtrées lorsque la sélection d'espèce change
   useEffect(() => {
     if (filters.species === 'all') {
       setFilteredRaces([]);
     } else {
-      // Find the selected species object
+      // Trouver l'objet espèce sélectionné
       const selectedSpecies = speciesData.find(species => 
         species.code === filters.species || species._id === filters.species
       );
       
       if (selectedSpecies) {
-        // Filter races that belong to the selected species
+        // Filtrer les races qui appartiennent à l'espèce sélectionnée
         const speciesIdStr = String(selectedSpecies._id);
         
         const matchingRaces = racesData.filter(race => {
@@ -152,21 +177,21 @@ const AnimalCatalog = () => {
           return raceSpeciesId === speciesIdStr || race.speciesId === selectedSpecies._id;
         });
         
-        console.log(`Found ${matchingRaces.length} races for species ${selectedSpecies.name} (${speciesIdStr})`);
+        console.log(`${matchingRaces.length} races trouvées pour l'espèce ${selectedSpecies.name} (${speciesIdStr})`);
         setFilteredRaces(matchingRaces);
       } else {
-        console.log(`No species found with code ${filters.species}`);
+        console.log(`Aucune espèce trouvée avec le code ${filters.species}`);
         setFilteredRaces([]);
       }
     }
     
-    // Reset race selection when species changes
+    // Réinitialiser la sélection de race lorsque l'espèce change
     if (filters.race !== 'all') {
       setFilters(prev => ({ ...prev, race: 'all' }));
     }
   }, [filters.species, speciesData, racesData]);
 
-  // Filter change handler
+  // Gestionnaire de changement de filtre
   const handleFilterChange = (filterType, value) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -174,7 +199,7 @@ const AnimalCatalog = () => {
     }));
   };
 
-  // Search handler
+  // Gestionnaire de recherche
   const handleSearch = (e) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -182,31 +207,63 @@ const AnimalCatalog = () => {
     }));
   };
 
-  // Toggle favorite
-  const toggleFavorite = (id) => {
-    setFavorites(prev => {
-      const newFavorites = {
-        ...prev,
-        [id]: !prev[id]
-      };
+  // Basculer le favori (maintenant via API)
+  const toggleFavorite = async (animalId) => {
+    // Vérifier si l'utilisateur est connecté
+    if (status !== 'authenticated' || !session) {
+      // Rediriger vers la page de connexion ou afficher un message
+      alert('Vous devez être connecté pour ajouter des favoris');
+      return;
+    }
+
+    try {
+      const isCurrentlyFavorite = favorites[animalId];
+      const action = isCurrentlyFavorite ? 'remove' : 'add';
+
+      const response = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          animalId: animalId,
+          action: action
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
+      const { success, isFavorite } = await response.json();
       
-      // Save to localStorage
-      localStorage.setItem('animalFavorites', JSON.stringify(newFavorites));
-      
-      return newFavorites;
-    });
+      if (success) {
+        // Mettre à jour l'état local
+        setFavorites(prev => ({
+          ...prev,
+          [animalId]: isFavorite
+        }));
+      } else {
+        throw new Error('Échec de la mise à jour des favoris');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des favoris:', error);
+      alert('Erreur lors de la mise à jour des favoris. Veuillez réessayer.');
+    }
   };
 
-  // Get age ranges by species
+  // Obtenir les plages d'âge par espèce
   const getAgeRanges = (species) => {
     switch (species?.toLowerCase()) {
       case 'cat':
+      case 'chat':
         return {
           young: { min: 0, max: 6 },
           adult: { min: 7, max: 10 },
           senior: { min: 11, max: Infinity }
         };
       case 'dog':
+      case 'chien':
         return {
           young: { min: 0, max: 5 },
           adult: { min: 6, max: 8 },
@@ -221,7 +278,7 @@ const AnimalCatalog = () => {
     }
   };
 
-  // Determine the age category of an animal
+  // Déterminer la catégorie d'âge d'un animal
   const getAgeCategory = (animal) => {
     if (!animal.age) return 'unknown';
     
@@ -241,9 +298,9 @@ const AnimalCatalog = () => {
     return 'unknown';
   };
 
-  // Get species display name 
+  // Obtenir le nom d'affichage de l'espèce
   const getSpeciesDisplayName = (speciesId) => {
-    // Try to find the species in the speciesData
+    // Essayer de trouver l'espèce dans les données speciesData
     const species = speciesData.find(s => {
       const sId = typeof s._id === 'object' ? String(s._id) : s._id;
       const specId = typeof speciesId === 'object' ? String(speciesId) : speciesId;
@@ -255,7 +312,7 @@ const AnimalCatalog = () => {
       return species.code;
     }
     
-    // Fallback to basic mapping if species not found
+    // Fallback vers la cartographie de base si l'espèce n'est pas trouvée
     const speciesMap = {
       'dog': 'Chien',
       'cat': 'Chat',
@@ -264,9 +321,9 @@ const AnimalCatalog = () => {
     return speciesMap[speciesId] || speciesId;
   };
 
-  // Get race display name
+  // Obtenir le nom d'affichage de la race
   const getRaceDisplayName = (raceId) => {
-    // Try to find the race in the racesData
+    // Essayer de trouver la race dans les données racesData
     const race = racesData.find(r => {
       const rId = typeof r._id === 'object' ? String(r._id) : r._id;
       const raceIdStr = typeof raceId === 'object' ? String(raceId) : raceId;
@@ -278,23 +335,23 @@ const AnimalCatalog = () => {
       return race.name;
     }
     
-    // If we can't find it, just return the ID or try to format it
+    // Si on ne peut pas le trouver, retourner simplement l'ID ou essayer de le formater
     if (typeof raceId === 'string' && raceId.includes('_')) {
-      return raceId.split('_')[1]; // Return part after underscore
+      return raceId.split('_')[1]; // Retourner la partie après le underscore
     }
     
     return raceId;
   };
 
-  // Filter animals according to criteria
+  // Filtrer les animaux selon les critères
   const filteredAnimals = animals.filter(animal => {
-    // Extract species information in various formats
+    // Extraire les informations d'espèce dans divers formats
     const animalSpeciesId = animal.speciesId;
     const animalSpeciesCode = animal.speciesCode;
     const speciesDetailsId = animal.speciesDetails?._id;
     const speciesDetailsCode = animal.speciesDetails?.code;
     
-    // Extract race information in various formats
+    // Extraire les informations de race dans divers formats
     const animalRaceId = animal.raceId;
     const animalRaceCode = animal.raceCode;
     const raceDetailsId = animal.raceDetails?._id;
@@ -302,20 +359,20 @@ const AnimalCatalog = () => {
     
     const animalName = animal.animalName || '';
     
-    // Filter by species
+    // Filtrer par espèce
     if (filters.species !== 'all') {
-      // Find the selected species in our data
+      // Trouver l'espèce sélectionnée dans nos données
       const selectedSpecies = speciesData.find(species => 
         species.code === filters.species || species._id === filters.species
       );
       
       if (!selectedSpecies) return false;
       
-      // Convert IDs to strings for comparison
+      // Convertir les IDs en chaînes pour la comparaison
       const selectedSpeciesId = String(selectedSpecies._id);
       const selectedSpeciesCode = selectedSpecies.code;
       
-      // Compare with animal's species in various formats
+      // Comparer avec l'espèce de l'animal dans divers formats
       const animalSpeciesIdStr = typeof animalSpeciesId === 'object' ? 
                                String(animalSpeciesId) : 
                                animalSpeciesId;
@@ -333,20 +390,20 @@ const AnimalCatalog = () => {
       if (!speciesMatch) return false;
     }
     
-    // Filter by race
+    // Filtrer par race
     if (filters.race !== 'all') {
-      // Find the selected race in our data
+      // Trouver la race sélectionnée dans nos données
       const selectedRace = racesData.find(race => 
         race.code === filters.race || race._id === filters.race
       );
       
       if (!selectedRace) return false;
       
-      // Convert IDs to strings for comparison
+      // Convertir les IDs en chaînes pour la comparaison
       const selectedRaceId = String(selectedRace._id);
       const selectedRaceCode = selectedRace.code;
       
-      // Compare with animal's race in various formats
+      // Comparer avec la race de l'animal dans divers formats
       const animalRaceIdStr = typeof animalRaceId === 'object' ? 
                             String(animalRaceId) : 
                             animalRaceId;
@@ -364,37 +421,38 @@ const AnimalCatalog = () => {
       if (!raceMatch) return false;
     }
     
-    // Filter by age using the getAgeCategory function
+    // Filtrer par âge en utilisant la fonction getAgeCategory
     if (filters.age !== 'all' && getAgeCategory(animal) !== filters.age) return false;
     
-    // Filter by gender
+    // Filtrer par sexe
     if (filters.gender !== 'all' && animal.gender?.toLowerCase() !== filters.gender) return false;
     
-    // Search by term
+    // Rechercher par terme
     if (filters.searchTerm && !animalName.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
     
     return true;
   });
 
-  // Get gender options
+  // Obtenir les options de sexe
   const genderOptions = ['all', 'male', 'female'];
 
   return (
     <div className={styles.animalCatalog}>
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
-          <h1>Animal Catalog</h1>
+          <h1>Catalogue d'Animaux</h1>
           <div className={styles.adoptionInfo}>
-            <h2>Responsible Adoption</h2>
+            <h2>Adoption Responsable</h2>
             <p>
-              Adopting an animal is a long-term commitment that requires love, patience and responsibility. 
-              Each animal deserves a loving home where it will be cared for and respected. Before adopting, 
-              make sure you are prepared to offer the necessary time, space and resources to ensure the well-being 
-              of your new friend. Together, we can create happy adoptions that last a lifetime.
+              Adopter un animal est un engagement à long terme qui nécessite amour, patience et responsabilité. 
+              Chaque animal mérite un foyer aimant où il sera soigné et respecté. Avant d'adopter, 
+              assurez-vous d'être prêt à offrir le temps, l'espace et les ressources nécessaires pour assurer le bien-être 
+              de votre nouveau ami. Ensemble, nous pouvons créer des adoptions heureuses qui durent toute une vie.
             </p>
           </div>
         </div>
       </div>
+      
       
       <div className={styles.mainContent}>
         <div className={styles.sidebar}>
