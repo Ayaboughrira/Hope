@@ -29,7 +29,7 @@ const Signup = () => {
   // Redirection si déjà connecté
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      router.push('/');  // Redirection vers la page d'accueil
+      router.push('/');  
     }
   }, [status, session, router]);
   
@@ -383,7 +383,7 @@ const Signup = () => {
     return (
       <div className={styles.authContainer}>
         <div className={redirectStyles.redirectMessage}>
-          Vous êtes déjà connecté. Redirection vers la page d'accueil...
+          You are logged in. Redirecting to the home page...
         </div>
       </div>
     );

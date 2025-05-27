@@ -129,7 +129,8 @@ export default function ProductForm() {
     try {
       // Debug: afficher les informations de session
       console.log('Session user:', session.user);
-      console.log('animalrieId:', session.user?.animalrieId);
+      console.log('User ID:', session.user?.id);
+      console.log('User Type:', session.user?.userType);
       
       // Préparer les données du formulaire avec FormData pour l'upload d'image
       const formDataToSend = new FormData();
@@ -139,12 +140,14 @@ export default function ProductForm() {
       formDataToSend.append('description', formData.description);
       formDataToSend.append('typeId', formData.typeId);
       
-      // Corriger le nom de la propriété : animalrieId au lieu de animalerieId
-      if (session.user?.animalrieId) {
-        formDataToSend.append('animalrieId', session.user.animalrieId);
-        console.log('animalrieId ajouté:', session.user.animalrieId);
+      // CORRECTION: Utiliser session.user.id au lieu de session.user.animalrieId
+      // Et vérifier que l'utilisateur est bien de type 'store' (animalrie)
+      if (session.user?.id && session.user?.userType === 'store') {
+        formDataToSend.append('animalrieId', session.user.id);
+        console.log('animalrieId ajouté:', session.user.id);
       } else {
-        console.log('Aucun animalrieId trouvé dans la session');
+        console.log('Utilisateur non autorisé ou non connecté en tant qu\'animalrie');
+        console.log('Type d\'utilisateur:', session.user?.userType);
       }
       
       if (formData.image) {
@@ -213,22 +216,27 @@ export default function ProductForm() {
     );
   }
 
+  // Vérifier que l'utilisateur est bien une animalrie
+  if (session.user?.userType !== 'store') {
+    return (
+      <div className={styles.formContainer}>
+        <div className={styles.errorMessage}>
+          <p>Seules les animalries peuvent publier des produits.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.formContainer}>
-      <h1 className={styles.title}>Publier un produit</h1>
-      <p className={styles.subtitle}>
-        Utilisateur: {session.user?.name || session.user?.email}
-        {/* Corriger aussi l'affichage de l'animalrie */}
-        {session.user?.animalrieId && (
-          <span> (Animalrie ID: {session.user.animalrieId})</span>
-        )}
-      </p>
+      <h1 className={styles.title}>Publish product</h1>
+      
       
       {error && <div className={styles.errorMessage}>{error}</div>}
       
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label htmlFor="label">Libellé du produit :</label>
+          <label htmlFor="label">Product label :</label>
           <input
             type="text"
             id="label"
@@ -242,7 +250,7 @@ export default function ProductForm() {
         
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label htmlFor="price">Prix :</label>
+            <label htmlFor="price">Price :</label>
             <input
               type="number"
               id="price"
@@ -285,7 +293,7 @@ export default function ProductForm() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="typeId">Type de produit :</label>
+          <label htmlFor="typeId">Product Type :</label>
           <select
             id="typeId"
             name="typeId"
@@ -294,7 +302,7 @@ export default function ProductForm() {
             required
             className={styles.select}
           >
-            <option value="">Sélectionner un type</option>
+            <option value="">Select a type</option>
             {types.map(type => (
               <option key={type._id} value={type._id}>
                 {type.nomType }
@@ -305,7 +313,7 @@ export default function ProductForm() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="image">Image du produit :</label>
+          <label htmlFor="image">Product image :</label>
           <input
             type="file"
             id="image"
@@ -328,7 +336,7 @@ export default function ProductForm() {
           className={styles.submitButton}
           disabled={isSubmitting || types.length === 0}
         >
-          {isSubmitting ? 'Publication en cours...' : 'Publier le produit'}
+          {isSubmitting ? 'Publication in progress...' : 'Publish produit'}
         </button>
       </form>
 
@@ -337,10 +345,10 @@ export default function ProductForm() {
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalSuccessIcon}>✓</div>
-            <h2 className={styles.modalTitle}>Succès!</h2>
-            <p className={styles.modalMessage}>Produit publié avec succès!</p>
+            <h2 className={styles.modalTitle}>Success!</h2>
+            <p className={styles.modalMessage}>Successfully published product !</p>
             <button className={styles.modalButton} onClick={closeModal}>
-              Fermer
+              Close
             </button>
           </div>
         </div>

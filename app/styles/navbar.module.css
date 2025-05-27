@@ -32,7 +32,7 @@
   height: 100%;
 }
 
-/* Logo section - LOGO BEAUCOUP PLUS GRAND */
+/* Logo section */
 .logoSection {
   display: flex;
   align-items: center;
@@ -45,30 +45,17 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-  padding: 0.3rem 0;
 }
 
 .logo {
-  height: 95%; /* BEAUCOUP plus grand - utilise presque toute la hauteur */
-  min-height: 65px; /* Hauteur minimale très grande */
+  height: 80%;
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
 }
 
 .scrolled .logo {
-  height: 90%; /* Même en mode scrolled, reste très grand */
-  min-height: 55px; /* Hauteur minimale grande même scrolled */
-}
-
-.logoImage {
-  height: auto !important;
-  width: auto !important;
-  max-height: 100%; /* Utilise toute la hauteur disponible */
-  min-width: 180px; /* Largeur minimale BEAUCOUP plus grande */
-  max-width: 250px; /* Largeur maximale pour éviter que ce soit trop grand */
-  object-fit: contain;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15)); /* Ombre plus prononcée */
+  height: 70%;
 }
 
 .logoPlaceholder {
@@ -323,12 +310,6 @@
   padding-top: 1.5rem;
 }
 
-.userLinksScrollContainer {
-  max-height: 300px;
-  overflow-y: auto;
-  margin: 1rem 0;
-}
-
 .userLink {
   display: flex;
   align-items: center;
@@ -369,22 +350,6 @@
   .links {
     gap: 1rem;
   }
-  
-  /* Logo adaptatif pour tablettes - PLUS GRAND */
-  .logo {
-    height: 90%; /* Très grand sur tablette */
-    min-height: 60px; /* Hauteur minimale grande */
-  }
-  
-  .scrolled .logo {
-    height: 85%; /* Reste grand même scrolled */
-    min-height: 50px;
-  }
-  
-  .logoImage {
-    min-width: 150px; /* Largeur plus grande sur tablette */
-    max-width: 200px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -402,22 +367,6 @@
   
   .logoPlaceholder {
     font-size: 1.5rem;
-  }
-  
-  /* Logo mobile optimisé - PLUS GRAND */
-  .logo {
-    height: 85%; /* Plus grand sur mobile */
-    min-height: 55px; /* Hauteur minimale plus grande */
-  }
-  
-  .scrolled .logo {
-    height: 80%; /* Reste grand même scrolled sur mobile */
-    min-height: 45px;
-  }
-  
-  .logoImage {
-    min-width: 130px; /* Plus large sur mobile */
-    max-width: 180px;
   }
   
   .link span {
@@ -448,22 +397,6 @@
     height: 50px;
   }
   
-  /* Logo très petit écran - PLUS GRAND */
-  .logo {
-    height: 80%; /* Plus grand même sur très petit écran */
-    min-height: 45px; /* Hauteur minimale décente */
-  }
-  
-  .scrolled .logo {
-    height: 75%; /* Reste visible même scrolled */
-    min-height: 40px;
-  }
-  
-  .logoImage {
-    min-width: 110px; /* Plus large sur très petit écran */
-    max-width: 150px;
-  }
-  
   .links {
     gap: 0.5rem;
   }
@@ -476,6 +409,9 @@
     width: 100%;
   }
 }
+
+
+
 
 /* Bouton du menu hamburger */
 .menuButton {
@@ -506,7 +442,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100vh; /* Utilise toute la hauteur de la vue */
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
@@ -518,7 +454,7 @@
   top: 0;
   left: 0;
   width: 280px;
-  height: 100vh;
+  height: 100vh; /* Utilise toute la hauteur de la vue */
   background-color: white;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1001;
@@ -646,13 +582,6 @@
   color: #555;
 }
 
-/* Conteneur de défilement pour "My Space" */
-.mySpaceScrollContainer {
-  max-height: 200px;
-  overflow-y: auto;
-  margin: 8px 0;
-}
-
 /* Séparateur dans le menu latéral */
 .sidebarDivider {
   padding: 16px;
@@ -723,6 +652,147 @@
 .sidebarAuthButton.primary:hover {
   background-color: #1976d2;
 }
+
+
+/* AJOUTER CE CSS À LA FIN DU FICHIER navbar.module.css */
+
+/* Container pour l'icône de localisation */
+.locationContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+/* Bouton de l'icône de localisation */
+.locationButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.locationButton:hover {
+  background: linear-gradient(90deg, #218838, #1fa085);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.locationIcon {
+  font-size: 1.2rem;
+}
+
+/* Dropdown de localisation */
+.locationDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  min-width: 200px;
+  overflow: hidden;
+  animation: dropdownSlideIn 0.3s ease-out;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Items du dropdown */
+.locationDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.locationDropdownItem:hover {
+  background: #f8f9fa;
+  color: #28a745;
+}
+
+.locationDropdownItem:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdownIcon {
+  font-size: 1rem;
+  color: #28a745;
+  min-width: 16px;
+}
+
+/* Ajustements responsifs */
+@media (max-width: 768px) {
+  .locationContainer {
+    margin-right: 0.5rem;
+  }
+  
+  .locationButton {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .locationIcon {
+    font-size: 1.1rem;
+  }
+  
+  .locationDropdown {
+    min-width: 180px;
+    right: -20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .locationButton {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .locationIcon {
+    font-size: 1rem;
+  }
+  
+  .locationDropdown {
+    min-width: 160px;
+    right: -30px;
+  }
+  
+  .locationDropdownItem {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+
+
+
 
 /* Adaptation pour les écrans plus grands */
 @media (min-width: 992px) {

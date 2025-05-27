@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 import { 
   FaUser, 
   FaTimes, 
@@ -34,6 +35,9 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const userModalRef = useRef(null);
   const sidebarRef = useRef(null);
+  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const locationDropdownRef = useRef(null);
+
 
   useEffect(() => {
     // Gérer le défilement pour changer l'apparence du navbar
@@ -55,21 +59,35 @@ const Navbar = () => {
     // Gérer les clics en dehors du modal et du menu latéral pour les fermer
     const handleClickOutside = (event) => {
       if (userModalRef.current && !userModalRef.current.contains(event.target) &&
-          !event.target.closest(`.${styles.userButton}`)) {
-        setUserModalOpen(false);
-      }
-      
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&
-          !event.target.closest(`.${styles.menuButton}`)) {
-        setMobileMenuOpen(false);
-      }
+        !event.target.closest(`.${styles.userButton}`)) {
+      setUserModalOpen(false);
+    }
+    
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&
+        !event.target.closest(`.${styles.menuButton}`)) {
+      setMobileMenuOpen(false);
+    }
+    if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target)) {
+      setLocationDropdownOpen(false);
+    }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
+     const toggleLocationDropdown = () => {
+  setLocationDropdownOpen(!locationDropdownOpen);
+};
+const handleServiceNavigation = (serviceType) => {
+  setLocationDropdownOpen(false);
+  // Utiliser router.push avec query params pour passer le type de service
+  window.location.href = `/ServiceLocator?filter=${serviceType}`;
+};
+
+
+
 
   // Empêcher le défilement du corps lorsque le modal ou le menu latéral est ouvert
   useEffect(() => {
@@ -114,18 +132,18 @@ const Navbar = () => {
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
         ];
 
       case 'vet':
         return [
           ...commonLinks,
-          
+          { label: 'Mes patients', href: '/my-patients', icon: <FaStethoscope /> },
           { label: 'Publish Articles', href: '/articleform', icon: <FaNewspaper /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
         ];
       case 'association':
         return [
@@ -136,7 +154,7 @@ const Navbar = () => {
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
         ];
       case 'store':
         return [
@@ -145,7 +163,7 @@ const Navbar = () => {
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorite', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
         ];
       default:
         return commonLinks;
@@ -174,7 +192,7 @@ const Navbar = () => {
           <Link href="/" className={styles.logoWrapper}>
             <div className={styles.logo}>
               <Image
-                src="/images/logo1.png" 
+                src="/images/" 
                 alt="Pet Adoption Logo"
                 width={150}
                 height={50}
@@ -188,13 +206,13 @@ const Navbar = () => {
               <FaHome className={styles.linkIcon} />
               <span>Home</span>
             </Link>
-            <Link href="/" className={styles.link}>
+            <Link href="/DisappearancesReport" className={styles.link}>
               <FaExclamationTriangle className={styles.linkIcon} />
               <span>Report</span>
             </Link>
-            <Link href="/cataloguedon" className={styles.link}>
+            <Link href="/Donations" className={styles.link}>
               <FaHandHoldingHeart className={styles.linkIcon} />
-              <span>Donate</span>
+              <span>Donation</span>
             </Link>
             <Link href="/annonceanimal" className={styles.link}>
               <FaBullhorn className={styles.linkIcon} />
@@ -205,6 +223,43 @@ const Navbar = () => {
 
         {/* Boutons d'authentification */}
         <div className={styles.authSection}>
+          {/* Icône de localisation */}
+  <div className={styles.locationContainer} ref={locationDropdownRef}>
+    <button 
+      onClick={toggleLocationDropdown} 
+      className={styles.locationButton}
+      aria-expanded={locationDropdownOpen}
+      aria-label="Find Services"
+    >
+      <FaMapMarkerAlt className={styles.locationIcon} />
+    </button>
+    
+    {locationDropdownOpen && (
+      <div className={styles.locationDropdown}>
+        <button 
+          onClick={() => handleServiceNavigation('association')}
+          className={styles.locationDropdownItem}
+        >
+          <FaUsers className={styles.dropdownIcon} />
+          <span>Associations</span>
+        </button>
+        <button 
+          onClick={() => handleServiceNavigation('petshop')}
+          className={styles.locationDropdownItem}
+        >
+          <FaStore className={styles.dropdownIcon} />
+          <span>Pet Stores</span>
+        </button>
+        <button 
+          onClick={() => handleServiceNavigation('veterinarian')}
+          className={styles.locationDropdownItem}
+        >
+          <FaStethoscope className={styles.dropdownIcon} />
+          <span>Veterinarians</span>
+        </button>
+      </div>
+    )}
+  </div>
           {isAuthenticated ? (
             <>
               <button onClick={toggleUserModal} className={styles.userButton}>
@@ -266,13 +321,13 @@ const Navbar = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/report" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
                       <FaExclamationTriangle className={styles.sidebarLinkIcon} />
                       <span>Report</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/Donform" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
                       <FaHandHoldingHeart className={styles.sidebarLinkIcon} />
                       <span>Donate</span>
                     </Link>
