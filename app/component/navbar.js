@@ -192,7 +192,7 @@ const handleServiceNavigation = (serviceType) => {
           <Link href="/" className={styles.logoWrapper}>
             <div className={styles.logo}>
               <Image
-                src="/images/" 
+                src="/images/logo1.png" 
                 alt="Pet Adoption Logo"
                 width={150}
                 height={50}
