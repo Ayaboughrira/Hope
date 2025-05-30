@@ -1,0 +1,533 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+.formulairesContainer {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 80px 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+/* En-tête */
+.formulairesHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #8b4513;
+}
+
+.formulairesHeader h1 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.formulairesHeader p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Styles des formulaires */
+.formulaire {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-top: 4px solid #ff8c00;
+}
+
+.formulaire h2 {
+  color: #ff8c00;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.formulaire h3 {
+  color: #8b4513;
+  font-size: 1.3rem;
+  margin: 1.2rem 0 0.8rem;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+/* Groupes d'inputs */
+.inputGroup {
+  margin-bottom: 1.2rem;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.inputGroup input,
+.inputGroup textarea,
+.inputGroup select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus,
+.inputGroup select:focus {
+  border-color: #ff8c00;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+}
+
+.inputGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Groupe d'adresse et contact */
+.addressGroup,
+.contactGroup {
+  background-color: #fff8f0;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #ff8c00;
+}
+
+/* Checkbox group */
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 0.5rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  margin: 0.3rem 0.8rem 0.3rem 0;
+  cursor: pointer;
+}
+
+.checkbox input {
+  margin-right: 0.5rem;
+  width: auto;
+}
+
+.checkbox span {
+  font-size: 0.95rem;
+}
+
+/* Boutons */
+.btn {
+  display: inline-block;
+  background-color: #ff8c00;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  text-align: center;
+}
+
+.btn:hover {
+  background-color: #ff9f33;
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnSubmit {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  background-color: #ff8c00;
+}
+
+.btnToggle {
+  display: block;
+  width: 80%;
+  max-width: 300px;
+  margin: 2rem auto 0;
+  background-color: #8b4513;
+}
+
+.btnToggle:hover {
+  background-color: #242222;
+}
+
+/* Message d'information */
+.infoMessage {
+  background-color: #fffaf0;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  color: #0a0a0a;
+  text-align: center;
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+  animation: pulse 4s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Animation de transition */
+.formFade {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Styles pour l'upload de photos */
+.photoUploadContainer {
+  background-color: #f9f9f9;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.photoPreviewArea {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 1rem;
+}
+
+.photoPreview {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.photoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoName {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.6);
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.removePhotoBtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(255,0,0,0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.photoPlaceholder {
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #ccc;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.photoPlaceholder:hover {
+  border-color: #ff8c00;
+  background-color: #fff5e6;
+}
+
+.photoPlaceholder span {
+  font-size: 2rem;
+  color: #888;
+}
+
+.photoPlaceholder p {
+  margin: 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.photoUploadInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.photoUploadInfo p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.uploadBtn {
+  padding: 6px 15px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.uploadBtn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: slideUp 0.3s ease-in-out;
+}
+
+.modal h3 {
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.modal p {
+  margin-bottom: 2rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btnSecondary {
+  background: #f8f9fa;
+  color: #666;
+  border: 2px solid #e9ecef;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btnSecondary:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+/* Loading states */
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Form loading states */
+.formulaire.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.inputGroup input:disabled,
+.inputGroup select:disabled,
+.inputGroup textarea:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+/* Ajouter ces styles dans donformulaire.module.css */
+
+.errorMessage {
+  background-color: #fee;
+  color: #c33;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: 1px solid #fcc;
+  text-align: center;
+}
+
+.btnSubmit:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btnSubmit:disabled:hover {
+  background-color: #ccc;
+  transform: none;
+}
+
+/* Indicateur de chargement pour les boutons */
+.btnSubmit[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .formulairesContainer {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .photoPreviewArea {
+    justify-content: center;
+  }
+  
+  .photoUploadInfo {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .modal {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .modalButtons {
+    flex-direction: column;
+  }
+  
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+  }
+}

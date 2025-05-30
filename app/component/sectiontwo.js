@@ -17,14 +17,14 @@ const AnimalCareSection = () => {
     {
       id: 2,
       name: "Dogs",
-      image: "/images/cat-care.jpg",
+      image: "/images/pic2.jpg",
       description: " Feline-specific care essentials: Building the foundation for lifelong health and happiness.",
       slug: "dogs"
     },
     {
       id: 3,
       name: "Birds",
-      image: "/images/rabbit-care.jpg",
+      image: "/images/pic.jpg",
       description: "Complete Guide to Habitat, Nutrition, and Essential Care for Your Birds.",
       slug:"birds"
     },

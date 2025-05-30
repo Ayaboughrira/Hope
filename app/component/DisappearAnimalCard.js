@@ -81,7 +81,7 @@ export default function MissingAnimalCard({ report }) {
               onClick={() => setIsModalOpen(true)} 
               className={styles.contactButton}
             >
-              I've seen this animal
+              I&aposve seen this animal
             </button>
           </div>
         </div>

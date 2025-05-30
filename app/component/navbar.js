@@ -128,7 +128,7 @@ const handleServiceNavigation = (serviceType) => {
       case 'owner':
         return [
           ...commonLinks,
-          { label: 'My pets', href: '/my-pets', icon: <FaPaw /> },
+      
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
@@ -138,7 +138,7 @@ const handleServiceNavigation = (serviceType) => {
       case 'vet':
         return [
           ...commonLinks,
-          { label: 'Mes patients', href: '/my-patients', icon: <FaStethoscope /> },
+          
           { label: 'Publish Articles', href: '/articleform', icon: <FaNewspaper /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
@@ -150,13 +150,14 @@ const handleServiceNavigation = (serviceType) => {
           ...commonLinks,
           { label: ' Annonce a compaign', href: '/compagneform', icon: <FaHeadphones/> },
           { label: 'Publish Articles', href: '/articleform', icon: <FaNewspaper /> },
-          { label: 'Abuse Reports', href: '/', icon: <FaShieldAlt /> },
+          { label: 'Abuse Reports', href: '/AbuseReports', icon: <FaShieldAlt /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
           { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
           { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
         ];
       case 'store':
+
         return [
           ...commonLinks,
           { label: 'Publish products', href: '/annoncerproduit', icon: <FaStore /> },
@@ -323,7 +324,7 @@ const handleServiceNavigation = (serviceType) => {
                   <li>
                     <Link href="/report" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
                       <FaExclamationTriangle className={styles.sidebarLinkIcon} />
-                      <span>Report</span>
+                      <span>Report to protect animals</span>
                     </Link>
                   </li>
                   <li>

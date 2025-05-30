@@ -16,16 +16,16 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <ul>
             <li><a href="/catalogueanimal">Adoption Process</a></li>
-            <li><a href="#">Success Stories</a></li>
-            <li><a href="#">Animal Care Tips</a></li>
-            <li><a href="#">Donation</a></li>
+            <li><Link href="/">Success Stories</Link></li>
+            <li><Link href="/">Animal Care Tips</Link></li>
+            <li><Link href="/Donations">Donation</Link></li>
           </ul>
         </div>
         
         <div className={styles.footersection}>
           <h3>Contact Us</h3>
-          <p><i className={styles.icon}>📧</i> info@petadoption.com</p>
-          <p><i className={styles.icon}>📱</i> +213 781092134</p>
+          <p><i className={styles.icon}>📧</i> hope65622@gmail.com</p>
+          <p><i className={styles.icon}>📱</i> +213 666666666</p>
           <p><i className={styles.icon}>📍</i> Algeria</p>
         </div>
         
