@@ -406,7 +406,13 @@ const Signup = () => {
           <div className={styles.authForm}>
             {/* Header */}
             <div className={styles.formHeader}>
-              
+              <Image
+                src="/images/logo1.png"
+                alt="Logo"
+                width={100}
+                height={50}
+                className={styles.appLogo}
+              />
               <h2 className={styles.formTitle}>
                 {isLogin ? 'Welcome back' : 'Creat your Account '}
               </h2>

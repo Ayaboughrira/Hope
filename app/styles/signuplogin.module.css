@@ -19,8 +19,9 @@
   border-radius: 0.75rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
-  /* Fixed height for stability */
-  height: 500px;
+  /* Augmentation de la hauteur pour plus d'espace */
+  min-height: 650px;
+  height: auto;
   width: 100%;
 }
 
@@ -40,13 +41,15 @@
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  /* Added to ensure proper spacing */
-  justify-content: space-between;
+  /* Modification pour assurer un espacement correct */
+  justify-content: flex-start;
+  min-height: 650px;
 }
 
 .formHeader {
   text-align: center;
   margin-bottom: 2rem;
+  flex-shrink: 0;
 }
 
 .appLogo {
@@ -89,6 +92,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .userTypeButton {
@@ -121,7 +125,10 @@
 .loginForm {
   display: flex;
   flex-direction: column;
-  gap: 2rem; /* Increased gap for login form fields */
+  gap: 1.5rem;
+  flex: 1;
+  /* Ajout pour s'assurer que le contenu occupe l'espace disponible */
+  min-height: 0;
 }
 
 .formField {
@@ -162,7 +169,10 @@
 .formNavigation {
   display: flex;
   justify-content: space-between;
-  margin-top: 1rem;
+  margin-top: auto;
+  /* Ajout pour s'assurer que les boutons restent en bas */
+  flex-shrink: 0;
+  padding-top: 1rem;
 }
 
 .navButton {
@@ -203,6 +213,8 @@
 .formFooter {
   text-align: center;
   margin-top: auto;
+  flex-shrink: 0;
+  padding-top: 1rem;
 }
 
 .switchModeButton {
@@ -247,6 +259,8 @@
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: all 0.3s ease; /* Enhanced transition */
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .submitButton:hover {
@@ -274,6 +288,7 @@
 /* Media queries for medium screens (tablets) */
 @media (max-width: 1024px) {
   .authCard {
+    min-height: 700px;
     height: auto;
     flex-direction: column;
   }
@@ -289,6 +304,7 @@
 
   .authForm {
     padding: 1.5rem;
+    min-height: 400px;
   }
 
   .formTitle {
@@ -328,6 +344,7 @@
 
   .authCard {
     border-radius: 0.5rem;
+    min-height: 600px;
   }
 
   .authImage {
@@ -336,6 +353,7 @@
 
   .authForm {
     padding: 1rem;
+    min-height: 400px;
   }
 
   .formTitle {
@@ -373,6 +391,7 @@
 /* Media queries for very small screens */
 @media (max-width: 480px) {
   .authCard {
+    min-height: 550px;
     height: auto;
   }
 
@@ -382,6 +401,7 @@
 
   .authForm {
     padding: 0.75rem;
+    min-height: 400px;
   }
 
   .formTitle {
@@ -417,9 +437,6 @@
   }
 }
 
-
-
-
 /* Ajoutez ces styles à votre fichier CSS existant */
 
 .errorMessage {
@@ -439,8 +456,6 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
-
-
 
 .errorInput {
   border: 1px solid #e53e3e !important;
