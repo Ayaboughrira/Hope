@@ -3,6 +3,7 @@ import Head from 'next/head';
 import HeroCarousel from  './component/sectionone.js';
 import AnimalCareSection from  './component/sectiontwo.js';
 import AdoptionSection from  './component/sectiontrois.js';
+import  DonationsSection  from './component/sectionfour.js';
 
 
 
@@ -18,6 +19,7 @@ export default function Home() {
       <HeroCarousel/>
       <AnimalCareSection/>
       <AdoptionSection/>
+      < DonationsSection/>
       
     
         

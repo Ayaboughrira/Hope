@@ -1,6 +1,6 @@
 import React from 'react';
-import  styles from '../styles/footer.module.css';
-import Link from  'next/link';
+import styles from '../styles/footer.module.css';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -8,14 +8,16 @@ const Footer = () => {
       
       <div className={styles.footercontent}>
         <div className={styles.footersection}>
-          <h3>About Us</h3>
-          <p>We help connect animals in need with loving homes and provide resources for animal shelters.</p>
+          <Link href="/aboutus" className={styles.aboutLink}>
+            <h3>About Us</h3>
+          </Link>
+          <p> We help connect animals in need with loving homes and provide resources for animal shelters.</p>
         </div>
         
         <div className={styles.footersection}>
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="/catalogueanimal">Adoption Process</a></li>
+            <li><Link href="/catalogueanimal">Adoption Process</Link></li>
             <li><Link href="/">Success Stories</Link></li>
             <li><Link href="/">Animal Care Tips</Link></li>
             <li><Link href="/Donations">Donation</Link></li>
@@ -31,7 +33,9 @@ const Footer = () => {
         
         <div className={styles.footersection}>
           <h3>Join Us</h3>
-          <Link  href="/signuplogin" className={styles.signupbtn}>Sign Up</Link>
+          <Link href="/signuplogin" className={styles.signupbtn}>
+            Sign Up
+          </Link>
           <div className={styles.socialicons}>
             <a href="#" className={styles.socialicon}>FB</a>
             <a href="#" className={styles.socialicon}>IG</a>
@@ -43,9 +47,9 @@ const Footer = () => {
       <div className={styles.footerbottom}>
         <p>&copy; 2025 Pet Adoption Platform. All rights reserved.</p>
         <div className={styles.footerlinks}>
-          <a href="#">FAQ</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+          <Link href="/">FAQ</Link>
+          <Link href="/">Privacy Policy</Link>
+          <Link href="/">Terms of Service</Link>
         </div>
       </div>
     </footer>
