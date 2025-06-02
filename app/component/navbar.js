@@ -1,35 +1,28 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useSession, signOut } from 'next-auth/react';
-import { FaMapMarkerAlt } from 'react-icons/fa';
-import { 
-  FaUser, 
-  FaTimes, 
-  FaHome, 
-  FaHandHoldingHeart, // Pour Donate (plus expressif)
-  FaExclamationTriangle, // Pour Report (plus expressif)
-  FaBullhorn, // Pour Advertise Animal (plus expressif)
-  FaBars, 
-  FaHeart, 
-  FaCalendarAlt, 
-  FaPaw, 
-  FaShoppingCart, 
-  FaStore, 
-  FaStethoscope, // Pour vétérinaire
-  FaNewspaper, // Pour articles
-  FaHeadphones, // Pour campagnes
-  FaShieldAlt, // Pour abuse reports
-  FaPlus, // Pour Post your Pet
-  FaUsers // Pour Rescue campaigns
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import {
+  FaBars, // Pour Report (plus expressif)
+  FaBullhorn, // Pour Admin
+  FaCog, // Pour Rescue campaigns
+  FaCrown, // Pour Donate (plus expressif)
+  FaExclamationTriangle, FaHandHoldingHeart, // Pour articles
+  FaHeadphones, FaHeart, FaHome, FaMapMarkerAlt, // Pour vétérinaire
+  FaNewspaper, FaPaw, // Pour campagnes
+  FaShieldAlt, FaStethoscope, FaStore, FaTimes, FaUser, // Pour Post your Pet
+  FaUsers, // Pour Dashboard
+  FaUsersCog // Pour Manage Users
 } from 'react-icons/fa';
+import { isAdminClient } from '../config/adminconfig-client';
 import styles from '../styles/navbar.module.css';
 
 const Navbar = () => {
   const { data: session, status } = useSession();
   const isAuthenticated = status === 'authenticated';
+  const isUserAdmin = session?.user?.email ? isAdminClient(session.user.email) : false;
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -124,51 +117,60 @@ const handleServiceNavigation = (serviceType) => {
       { label: 'My Account', href: `/profile/${session.user.userType}/${session.user.id}`, icon: <FaUser /> },
     ];
     
+    // Add admin links if user is admin
+    const adminLinks = isUserAdmin ? [
+      { label: 'Admin Dashboard', href: '/admin', icon: <FaCog />, isAdmin: true },
+    ] : [];
+    
+    let userTypeLinks = [];
+    
     switch (session.user.userType) {
       case 'owner':
-        return [
-          ...commonLinks,
-      
+        userTypeLinks = [
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
           { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaPaw /> },
         ];
+        break;
 
       case 'vet':
-        return [
-          ...commonLinks,
-          
+        userTypeLinks = [
           { label: 'Publish Articles', href: '/articleform', icon: <FaNewspaper /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
-          { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My animals', href: '/mesanimaux', icon: <FaPaw/> },
+          {label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> },
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaPaw /> }
         ];
+        break;
+        
       case 'association':
-        return [
-          ...commonLinks,
+        userTypeLinks = [
           { label: ' Annonce a compaign', href: '/compagneform', icon: <FaHeadphones/> },
           { label: 'Publish Articles', href: '/articleform', icon: <FaNewspaper /> },
-          { label: 'Abuse Reports', href: '/AbuseReports', icon: <FaShieldAlt /> },
+          { label: 'Abuse Reports', href: '/', icon: <FaShieldAlt /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
-          { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My animals', href: '/mesanimaux', icon: <FaPaw /> },
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> },
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaPaw /> }
         ];
+        break;
+        
       case 'store':
-
-        return [
-          ...commonLinks,
+        userTypeLinks = [
           { label: 'Publish products', href: '/annoncerproduit', icon: <FaStore /> },
           { label: 'My Adoption Request', href: '/mesdemandeadoption', icon: <FaHandHoldingHeart /> },
-          { label: 'My animals', href: '/mesanimaux', icon: <FaHeart /> },
-          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaHeart /> },
-          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> }
+          { label: 'My animals', href: '/mesanimaux', icon: <FaPaw /> },
+          { label: 'My favorites', href: '/favoritepets', icon: <FaHeart /> },
+          { label: 'Manage Adoption', href: '/adoptiondemande', icon: <FaPaw /> }
         ];
+        break;
+        
       default:
-        return commonLinks;
+        userTypeLinks = [];
     }
+    
+    return [...commonLinks, ...userTypeLinks, ...adminLinks];
   };
 
   return (
@@ -307,7 +309,10 @@ const handleServiceNavigation = (serviceType) => {
                     <FaUser size={32} />
                   </div>
                   <div className={styles.userDetails}>
-                    <h4>{session.user.name}</h4>
+                    <div className={styles.userNameContainer}>
+                      <h4>{session.user.name}</h4>
+                      {isUserAdmin && <FaCrown className={styles.adminIcon} />}
+                    </div>
                     <p>{session.user.email}</p>
                   </div>
                 </div>
@@ -330,7 +335,7 @@ const handleServiceNavigation = (serviceType) => {
                   <li>
                     <Link href="/Donform" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
                       <FaHandHoldingHeart className={styles.sidebarLinkIcon} />
-                      <span>Donate</span>
+                      <span>Donate for animals</span>
                     </Link>
                   </li>
                   <li>
@@ -364,7 +369,7 @@ const handleServiceNavigation = (serviceType) => {
                                         'Pet Owner' }</span>
                       </li>
                       <div className={styles.mySpaceScrollContainer}>
-                        {getUserTypeLinks().map((link, index) => (
+                        {getUserTypeLinks().filter(link => !link.isAdmin).map((link, index) => (
                           <li key={index}>
                             <Link 
                               href={link.href} 
@@ -377,6 +382,40 @@ const handleServiceNavigation = (serviceType) => {
                           </li>
                         ))}
                       </div>
+                      
+                      {/* Admin Section in Sidebar */}
+                      {isUserAdmin && (
+                        <>
+                          <li className={styles.sidebarDivider}>
+                            <span className={styles.adminSectionTitle}>
+                              <FaCrown className={styles.adminSectionIcon} />
+                              Admin Panel
+                            </span>
+                          </li>
+                          <div className={styles.adminScrollContainer}>
+                            <li>
+                              <Link 
+                                href="/admin" 
+                                className={`${styles.sidebarLink} ${styles.adminLink}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <FaCog className={styles.adminLinkIcon} />
+                                <span>Dashboard</span>
+                              </Link>
+                            </li>
+                            <li>
+                              <Link 
+                                href="/admin/users" 
+                                className={`${styles.sidebarLink} ${styles.adminLink}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <FaUsersCog className={styles.adminLinkIcon} />
+                                <span>Manage Users</span>
+                              </Link>
+                            </li>
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </ul>
@@ -414,11 +453,11 @@ const handleServiceNavigation = (serviceType) => {
             ref={userModalRef}
             className={styles.userModal}
           >
-            <div className={styles.userModalHeader}>
-              <h3>My Space {session.user.userType === 'vet' ? 'Veterinarian' : 
-                            session.user.userType === 'association' ? 'Association' : 
-                            session.user.userType === 'store' ? 'Pet Store' : 
-                            'Pet Owner'}</h3>
+            <div className={`${styles.userModalHeader} ${isUserAdmin ? styles.adminModalHeader : ''}`}>
+              <h3>{isUserAdmin ? 'Admin' : `My Space ${session.user.userType === 'vet' ? 'Veterinarian' : 
+              session.user.userType === 'association' ? 'Association' : 
+              session.user.userType === 'store' ? 'Pet Store' : 
+              'Pet Owner'}`}</h3>
               <button 
                 className={styles.closeButton}
                 onClick={() => setUserModalOpen(false)}
@@ -430,18 +469,22 @@ const handleServiceNavigation = (serviceType) => {
             
             <div className={styles.userModalContent}>
               <div className={styles.userInfo}>
-                <div className={styles.userAvatar}>
+                <div className={`${styles.userAvatar} ${isUserAdmin ? styles.adminAvatar : ''}`}>
                   <FaUser size={32} />
                 </div>
                 <div className={styles.userDetails}>
-                  <h4>{session.user.name}</h4>
+                  <div className={styles.userNameContainer}>
+                    <h4>{session.user.name}</h4>
+                    {isUserAdmin && <FaCrown className={styles.adminIconModal} />}
+                  </div>
                   <p>{session.user.email}</p>
+                  {isUserAdmin && <span className={styles.adminBadge}>Administrator</span>}
                 </div>
               </div>
               
               <div className={styles.userLinksScrollContainer}>
                 <ul className={styles.userLinks}>
-                  {getUserTypeLinks().map((link, index) => (
+                  {getUserTypeLinks().filter(link => !link.isAdmin).map((link, index) => (
                     <li key={index}>
                       <Link 
                         href={link.href} 
@@ -453,6 +496,20 @@ const handleServiceNavigation = (serviceType) => {
                       </Link>
                     </li>
                   ))}
+                  
+                  {/* Admin Links in Modal */}
+                  {isUserAdmin && (
+                    <li>
+                      <Link 
+                        href="/admin" 
+                        className={`${styles.userLink} ${styles.adminUserLink}`}
+                        onClick={() => setUserModalOpen(false)}
+                      >
+                        <FaCog />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    </li>
+                  )}
                 </ul>
               </div>
               

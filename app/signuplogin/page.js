@@ -18,13 +18,13 @@ const Signup = () => {
   const { data: session, status } = useSession();
   
   // State management
-  const [isLogin, setIsLogin] = useState(false);
-  const [userType, setUserType] = useState('');
-  const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({});
-  const [errors, setErrors] = useState({});
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);//mode de connexion /inscription
+  const [userType, setUserType] = useState(''); // type d'users
+  const [currentStep, setCurrentStep] = useState(0);// etat actuelle du formulaire
+  const [formData, setFormData] = useState({});//donnees du formulaire
+  const [errors, setErrors] = useState({});// erreur de validation 
+  const [error, setError] = useState('');// erreur generale
+  const [loading, setLoading] = useState(false); // etat de loading 
   
   // Redirection si déjà connecté
   useEffect(() => {
@@ -33,7 +33,7 @@ const Signup = () => {
     }
   }, [status, session, router]);
   
-  // Validation patterns - useMemo pour éviter la re-création
+  // Validation patterns - useMemo pour éviter la re-création 
   const validationPatterns = useMemo(() => ({
     email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     phone: /^(0)(5|6|7)[0-9]{8}$/,  
@@ -64,7 +64,7 @@ const Signup = () => {
     { id: 'store', label: 'Pet Store', icon: Store }
   ], []);
 
-  // Form fields for each user type - useMemo pour éviter la re-création
+  // les champs des users for each user type - useMemo pour éviter la re-création
   const formFields = useMemo(() => ({
     owner: [
       { name: 'firstName', label: 'First Name', type: 'text', icon: User },
