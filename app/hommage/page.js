@@ -52,7 +52,7 @@ export default function Hommage() {
         </div>
         <div className={styles.animalImageRight}>
           <Image 
-            src="/images/pic2.jpg" 
+            src="/images/achil.jpg" 
             alt="Achil the dog"
             width={500}
             height={300}
