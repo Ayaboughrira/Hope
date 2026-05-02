@@ -7,7 +7,8 @@ import { authOptions } from '../api/auth/[...nextauth]/route';
 // Admin emails list (même liste que côté client)
 export const ADMIN_EMAILS = [
   'helpingourpetseveryday@gmail.com',
-   'hope65622@gmail.com', // Your main admin email
+   'hope65622@gmail.com',
+   'hopehope@gmail.com', // Your main admin email
   // Add more admin emails here if needed
 ];
 

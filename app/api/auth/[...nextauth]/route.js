@@ -1,3 +1,4 @@
+// app/api/auth/[...nextauth]/route
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { connectDB } from "../../../config/mongodb";
@@ -13,64 +14,40 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
-          // Connexion à la base de données
           const db = await connectDB();
-          
-          // Recherche dans toutes les collections d'utilisateurs avec les noms corrects
           const collections = ['user', 'veterinaire', 'association', 'animalrie'];
           let user = null;
           let userType = null;
-          
-          // Chercher l'utilisateur dans chaque collection
+
           for (const collection of collections) {
-            const foundUser = await db.collection(collection).findOne({ 
-              email: credentials.email 
+            const foundUser = await db.collection(collection).findOne({
+              email: credentials.email
             });
-            
+
             if (foundUser) {
               user = foundUser;
-              // Mapper le nom de la collection au userType correct
               switch(collection) {
-                case 'user':
-                  userType = 'owner';
-                  break;
-                case 'veterinaire':
-                  userType = 'vet';
-                  break;
-                case 'association':
-                  userType = 'association';
-                  break;
-                case 'animalrie':
-                  userType = 'store';
-                  break;
-                default:
-                  userType = collection;
+                case 'user':        userType = 'owner';       break;
+                case 'veterinaire': userType = 'vet';         break;
+                case 'association': userType = 'association'; break;
+                case 'animalrie':   userType = 'store';       break;
+                default:            userType = collection;
               }
               break;
             }
           }
 
-          // Si aucun utilisateur n'est trouvé
-          if (!user) {
-            return null;
-          }
+          if (!user) return null;
 
-          // Vérification du mot de passe
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          if (!isPasswordValid) return null;
 
-          if (!isPasswordValid) {
-            return null;
-          }
-
-          // Retourner les données utilisateur nécessaires
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.firstName || user.clinicName || user.associationName || user.storeName || user.email,
-            userType: userType
+            userType: userType,
+            mfaEnabled: user.mfaEnabled || false,  // ← AJOUT
           };
         } catch (error) {
           console.error("Erreur d'authentification:", error);
@@ -81,18 +58,20 @@ export const authOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // Transfert des données utilisateur au token
       if (user) {
         token.id = user.id;
         token.userType = user.userType;
+        token.mfaEnabled = user.mfaEnabled;   // ← AJOUT
+        token.mfaVerified = false;             // ← AJOUT : false à chaque nouveau login
       }
       return token;
     },
     async session({ session, token }) {
-      // Transfert des données du token à la session
       if (token) {
         session.user.id = token.id;
         session.user.userType = token.userType;
+        session.user.mfaEnabled = token.mfaEnabled;   // ← AJOUT
+        session.user.mfaVerified = token.mfaVerified; // ← AJOUT
       }
       return session;
     }
@@ -102,12 +81,9 @@ export const authOptions = {
     signOut: "/auth/signout",
     error: "/auth/error",
   },
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

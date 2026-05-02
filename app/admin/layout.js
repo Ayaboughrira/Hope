@@ -1,4 +1,4 @@
-//admin layout.js - Version Corrigée
+//app/admin/layout.js 
 'use client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';

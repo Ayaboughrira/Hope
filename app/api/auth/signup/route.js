@@ -7,7 +7,6 @@ export async function POST(request) {
     const body = await request.json();
     const { userType, email, password, ...userData } = body;
 
-    // Vérification des données requises
     if (!userType || !email || !password) {
       return NextResponse.json(
         { message: "Données requises manquantes" },
@@ -15,24 +14,14 @@ export async function POST(request) {
       );
     }
 
-    // Connexion à la base de données
     const db = await connectDB();
 
-    // Déterminer la collection en fonction du userType
     let collectionName;
     switch (userType) {
-      case 'owner':
-        collectionName = 'user';
-        break;
-      case 'vet':
-        collectionName = 'veterinaire';
-        break;
-      case 'association':
-        collectionName = 'association';
-        break;
-      case 'store':
-        collectionName = 'animalrie';
-        break;
+      case 'owner':       collectionName = 'user';        break;
+      case 'vet':         collectionName = 'veterinaire'; break;
+      case 'association': collectionName = 'association'; break;
+      case 'store':       collectionName = 'animalrie';   break;
       default:
         return NextResponse.json(
           { message: "Type d'utilisateur non valide" },
@@ -40,7 +29,6 @@ export async function POST(request) {
         );
     }
 
-    // Vérifier si l'utilisateur existe déjà
     const existingUser = await db.collection(collectionName).findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -49,24 +37,22 @@ export async function POST(request) {
       );
     }
 
-    // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Création de l'utilisateur
     const newUser = {
       email,
       password: hashedPassword,
       createdAt: new Date(),
+      mfaSecret: null,     // ← AJOUT
+      mfaEnabled: false,   // ← AJOUT
       ...userData
     };
 
-    // Insertion dans la base de données
     const result = await db.collection(collectionName).insertOne(newUser);
 
-    // Si l'insertion a réussi
     if (result.acknowledged) {
       return NextResponse.json(
-        { 
+        {
           message: "Inscription réussie",
           userId: result.insertedId.toString(),
           userType
