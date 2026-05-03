@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
     // Obtenir la session pour vérification d'authentification (optionnel)
     const session = await getServerSession(authOptions);
     
-    // Option: Vérifier si l'utilisateur est authentifié
+    //  Vérifier si l'utilisateur est authentifié
     if (!session) {
       return NextResponse.json(
         { success: false, message: 'Non autorisé' },

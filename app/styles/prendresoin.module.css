@@ -1,6 +1,6 @@
 /* prendresoin.module.css */
 /* Variables pour les couleurs et thèmes */
-:root {
+:global(:root) {
   --primary-color: #ff7f24; /* Orange comme couleur principale */
   --secondary-color: #ffdfbf;
   --accent-color: #ff9a56;

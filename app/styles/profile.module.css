@@ -1,6 +1,6 @@
 /* profile.module.css */
 /* Variables de couleur - design professionnel avec nuances gris-bleu */
-:root {
+:global(:root) {
   --primary-color: #ff5a00;
   --primary-light: #ff7a2f;
   --primary-dark: #e64500;

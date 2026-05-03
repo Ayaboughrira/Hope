@@ -18,7 +18,7 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <ul>
             <li><Link href="/catalogueanimal">Adoption Process</Link></li>
-            <li><Link href="/">Success Stories</Link></li>
+            <li><Link href="/hommage">Success Stories</Link></li>
             <li><Link href="/">Animal Care Tips</Link></li>
             <li><Link href="/Donations">Donation</Link></li>
           </ul>
